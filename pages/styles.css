@@ -626,3 +626,25 @@ dialog::backdrop {
 .shell pre code {
   font: inherit;
 }
+
+.handbook summary {
+  cursor: pointer;
+  color: var(--orange);
+  margin: 0.8rem 0;
+  text-underline-offset: 0.2em;
+  font-weight: 600;
+}
+.handbook details p {
+  margin: 0.75rem 0;
+}
+.handbook details pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #e9ede6;
+  padding: 1rem;
+  border-radius: 5px;
+}
+.handbook summary:focus-visible {
+  outline: 3px solid #e37440;
+  outline-offset: 3px;
+}

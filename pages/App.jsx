@@ -1,3 +1,4 @@
+import { handbook } from "./handbook.js";
 import React, { useEffect, useRef, useState } from "react";
 import { drivers, install, repo, text } from "./content.js";
 import shots from "./public/screenshots/manifest.json";
@@ -354,10 +355,24 @@ export function App({ lang }) {
           <div className="handbook">
             {t.guides.map(([title, body, path]) => (
               <article key={path}>
-                <h3>
-                  <a href={repo + "/blob/main/" + path}>{title}</a>
-                </h3>
+                <h3>{title}</h3>
                 <p>{body}</p>
+                <details>
+                  <summary>{t.guide}</summary>
+                  {handbook[path][lang].map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                  {handbook[path].code && (
+                    <pre>
+                      <code>{handbook[path].code}</code>
+                    </pre>
+                  )}
+                  <a className="text-link" href={repo + "/blob/main/" + path}>
+                    {lang === "tr"
+                      ? "Ayrıntılı kaynak (İngilizce)"
+                      : "Full reference"}
+                  </a>
+                </details>
               </article>
             ))}
           </div>

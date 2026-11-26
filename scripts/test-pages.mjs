@@ -101,6 +101,9 @@ try {
       ),
       false,
     );
+    const themeGuide = page.locator("#handbook details").nth(1);
+    await themeGuide.locator("summary").click();
+    await expect(themeGuide.locator("code")).toContainText('content="violet"');
     await page.locator(".language").click();
     await expect(page.locator("html")).toHaveAttribute(
       "lang",
