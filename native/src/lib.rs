@@ -171,6 +171,13 @@ impl Buffer {
         }
     }
     fn write(&mut self, v: Vec<u8>) {
+        // An empty Rust Vec uses a sentinel pointer. Only pass null or actual
+        // foreign allocations back through cgo.
+        if v.is_empty() {
+            self.len = 0;
+            self.ptr = std::ptr::null_mut();
+            return;
+        }
         let b = v.into_boxed_slice();
         self.len = b.len();
         self.ptr = Box::into_raw(b) as *mut u8;

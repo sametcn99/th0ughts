@@ -5,6 +5,7 @@ package storage
 /*
 #cgo LDFLAGS: -L${SRCDIR}/../native/lib -lth0ughts_kv
 #cgo linux LDFLAGS: -ldl -lpthread -lm
+#include "nativekv_build.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>

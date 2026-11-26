@@ -12,3 +12,4 @@ docs/measurements
 pages/
 native/target/
 native/lib/
+storage/nativekv_build.h

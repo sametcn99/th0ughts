@@ -20,6 +20,7 @@ RUN go mod download
 COPY . .
 COPY --from=web /src/server/assets/owner.js /src/server/assets/thread.js server/assets/
 COPY --from=kv /src/native/lib native/lib
+COPY --from=kv /src/storage/nativekv_build.h storage/nativekv_build.h
 COPY --from=web /src/server/vendor server/vendor
 COPY --from=web /src/server/preview server/preview
 RUN apk add --no-cache build-base

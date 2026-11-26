@@ -12,3 +12,4 @@ bin/
 pages/dist/
 native/target/
 native/lib/
+storage/nativekv_build.h
