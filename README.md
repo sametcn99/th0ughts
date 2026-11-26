@@ -68,6 +68,8 @@ Set the master key before starting the server. Rebuild the binary after updating
 
 ## Documentation site and screenshots
 
+The documentation opens in [English](https://sametcn99.github.io/th0ughts/). Select [Türkçe](https://sametcn99.github.io/th0ughts/tr/) for Turkish.
+
 Run `bun run build:pages` to render the English and Turkish React site into `pages/dist`. After building `bin/th0ughts` and installing Playwright Chromium, run `bun run screenshots` to refresh the images in `pages/public/screenshots`, their manifest and the gallery below. Capture uses a disposable SQLite instance with sample content. GitHub Actions captures fresh images and publishes the site on each push to main.
 
 <!-- gallery:start -->

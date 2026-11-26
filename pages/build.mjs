@@ -31,16 +31,10 @@ await build({
   loader: { ".woff2": "file", ".woff": "file", ".jpg": "file" },
   assetNames: "assets/[name]-[hash]",
 });
-for (const name of ["instrument-serif", "dm-sans"]) {
-  const pkg =
-    name === "dm-sans"
-      ? "@fontsource-variable/dm-sans"
-      : "@fontsource/instrument-serif";
-  await cp(
-    path.join(root, "node_modules", pkg, "LICENSE"),
-    path.join(dist, "assets", name + "-LICENSE.txt"),
-  );
-}
+await cp(
+  path.join(root, "node_modules/@fontsource-variable/dm-sans/LICENSE"),
+  path.join(dist, "assets/dm-sans-LICENSE.txt"),
+);
 for (const lang of ["en", "tr"]) {
   const tr = lang === "tr",
     prefix = tr ? "../" : "./",
@@ -50,7 +44,7 @@ for (const lang of ["en", "tr"]) {
     : "th0ughts · A self-hosted microblog";
   const description = text[lang].lead;
   const markup = renderToString(React.createElement(App, { lang }));
-  const html = `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><meta name="description" content="${description}"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="en" href="${site}"><link rel="alternate" hreflang="tr" href="${site}tr/"><link rel="alternate" hreflang="x-default" href="${site}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:image" content="${site}screenshots/timeline.webp"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#152b3c"><link rel="stylesheet" href="${prefix}styles.css"></head><body><div id="root">${markup}</div><script type="module" src="${prefix}app.js"></script></body></html>\n`;
+  const html = `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><meta name="description" content="${description}"><link rel="canonical" href="${url}"><link rel="alternate" hreflang="en" href="${site}"><link rel="alternate" hreflang="tr" href="${site}tr/"><link rel="alternate" hreflang="x-default" href="${site}"><meta property="og:type" content="website"><meta property="og:url" content="${url}"><meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:image" content="${site}screenshots/timeline.webp"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#fafaf7"><link rel="stylesheet" href="${prefix}styles.css?v=${ref}"></head><body><div id="root">${markup}</div><script type="module" src="${prefix}app.js?v=${ref}"></script></body></html>\n`;
   await writeFile(path.join(dist, tr ? "tr/index.html" : "index.html"), html);
 }
 const installer = await readFile(path.join(root, "deploy/install.sh"), "utf8");

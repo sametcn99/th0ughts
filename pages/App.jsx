@@ -33,7 +33,6 @@ function Code({ value, label, t }) {
       <div className="shell-head">
         <span>{label}</span>
         <button type="button" onClick={copy}>
-          <i aria-hidden="true" className="copy-icon" />
           <span aria-live="polite">{message || t.copy}</span>
         </button>
       </div>
@@ -46,72 +45,66 @@ function Code({ value, label, t }) {
 function Brand() {
   return (
     <span className="brand">
-      <i aria-hidden="true" />
-      th0ughts
+      th<span>0</span>ughts
     </span>
   );
 }
-function Hero({ lang, prefix, t }) {
-  const [view, setView] = useState("timeline");
-  const photo = shotById[view];
+function QuickStart({ prefix, t }) {
   return (
-    <section className="hero" id="top">
-      <div className="hero-inner">
-        <div className="hero-copy">
-          <div className="category">{t.intro}</div>
-          <h1>
-            {t.hero[0]}
-            <br />
-            <em>{t.hero[1]}</em>
-          </h1>
-          <p>{t.lead}</p>
-          <Code value={install} label={t.terminal} t={t} />
-          <div className="hero-links">
-            <a href="#installation">{t.alternatives}</a>
-            <a href={prefix + "install.sh"}>{t.inspect}</a>
-          </div>
-        </div>
-        <div className="artboard">
-          <div className="example">
-            <div className="window-bar" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-              <span>Studio Notes</span>
-            </div>
-            <img
-              fetchPriority="high"
-              width={photo.width}
-              height={photo.height}
-              alt={photo.title[lang]}
-              src={prefix + "screenshots/" + photo.file}
-            />
-          </div>
-          <div className="art-controls" aria-label={t.preview}>
-            {[
-              ["timeline", "Paper"],
-              ["theme-index", "Index"],
-            ].map(([id, name]) => (
-              <button
-                key={id}
-                aria-pressed={view === id}
-                onClick={() => setView(id)}
-              >
-                {name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+    <section id="top" className="quick-start">
+      <h1>{t.quickStart}</h1>
+      <p className="lede">{t.lead}</p>
+      <Code value={install} label={t.terminal} t={t} />
+      <p className="installer-note">
+        {t.quickNote} <a href={prefix + "install.sh"}>{t.inspect}</a>
+      </p>
     </section>
   );
 }
-function Installer({ lang, t }) {
+function Themes({ prefix, t, lang }) {
+  return (
+    <section id="themes">
+      <h2>{t.themeTitle}</h2>
+      <p>{t.themeIntro}</p>
+      <div className="specimens">
+        {[
+          ["timeline", "Paper"],
+          ["theme-index", "Index"],
+        ].map(([id, name]) => {
+          const shot = shotById[id];
+          const src = prefix + "screenshots/" + shot.file;
+          return (
+            <figure key={id}>
+              <a href={src} aria-label={t.enlarge + " · " + name}>
+                <img
+                  src={src}
+                  width={shot.width}
+                  height={shot.height}
+                  alt={shot.title[lang]}
+                />
+              </a>
+              <figcaption>{name}</figcaption>
+            </figure>
+          );
+        })}
+      </div>
+      <a
+        href="#theme-guide"
+        onClick={() => {
+          document.getElementById("theme-guide").open = true;
+        }}
+      >
+        {t.themeGuide}
+      </a>
+    </section>
+  );
+}
+function Installer({ t }) {
   const [method, select] = useState(0);
   const [db, setDB] = useState("sqlite");
   const title = [t.wizard, t.compose, t.coolify, t.dokploy, t.source][method];
   return (
-    <section id="installation" className="section wrap">
+    <section id="installation" className="section">
       <h2>{t.installTitle}</h2>
       <div className="install-grid">
         <nav className="methods" aria-label={t.install}>
@@ -130,7 +123,7 @@ function Installer({ lang, t }) {
           {method === 0 && (
             <>
               <p>{t.wizardIntro}</p>
-              <Code value={install} label="Bash" t={t} />
+              <a href="#top">{t.quickStart}</a>
               <ol>
                 {t.steps.map((step) => (
                   <li key={step}>{step}</li>
@@ -220,15 +213,14 @@ function Gallery({ lang, prefix, t }) {
   const move = (n) =>
     setSelected((selected + n + filtered.length) % filtered.length);
   return (
-    <section id="gallery" className="section gallery">
+    <section id="gallery" className="gallery">
       <div className="wrap">
         <div className="gallery-heading">
           <div>
             <h2>{t.gallery}</h2>
-            <p>{t.galleryIntro}</p>
           </div>
           <span>
-            {shots.length} / {t.screen}
+            {shots.length} {t.screen}
           </span>
         </div>
         <div className="filters" aria-label={t.gallery}>
@@ -264,7 +256,7 @@ function Gallery({ lang, prefix, t }) {
                   src={prefix + "screenshots/" + s.file}
                 />
               </div>
-              <span className="card-group">{t.groups[s.group]}</span>
+
               <strong>{s.title[lang]}</strong>
             </button>
           ))}
@@ -317,76 +309,88 @@ function Gallery({ lang, prefix, t }) {
 export function App({ lang }) {
   const t = text[lang];
   const prefix = lang === "en" ? "./" : "../";
+  const links = [
+    ["top", t.quickStart],
+    ["themes", t.themeTitle],
+    ["installation", t.install],
+    ["gallery", t.gallery],
+    ["handbook", t.docs],
+  ];
   return (
     <>
-      <a className="skip" href="#installation">
+      <a className="skip" href="#main">
         {t.skip}
       </a>
-      <header>
-        <div className="wrap mast">
-          <a href="#top" aria-label="th0ughts">
+      <div className="manual">
+        <header className="sidebar">
+          <a className="home" href="#top" aria-label="th0ughts">
             <Brand />
           </a>
-          <nav aria-label={t.docs}>
-            <a href="#installation">{t.install}</a>
-            <a href="#gallery">{t.gallery}</a>
-            <a href="#handbook">{t.docs}</a>
-          </nav>
-          <div className="right">
-            <a
-              className="language"
-              lang={lang === "en" ? "tr" : "en"}
-              href={lang === "en" ? "./tr/" : "../"}
-            >
-              {lang === "en" ? "Türkçe" : "English"}
-            </a>
-            <a className="git" href={repo}>
-              GitHub
-            </a>
-          </div>
-        </div>
-      </header>
-      <main>
-        <Hero {...{ lang, prefix, t }} />
-        <Installer {...{ lang, t }} />
-        <Gallery {...{ lang, prefix, t }} />
-        <section id="handbook" className="section wrap">
-          <h2>{t.handbook}</h2>
-          <div className="handbook">
-            {t.guides.map(([title, body, path]) => (
-              <article key={path}>
-                <h3>{title}</h3>
-                <p>{body}</p>
-                <details>
-                  <summary>{t.guide}</summary>
-                  {handbook[path][lang].map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
-                  {handbook[path].code && (
-                    <pre>
-                      <code>{handbook[path].code}</code>
-                    </pre>
-                  )}
-                  <a className="text-link" href={repo + "/blob/main/" + path}>
-                    {lang === "tr"
-                      ? "Ayrıntılı kaynak (İngilizce)"
-                      : "Full reference"}
-                  </a>
-                </details>
-              </article>
+          <nav className="contents" aria-label={t.docs}>
+            {links.map(([id, name]) => (
+              <a key={id} href={"#" + id}>
+                {name}
+              </a>
             ))}
+          </nav>
+          <div className="resources">
+            <a href={repo}>
+              GitHub <span aria-hidden="true">↗</span>
+            </a>
+            <nav aria-label={t.language}>
+              <a
+                href={prefix}
+                lang="en"
+                hrefLang="en"
+                aria-current={lang === "en" ? "page" : undefined}
+              >
+                English
+              </a>
+              <span aria-hidden="true"> / </span>
+              <a
+                href={prefix + "tr/"}
+                lang="tr"
+                hrefLang="tr"
+                aria-current={lang === "tr" ? "page" : undefined}
+              >
+                Türkçe
+              </a>
+            </nav>
           </div>
-        </section>
-      </main>
-      <footer>
-        <div className="wrap foot">
-          <a href="#top">
-            <Brand />
-          </a>
-          <a href={repo}>{t.github}</a>
-          <a href="#top">{t.back}</a>
-        </div>
-      </footer>
+        </header>
+        <main id="main">
+          <QuickStart {...{ prefix, t }} />
+          <Themes {...{ lang, prefix, t }} />
+          <Installer t={t} />
+          <Gallery {...{ lang, prefix, t }} />
+          <section id="handbook">
+            <h2>{t.docs}</h2>
+            {t.guides.map(([title, body, path]) => (
+              <details
+                key={path}
+                className="reference"
+                id={path === "docs/themes.md" ? "theme-guide" : undefined}
+              >
+                <summary>{title}</summary>
+                <p>{body}</p>
+                {handbook[path][lang].map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+                {handbook[path].code && (
+                  <pre>
+                    <code>{handbook[path].code}</code>
+                  </pre>
+                )}
+                <a href={repo + "/blob/main/" + path}>{t.fullReference}</a>
+              </details>
+            ))}
+          </section>
+          <footer>
+            <a href={repo}>GitHub ↗</a>
+            <a href="#top">{t.back} ↑</a>
+          </footer>
+        </main>
+      </div>
     </>
   );
 }

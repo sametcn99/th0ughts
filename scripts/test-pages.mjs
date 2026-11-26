@@ -41,6 +41,7 @@ try {
     ["tr", 390],
   ]) {
     const ctx = await browser.newContext({
+      locale: "tr-TR",
       viewport: { width, height: 900 },
       permissions: ["clipboard-read", "clipboard-write"],
     });
@@ -53,16 +54,22 @@ try {
     await page.goto(origin + "/th0ughts/" + (lang === "tr" ? "tr/" : ""), {
       waitUntil: "networkidle",
     });
-    await page.locator(".hero .shell button").click();
+    await page.locator("#top .shell button").click();
     assert.equal(
       await page.evaluate(() => navigator.clipboard.readText()),
       "curl -fsSL https://sametcn99.github.io/th0ughts/install.sh | bash",
     );
-    await page.getByRole("button", { name: "Index", exact: true }).click();
-    await expect(page.locator(".example img")).toHaveAttribute(
-      "src",
+    await expect(page.locator("html")).toHaveAttribute("lang", lang);
+    await expect(page.locator("h1")).toHaveText(
+      lang === "en" ? "Quick start" : "Hızlı kurulum",
+    );
+    await expect(page.locator("#themes figure a").nth(1)).toHaveAttribute(
+      "href",
       /theme-index.webp$/,
     );
+    await page.locator('#themes a[href="#theme-guide"]').click();
+    await expect(page.locator("#theme-guide code")).toBeVisible();
+    await page.locator("#theme-guide summary").click();
     for (const button of await page.locator(".methods button").all())
       await button.click();
     await page
@@ -104,7 +111,12 @@ try {
     const themeGuide = page.locator("#handbook details").nth(1);
     await themeGuide.locator("summary").click();
     await expect(themeGuide.locator("code")).toContainText('content="violet"');
-    await page.locator(".language").click();
+    await page
+      .getByRole("link", {
+        name: lang === "en" ? "Türkçe" : "English",
+        exact: true,
+      })
+      .click();
     await expect(page.locator("html")).toHaveAttribute(
       "lang",
       lang === "en" ? "tr" : "en",

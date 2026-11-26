@@ -12,23 +12,26 @@ export const drivers = {
 };
 export const text = {
   en: {
-    skip: "Skip to installation",
+    skip: "Skip to content",
+    quickStart: "Quick start",
+    quickNote:
+      "The installer asks for a database, port and installation directory.",
+    themeTitle: "Themes",
+    themeIntro:
+      "The same feed in two themes. Each theme is one HTML file with its own layout and CSS.",
+    themeGuide: "Write a theme",
+    language: "Language",
+    fullReference: "Full reference",
     install: "Installation",
     gallery: "Gallery",
     docs: "Handbook",
-    github: "GitHub",
-    hero: ["A feed of", "your own."],
-    lead: "A single-owner microblog for notes, photos and the things worth keeping. Publish on your domain, in a theme you can make yourself.",
+    lead: "th0ughts is a self-hosted microblog for one author. To publish your first post, connect to your Linux server over SSH and run the installer.",
     terminal: "Install on your VPS",
     copy: "Copy",
     copied: "Copied",
     copyFail: "Select and copy the command",
     inspect: "Read the installer",
-    alternatives: "Other installation options",
-    preview: "Timeline preview",
-    intro: "Self-hosted microblog",
-    viewGallery: "Explore the gallery",
-    screen: "Screenshots",
+    screen: "screenshots",
     all: "All",
     previous: "Previous",
     next: "Next",
@@ -40,10 +43,8 @@ export const text = {
       access: "Access",
       storage: "Storage",
     },
-    galleryIntro:
-      "Explore the reader, the owner’s workspace and the settings behind each view.",
     enlarge: "Open screenshot",
-    installTitle: "Set up your instance.",
+    installTitle: "Installation",
     methods: [
       "VPS wizard",
       "Docker Compose",
@@ -77,8 +78,6 @@ export const text = {
     sourceDetail:
       "Install the Go toolchain from go.mod. Go embeds the included React bundle. To change the frontend, install the version of Bun in package.json, then run bun install --frozen-lockfile and bun run build before compiling.",
     full: "Deployment reference",
-    handbook: "Inside th0ughts.",
-    guide: "Read the guide",
     back: "Back to top",
     guides: [
       [
@@ -114,23 +113,25 @@ export const text = {
     ],
   },
   tr: {
-    skip: "Kuruluma geç",
+    skip: "İçeriğe geç",
+    quickStart: "Hızlı kurulum",
+    quickNote: "Sihirbaz veritabanını, portu ve kurulum dizinini sorar.",
+    themeTitle: "Temalar",
+    themeIntro:
+      "Aynı akışın iki farklı temadaki görünümü. Her tema, kendi yerleşimini ve CSS kurallarını içeren tek bir HTML dosyasıdır.",
+    themeGuide: "Tema yazma rehberi",
+    language: "Dil",
+    fullReference: "Ayrıntılı kaynak (İngilizce)",
     install: "Kurulum",
     gallery: "Galeri",
     docs: "Rehber",
-    github: "GitHub",
-    hero: ["Sana ait", "bir akış."],
-    lead: "Notların, fotoğrafların ve saklamak istediklerin için tek yazarlı bir mikroblog. Kendi alan adında, kendi tasarladığın temayla yayımla.",
+    lead: "th0ughts kendi sunucunda çalıştırabileceğin tek yazarlı bir mikroblog. İlk gönderini yayımlamak için Linux sunucuna SSH ile bağlanıp kurulum komutunu çalıştır.",
     terminal: "VPS’ine kur",
     copy: "Kopyala",
     copied: "Kopyalandı",
     copyFail: "Komutu seçip kopyala",
     inspect: "Kurulum betiğini oku",
-    alternatives: "Diğer kurulum seçenekleri",
-    preview: "Akış önizlemesi",
-    intro: "Kendi sunucunda mikroblog",
-    viewGallery: "Galeriyi keşfet",
-    screen: "Ekran görüntüleri",
+    screen: "ekran görüntüsü",
     all: "Tümü",
     previous: "Önceki",
     next: "Sonraki",
@@ -142,10 +143,8 @@ export const text = {
       access: "Erişim",
       storage: "Depolama",
     },
-    galleryIntro:
-      "Okurun gördüğü akışı, yayınlama araçlarını ve her görünümün ayarlarını incele.",
     enlarge: "Ekran görüntüsünü aç",
-    installTitle: "Kendi sunucuna kur.",
+    installTitle: "Kurulum",
     methods: [
       "VPS sihirbazı",
       "Docker Compose",
@@ -179,8 +178,6 @@ export const text = {
     sourceDetail:
       "go.mod içinde belirtilen Go sürümünü kur. Go, repodaki React derlemesini içine alır. Ön yüzü değiştirmek için package.json içindeki Bun sürümünü kur, ardından derlemeden önce bun install --frozen-lockfile ve bun run build çalıştır.",
     full: "Dağıtım rehberi",
-    handbook: "th0ughts rehberi.",
-    guide: "Rehberi oku",
     back: "Başa dön",
     guides: [
       [
