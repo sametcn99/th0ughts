@@ -2,14 +2,25 @@
   box-sizing: border-box;
 }
 html {
-  color-scheme: light;
+  --scheme: light;
+  --canvas: #f5f7f8;
+  --surface: #fff;
+  --subtle: #f2f5f8;
+  --accent-surface: #eaf0f6;
+  --on-accent: #fff;
+  --focus: #8b6120;
+  --shadow: #18212918;
+  --backdrop: rgb(22 34 47 / 42%);
+  --panel-shadow: rgb(20 33 52 / 24%);
+  --ui-font: system-ui, sans-serif;
+  color-scheme: var(--scheme);
   --accent: #295b99;
   --ink: #182129;
   --muted: #555f69;
   --line: #dce1e5;
-  background: #f5f7f8;
+  background: var(--canvas);
   color: var(--ink);
-  font-family: "DM Sans", system-ui, sans-serif;
+  font-family: var(--ui-font);
 }
 body {
   margin: 0;
@@ -19,6 +30,7 @@ body {
   flex-direction: column;
 }
 .site-footer {
+  background: var(--footer-surface, var(--canvas));
   margin-top: auto;
   padding: 20px 16px;
   border-top: 1px solid var(--line);
@@ -26,7 +38,7 @@ body {
   font-size: 0.875rem;
 }
 .site-footer a {
-  color: var(--muted);
+  color: var(--footer-ink, var(--muted));
   text-underline-offset: 0.2em;
 }
 a {
@@ -36,7 +48,7 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 summary:focus-visible {
-  outline: 3px solid #8b6120;
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 .mast {
@@ -46,7 +58,7 @@ summary:focus-visible {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--line);
-  background: white;
+  background: var(--surface);
   gap: 18px;
 }
 .wordmark {
@@ -70,7 +82,7 @@ summary:focus-visible {
 .language-picker {
   position: relative;
   flex-shrink: 0;
-  font: 500 14px/1.4 system-ui, sans-serif;
+  font: 500 14px/1.4 var(--ui-font);
 }
 .language-picker summary {
   list-style: none;
@@ -101,11 +113,11 @@ summary:focus-visible {
   padding: 4px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: white;
-  box-shadow: 0 4px 12px #18212918;
+  background: var(--surface);
+  box-shadow: 0 4px 12px var(--shadow);
 }
 .language-picker nav a { display: block; padding: 8px 10px; color: var(--ink); text-decoration: none; border-radius: 4px; }
-.language-picker nav a:hover, .language-picker nav a:focus-visible { background: #f1f4f6; }
+.language-picker nav a:hover, .language-picker nav a:focus-visible { background: var(--subtle); }
 .language-picker a[aria-current="true"] { font-weight: 700; }
 .language-picker a[aria-current="true"]::after { content: "✓" / ""; float: right; }
 .reading,
@@ -114,7 +126,7 @@ summary:focus-visible {
   max-width: 700px;
   margin: 0 auto;
   padding: 0;
-  background: white;
+  background: var(--surface);
   border-inline: 1px solid var(--line);
 }
 .themed > .intro,
@@ -166,7 +178,7 @@ summary:focus-visible {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 9px;
-  background: #fff;
+  background: var(--surface);
   padding: 7px 10px;
   font: inherit;
 }
@@ -175,17 +187,17 @@ summary:focus-visible {
   font: inherit;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
   padding: 7px 14px;
   cursor: pointer;
 }
 .entries {
   margin: 0;
-  background: white;
+  background: var(--surface);
 }
 .entry {
   position: relative;
-  background: white;
+  background: var(--surface);
   border-bottom: 1px solid var(--line);
   padding: 16px;
   overflow-wrap: anywhere;
@@ -219,9 +231,8 @@ article.entry:has(.byline) {
   height: 36px;
   border-radius: 50%;
   font:
-    700 17px/1 system-ui,
-    sans-serif;
-  background: #eaf0f6;
+    700 17px/1 var(--ui-font);
+  background: var(--accent-surface);
   color: var(--accent);
 }
 .byline strong {
@@ -232,8 +243,7 @@ article.entry:has(.byline) {
 .entry-detail h1 {
   margin: 9px 0 5px;
   font:
-    700 19px/1.25 system-ui,
-    sans-serif;
+    700 19px/1.25 var(--ui-font);
   letter-spacing: -0.025em;
 }
 .entry h2 a {
@@ -291,7 +301,7 @@ article.entry:has(.byline) {
   text-align: center;
   padding: 44px 20px;
   color: var(--muted);
-  border: 1px dashed #becabb;
+  border: 1px dashed var(--line);
   border-radius: 14px;
 }
 .empty span {
@@ -394,3 +404,5 @@ article.entry:has(.byline) {
 }
 
 html.settings-open { overflow: hidden; }
+
+.search :is(input, button), .edit { color: var(--ink); }

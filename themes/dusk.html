@@ -1,0 +1,32 @@
+<meta name="theme" content="dusk" title="Dusk">
+<style>
+/* The shared palette also reaches the owner controls and the footer. */
+:root {
+  --canvas: #f5efe7;
+  --surface: #fffaf2;
+  --ink: #352922;
+  --muted: #685850;
+  --line: #d7c7bb;
+  --accent: #85462e;
+  --accent-surface: #f4ddce;
+  --subtle: #f7eee4;
+  --focus: #874900;
+}
+.entry { border-radius: 0; }
+.read-post:hover { text-decoration: underline; }
+@media (prefers-color-scheme: dark) {
+  :root {
+    --scheme: dark;
+    --canvas: #171419;
+    --surface: #211d24;
+    --ink: #f7edf0;
+    --muted: #c6b4bb;
+    --line: #544550;
+    --accent: #f5ad92;
+    --on-accent: #2e1813;
+    --accent-surface: #49323a;
+    --subtle: #302831;
+    --focus: #ffdb91;
+  }
+}
+</style>

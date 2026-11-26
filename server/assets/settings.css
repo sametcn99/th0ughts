@@ -9,18 +9,18 @@
   gap: 9px;
 }
 .settings-launch a {
-  color: #43576d;
+  color: var(--muted);
   font-size: 14px;
   text-underline-offset: 3px;
 }
 .settings-dialog {
-  --ui-ink: #1e2938;
-  --ui-muted: #53667a;
-  --ui-line: #dce3eb;
-  --ui-blue: #255797;
+  --ui-ink: var(--ink);
+  --ui-muted: var(--muted);
+  --ui-line: var(--line);
+  --ui-blue: var(--accent);
   color: var(--ui-ink);
-  background: white;
-  border: 1px solid #ccd6df;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 16px;
   padding: 0;
   margin: auto;
@@ -28,7 +28,7 @@
   height: min(744px, calc(100dvh - 48px));
   max-width: none;
   max-height: none;
-  box-shadow: 0 18px 70px rgb(20 33 52 / 24%);
+  box-shadow: 0 18px 70px var(--panel-shadow);
   overflow: hidden;
 }
 .settings-dialog[open] {
@@ -36,7 +36,7 @@
   flex-direction: column;
 }
 .settings-dialog::backdrop {
-  background: rgb(22 34 47 / 42%);
+  background: var(--backdrop);
 }
 .settings-heading,
 .settings-footer {
@@ -57,21 +57,21 @@
 }
 .settings-dialog button {
   background: var(--ui-blue);
-  color: white;
+  color: var(--on-accent);
   border-radius: 7px;
   min-height: 38px;
 }
 .settings-dialog button.secondary {
-  background: white;
+  background: var(--surface);
   color: var(--ui-ink);
-  border-color: #c9d3de;
+  border-color: var(--line);
 }
 .settings-dialog button:enabled:hover {
   filter: brightness(0.95);
 }
 .settings-dialog button:focus-visible,
 .settings-dialog :is(input, select, textarea, a):focus-visible {
-  outline-color: var(--ui-blue);
+  outline-color: var(--focus);
 }
 .settings-dialog .close-settings {
   justify-content: center;
@@ -79,7 +79,7 @@
   padding: 0;
   border: 0;
   color: var(--ui-muted);
-  background: #f2f5f8;
+  background: var(--subtle);
 }
 .settings-layout {
   display: grid;
@@ -92,21 +92,21 @@
   flex-direction: column;
   gap: 4px;
   padding: 18px 12px;
-  background: #f5f7fa;
+  background: var(--subtle);
   border-inline-end: 1px solid var(--ui-line);
   overflow-y: auto;
 }
 .settings-nav button {
   padding: 11px 12px;
   text-align: start;
-  color: #394c61;
+  color: var(--ink);
   background: transparent;
   border: 0;
   font-weight: 520;
 }
 .settings-nav button[aria-pressed="true"] {
-  color: #194f92;
-  background: #e2ebf8;
+  color: var(--accent);
+  background: var(--accent-surface);
   font-weight: 670;
 }
 .settings-nav svg {
@@ -149,7 +149,7 @@
 .settings-content label {
   gap: 6px;
   margin: 11px 0;
-  color: #37495d;
+  color: var(--ink);
   font-size: 14px;
   font-weight: 530;
 }
@@ -160,7 +160,7 @@
     [type="color"]
   ) {
   width: 100%;
-  border: 1px solid #c5cfda;
+  border: 1px solid var(--line);
   border-radius: 7px;
   color: var(--ui-ink);
   font-weight: 400;
@@ -176,7 +176,7 @@
   gap: 12px;
   min-height: 42px;
   padding: 6px 10px;
-  border: 1px dashed #a6b8cb;
+  border: 1px dashed var(--line);
   border-radius: 7px;
   overflow: hidden;
 }
@@ -195,8 +195,8 @@
   border-radius: 4px;
   padding: 4px 8px;
   font-weight: 600;
-  background: #eaf0f7;
-  color: #2e445c;
+  background: var(--accent-surface);
+  color: var(--ink);
 }
 .file-name {
   min-width: 0;
@@ -209,7 +209,7 @@
   width: 100%;
   padding: 3px;
   height: 34px;
-  border-color: #c5cfda;
+  border-color: var(--line);
 }
 .settings-content :is(input[type="range"], input[type="checkbox"]) {
   accent-color: var(--ui-blue);
@@ -282,7 +282,7 @@
   display: block;
 }
 .settings-content :is(code, output) {
-  background: #f2f5f9;
+  background: var(--subtle);
   border-radius: 6px;
 }
 .settings-footer {
@@ -327,7 +327,7 @@
     gap: 9px;
     margin: 0;
     padding: 9px 18px;
-    background: #f0f4fa;
+    background: var(--subtle);
     border-bottom: 1px solid var(--ui-line);
     color: var(--ui-blue);
   }
@@ -371,4 +371,14 @@
   .scope-grid {
     gap: 0 8px;
   }
+}
+
+/* Static previews use the same dialog without opening a browser top layer. */
+:host([inert]) .settings-dialog[open] {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
 }

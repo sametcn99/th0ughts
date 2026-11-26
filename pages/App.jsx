@@ -64,6 +64,7 @@ function Themes({ prefix, t, lang }) {
         {[
           ["timeline", "Paper"],
           ["theme-index", "Index"],
+          ["theme-dusk", "Dusk"],
         ].map(([id, name]) => {
           const shot = shotById[id];
           const src = prefix + "screenshots/" + shot.file;

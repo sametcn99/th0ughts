@@ -56,3 +56,7 @@ func Latest(ctx context.Context, service *feed.Service, lang string) (feed.Page,
 Reuse one service across requests to share its search index, mutation lock, and cache generation. A single writer process owns each site. Resolve credentials at your transport boundary before calling the service to publish or manage settings.
 
 A new store implements `storage.Store` and its public ordering, cursor, missing-record and durability contract. Pass it to the service directly or register its built-in driver and deployment recipe when contributing it to the project. The local JSON drivers additionally hold an exclusive file lock.
+
+### Theme commands
+
+Use the shared `service.Themes` catalog when embedding the service. `publish_theme` takes `{"settings":{...},"source":"..."}` and commits both changes together. Publishing a file requires both the `settings` and `themes` scopes. `save_settings` validates option overrides against the installed schemas. `get_theme` returns the current HTML in `source`, the last revision in `previous`, and older revisions in `history`. Pass one of these sources to `install_theme` to restore it. `delete_theme` removes an inactive custom theme by ID. These commands are available through the named HTTP endpoints, CLI and agent tools.

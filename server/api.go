@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"sort"
 
@@ -64,17 +65,32 @@ var commands = []Command{
 	}),
 	command("get_settings", "", true, func(c context.Context, s *Server, a feed.Actor, _ empty) (any, error) { return s.S.Settings(c) }),
 	command("save_settings", "settings", false, func(c context.Context, s *Server, a feed.Actor, x feed.Settings) (any, error) {
-		if _, e := s.T.Load(c, x.Theme); e != nil {
-			return nil, feed.Invalid
-		}
 		return true, s.S.SaveSettings(c, a, x)
+	}),
+	command("publish_theme", "settings", false, func(c context.Context, s *Server, a feed.Actor, x struct {
+		Settings feed.Settings `json:"settings"`
+		Source   string        `json:"source"`
+	}) (any, error) {
+		return true, s.T.Publish(c, a, x.Settings, x.Source)
+	}),
+	command("get_theme", "themes", true, func(c context.Context, s *Server, a feed.Actor, x identify) (any, error) { return s.T.Source(c, x.ID) }),
+	command("delete_theme", "themes", false, func(c context.Context, s *Server, a feed.Actor, x identify) (any, error) {
+		return true, s.T.Delete(c, a, x.ID)
 	}),
 	command("list_themes", "themes", true, func(c context.Context, s *Server, a feed.Actor, _ empty) (any, error) { return s.T.List(c) }),
 	command("preview_theme", "owner", false, func(_ context.Context, s *Server, a feed.Actor, x struct {
-		Source string `json:"source"`
-	}) (any, error) { design, err := theme.Compile(x.Source); if err != nil {
-		return nil, feed.Invalid
-	}; token := s.issueTicket(design, "preview:"+a.Session); return map[string]any{"theme": design, "ticket": token}, nil }),
+		Source  string                       `json:"source"`
+		Options map[string]map[string]string `json:"options,omitempty"`
+	}) (any, error) {
+		design, err := theme.Compile(x.Source)
+		if err != nil {
+			return nil, err
+		}
+		values := x.Options[design.ID]
+		design.Normalize(values)
+		token := s.issueTicket(design, "preview:"+a.Session)
+		return map[string]any{"theme": design, "ticket": token, "options": values}, nil
+	}),
 	command("install_theme", "themes", false, func(c context.Context, s *Server, a feed.Actor, x themeInput) (any, error) {
 		return s.T.Install(c, a, x.Source, x.Rollback)
 	}),
@@ -141,7 +157,12 @@ func MCP(list []Command, labels map[string]string, call func(context.Context, st
 			v, e := call(ctx, op.Name, req.Params.Arguments)
 			if e != nil {
 				_, code := errorStatus(e)
-				return &mcp.CallToolResult{IsError: true, Content: []mcp.Content{&mcp.TextContent{Text: labels[code]}}}, nil
+				message := labels[code]
+				var d *theme.Diagnostic
+				if errors.As(e, &d) {
+					message = d.Localize(labels)
+				}
+				return &mcp.CallToolResult{IsError: true, Content: []mcp.Content{&mcp.TextContent{Text: message}}}, nil
 			}
 			b, e := json.Marshal(v)
 			return &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: string(b)}}}, e

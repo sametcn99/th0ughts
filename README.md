@@ -76,7 +76,7 @@ Run `bun run build:pages` to render the English and Turkish React site into `pag
 
 <!-- gallery:start -->
 <details>
-<summary>Application screenshots (37)</summary>
+<summary>Application screenshots (45)</summary>
 
 Build the Go binary (see Local development), install Chromium with `bun run --bun playwright install chromium`, and run `bun run screenshots` to refresh this gallery. The script creates and removes its own demo instance.
 
@@ -168,6 +168,34 @@ Build the Go binary (see Local development), install Chromium with `bun run --bu
 
 ![Sample content in owner preview](https://sametcn99.github.io/th0ughts/screenshots/preview-owner.webp)
 
+**Short post permalink preview**
+
+![Short post permalink preview](https://sametcn99.github.io/th0ughts/screenshots/preview-short.webp)
+
+**Article card preview**
+
+![Article card preview](https://sametcn99.github.io/th0ughts/screenshots/preview-article-list.webp)
+
+**Full Article preview**
+
+![Full Article preview](https://sametcn99.github.io/th0ughts/screenshots/preview-article.webp)
+
+**Sign-in preview**
+
+![Sign-in preview](https://sametcn99.github.io/th0ughts/screenshots/preview-login.webp)
+
+**Composer preview**
+
+![Composer preview](https://sametcn99.github.io/th0ughts/screenshots/preview-composer.webp)
+
+**Settings dialog preview**
+
+![Settings dialog preview](https://sametcn99.github.io/th0ughts/screenshots/preview-settings.webp)
+
+**Theme downloads and revision history**
+
+![Theme downloads and revision history](https://sametcn99.github.io/th0ughts/screenshots/theme-history.webp)
+
 **Scoped access token settings**
 
 ![Scoped access token settings](https://sametcn99.github.io/th0ughts/screenshots/tokens.webp)
@@ -207,6 +235,10 @@ Build the Go binary (see Local development), install Chromium with `bun run --bu
 **Starter theme**
 
 ![Starter theme](https://sametcn99.github.io/th0ughts/screenshots/theme-starter.webp)
+
+**Dusk theme**
+
+![Dusk theme](https://sametcn99.github.io/th0ughts/screenshots/theme-dusk.webp)
 
 **Mobile timeline in Turkish**
 

@@ -458,7 +458,33 @@ async function captureSettings(owner, shot) {
     "Sample content in owner preview",
     "Sahip önizlemesinde örnek içerik",
   );
+  for (const [view, selector, en, tr] of [
+    ["short", ".entry-detail", "Short post permalink preview", "Kısa gönderi önizlemesi"],
+    ["article-list", ".article-preview", "Article card preview", "Makale kartı önizlemesi"],
+    ["article", ".entry-detail h1", "Full Article preview", "Makale sayfası önizlemesi"],
+    ["login", "#login form", "Sign-in preview", "Giriş ekranı önizlemesi"],
+    ["composer", ".compose-panel", "Composer preview", "Düzenleyici önizlemesi"],
+    ["settings", "dialog[open]", "Settings dialog preview", "Ayarlar penceresi önizlemesi"],
+  ]) {
+    await panel.getByLabel("Preview screen").selectOption(view);
+    await frame.locator(selector).waitFor();
+    await panel.locator("iframe").scrollIntoViewIfNeeded();
+    await panelShot("preview-" + view, "appearance", en, tr);
+  }
   await button(panel, "Preview").click();
+  // Keep revision management visible in the gallery without changing the live theme.
+  for (const title of ["Notebook One", "Notebook Two", "Notebook Three"]) {
+    await owner.request.post("/api/v1/install_theme", {
+      headers: {"X-Th0ughts-Request":"1"},
+      data: {source:`<meta name="theme" content="notebook" title="${title}">`},
+      failOnStatusCode:true,
+    });
+  }
+  await tab("Site"); await tab("Appearance");
+  await panel.getByLabel("Active theme").selectOption("notebook");
+  await button(panel,"Version history").click();
+  await panel.getByLabel("Earlier revisions").selectOption("1");
+  await panelShot("theme-history","appearance","Theme downloads and revision history","Tema indirme ve sürüm geçmişi");
   await tab("Access tokens");
   await panel.getByLabel("Token name").fill("Notebook CLI");
   await panel.getByLabel("Write posts").check();
@@ -536,17 +562,19 @@ async function captureSettings(owner, shot) {
 }
 
 async function captureThemesAndMobile(owner, reader, data, shot) {
-  for (const theme of ["index", "starter"]) {
+  for (const theme of ["index", "starter", "dusk"]) {
     await data.api("save_settings", { ...data.site, theme });
+    await reader.emulateMedia({colorScheme:theme==="dusk"?"dark":"light"});
     await navigate(reader, "/?lang=en");
     await shot(
       reader,
       "theme-" + theme,
       "appearance",
-      theme === "index" ? "Index theme" : "Starter theme",
-      theme === "index" ? "Index teması" : "Starter teması",
+      theme.charAt(0).toUpperCase() + theme.slice(1) + " theme",
+      theme.charAt(0).toUpperCase() + theme.slice(1) + " teması",
     );
   }
+  await reader.emulateMedia({colorScheme:"light"});
   await data.api("save_settings", data.site);
   await reader.setViewportSize({ width: 390, height: 844 });
   await navigate(reader, "/?lang=tr");

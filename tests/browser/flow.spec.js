@@ -213,6 +213,8 @@ for (const [lang, mobile] of [
         // Upload the exact format accepted from a repository contributor.
         const source = (version) =>
           '<meta name="theme" content="folio" title="Folio">' +
+          '<style>:root { --surface:#faf3ed; --footer-surface:#deeedd; } @media (prefers-color-scheme: dark) { :root { --surface:#203040; } }</style>' +
+          '<script id="options" type="application/json">[{"key":"gap","type":"range","min":0,"max":2,"step":0.25,"unit":"rem","default":"0.5","labels":{"en":"Gap","tr":"Aralık"}}]</script>' +
           '<template id="item"><header class="folio-' +
           version +
           '"><theme-text en="Field notes" tr="Saha notları"></theme-text><slot name="title"></slot><slot name="byline"></slot></header><slot name="body"></slot><slot name="media"></slot><slot name="tags"></slot><slot name="actions"></slot></template>';
@@ -252,6 +254,19 @@ for (const [lang, mobile] of [
         await expect(frame.locator(".prose")).toHaveText(
           "A sample post for previewing this theme.",
         );
+        await expect(settings.getByLabel("Gap")).toHaveAttribute("step","0.25");
+        const screen = settings.getByLabel("Preview screen");
+        for (const [view, selector] of [["short",".entry-detail"],["article-list",".article-preview .read-post"],["article",".entry-detail h1"],["login","#login form"],["composer","#composer .compose-panel"],["settings","#settings dialog[open]"]]) {
+          await screen.selectOption(view);
+          await expect(frame.locator(selector)).toBeVisible();
+          await expect(frame.locator("#state")).toHaveCount(0);
+          await expect(frame.locator("html")).toHaveCSS("background-color","rgb(245, 247, 248)");
+        }
+        await expect(frame.locator("#settings dialog")).toHaveCSS("background-color","rgb(250, 243, 237)");
+        await page.emulateMedia({colorScheme:"dark"});
+        await expect(frame.locator("#settings dialog")).toHaveCSS("background-color","rgb(32, 48, 64)");
+        await page.emulateMedia({colorScheme:"light"});
+        await screen.selectOption("feed");
         await page.getByRole("button", { name: "Save", exact: true }).click();
         await expect(page.locator(".folio-first")).toBeVisible();
         await expect(settings.locator(".notice")).toHaveText("Saved.");
@@ -266,6 +281,19 @@ for (const [lang, mobile] of [
           .getByRole("button", { name: "Preview", exact: true })
           .click();
         await expect(frame.locator(".folio-second")).toBeVisible();
+        await settings.getByRole("button",{name:"Site",exact:true}).click();
+        const siteURL=settings.getByLabel("Public site URL");
+        const originalURL=await siteURL.inputValue();
+        await siteURL.fill("invalid");
+        await settings.getByRole("button",{name:"Appearance",exact:true}).click();
+        await settings.getByRole("button",{name:"Save",exact:true}).click();
+        await expect(settings.locator(".notice")).toHaveText("Check the information you entered.");
+        await publicPage.reload();
+        await expect(publicPage.locator(".folio-first")).toBeVisible();
+        await expect(publicPage.locator(".site-footer")).toHaveCSS("background-color","rgb(222, 238, 221)");
+        await settings.getByRole("button",{name:"Site",exact:true}).click();
+        await siteURL.fill(originalURL);
+        await settings.getByRole("button",{name:"Appearance",exact:true}).click();
         await visitor.close();
         await expect(page.locator("#settings .dirty-state")).toHaveText("Unsaved changes");
         await page.getByRole("button", { name: "Save", exact: true }).click();
@@ -279,6 +307,21 @@ for (const [lang, mobile] of [
         await expect(page.locator("#settings .notice")).toHaveText("Saved.");
         await page.reload();
         await expect(page.locator(".folio-first")).toBeVisible();
+        await appearance();
+        await settings.getByRole("button",{name:"Version history"}).click();
+        await expect(settings.getByLabel("Earlier revisions")).toHaveValue("0");
+        const downloadEvent=page.waitForEvent("download");
+        await settings.getByRole("button",{name:"Download theme file"}).click();
+        const download=await downloadEvent;
+        expect(download.suggestedFilename()).toBe("folio.html");
+        await settings.getByLabel("Active theme").selectOption("paper");
+        await settings.getByRole("button",{name:"Save",exact:true}).click();
+        await expect(settings.locator(".notice")).toHaveText("Saved.");
+        await settings.getByLabel("Active theme").selectOption("folio");
+        page.once("dialog",d=>d.accept());
+        await settings.getByRole("button",{name:"Delete theme",exact:true}).click();
+        await expect(settings.locator('option[value="folio"]')).toHaveCount(0);
+        await page.keyboard.press("Escape");
         await cdp.send("WebAuthn.enable");
         await cdp.send("WebAuthn.addVirtualAuthenticator", {
           options: {

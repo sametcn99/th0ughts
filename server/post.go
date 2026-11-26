@@ -21,15 +21,16 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 	parts := map[string]string{}
 	author := first(site.Author, site.Name)
 	initial, _ := utf8.DecodeRuneInString(strings.TrimSpace(author))
-	var by strings.Builder
-	fmt.Fprintf(&by, "<div class=\"byline\"><span class=\"avatar\" aria-hidden=\"true\">%s</span><strong>%s</strong><a href=\"%s\"><time datetime=\"%s\">%s</time></a>", esc(strings.ToUpper(string(initial))), esc(author), esc(link("", p.ID, l)), dt.Format(time.RFC3339), esc(dateLabel(dt, words)))
+	parts["avatar"] = fmt.Sprintf(`<span class="avatar" aria-hidden="true">%s</span>`, esc(strings.ToUpper(string(initial))))
+	parts["author"] = "<strong>" + esc(author) + "</strong>"
+	parts["date"] = fmt.Sprintf(`<a href="%s"><time datetime="%s">%s</time></a>`, esc(link("", p.ID, l)), dt.Format(time.RFC3339), esc(dateLabel(dt, words)))
 	if p.Pinned {
-		fmt.Fprintf(&by, "<span>%s</span>", esc(words["pinned"]))
+		parts["status"] += "<span>" + esc(words["pinned"]) + "</span>"
 	}
 	if !t.Published {
-		fmt.Fprintf(&by, "<span>%s</span>", esc(words["draft"]))
+		parts["status"] += "<span>" + esc(words["draft"]) + "</span>"
 	}
-	parts["byline"] = by.String() + "</div>"
+	parts["byline"] = `<div class="byline">` + parts["avatar"] + parts["author"] + parts["date"] + parts["status"] + "</div>"
 	rendered := bodyHTML(t.Body)
 	class := "entry"
 	attachments := p.Attachments(t)
@@ -45,14 +46,14 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 		}
 	}
 	parts["body"] = `<div class="prose">` + rendered + "</div>"
-	if !detail && (t.Title != "" || utf8.RuneCountInString(t.Body) > timelineTextLimit) {
-		visible := plainHTML(rendered)
-		if t.Title != "" || utf8.RuneCountInString(visible) > timelineTextLimit {
-			class += " article-preview"
-			parts["body"] = `<div class="prose"><p>` + esc(excerpt(visible, articleExcerptLength)) + `</p></div><a class="read-post" href="` + permalink + `">` + esc(words["read_article"]) + ` <span aria-hidden="true">→</span></a>`
-			if len(attachments) > 1 {
-				attachments = attachments[:1]
-			}
+	visible := plainHTML(rendered)
+	article := t.Title != "" || utf8.RuneCountInString(visible) > timelineTextLimit
+	if article && !detail {
+		class += " article-preview"
+		parts["body"] = `<div class="prose"><p>` + esc(excerpt(visible, articleExcerptLength)) + `</p></div>`
+		parts["readmore"] = `<a class="read-post" href="` + permalink + `">` + esc(words["read_article"]) + ` <span aria-hidden="true">→</span></a>`
+		if len(attachments) > 1 {
+			attachments = attachments[:1]
 		}
 	}
 	var media, tags strings.Builder
@@ -75,5 +76,5 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 	if private {
 		parts["actions"] = fmt.Sprintf("<button class=\"edit\" data-edit=\"%s\">%s</button>", esc(p.ID), esc(words["edit"]))
 	}
-	return "<article class=\"" + class + "\" lang=\"" + esc(l) + "\">" + design.RenderLocale("item", parts, lang, map[string]bool{"owner": private, "pinned": p.Pinned, "draft": !t.Published, "media": len(p.Attachments(t)) > 0, "tags": len(p.Tags) > 0, "title": t.Title != ""}) + "</article>"
+	return "<article class=\"" + class + "\" lang=\"" + esc(l) + "\">" + design.RenderLocale("item", parts, lang, map[string]bool{"article": article, "short": !article, "detail": detail, "list": !detail, "owner": private, "pinned": p.Pinned, "draft": !t.Published, "media": len(p.Attachments(t)) > 0, "tags": len(p.Tags) > 0, "title": t.Title != ""}) + "</article>"
 }

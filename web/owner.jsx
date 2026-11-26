@@ -93,7 +93,7 @@ function savedDraft() {
     return null;
   }
 }
-function Composer() {
+export function Composer() {
   const [post, set] = useState(() => savedDraft() || blank()),
     [lang, langSet] = useState(post?.original || state.lang);
   const a = useAction();
@@ -343,9 +343,11 @@ function Composer() {
     </section>
   );
 }
-if (location.pathname === "/login") mount("login", <SignIn />);
-else if (state.setup) mount("composer", <Setup />);
-else if (state.owner) {
-  mount("composer", <Composer />);
-  mount("settings", <Settings />);
+if (typeof document !== "undefined") {
+  if (location.pathname === "/login") mount("login", <SignIn />);
+  else if (state.setup) mount("composer", <Setup />);
+  else if (state.owner) {
+    mount("composer", <Composer />);
+    mount("settings", <Settings />);
+  }
 }

@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
-export const state = JSON.parse(document.querySelector("#state").textContent);
+export const state =
+  typeof document === "undefined"
+    ? {}
+    : JSON.parse(document.querySelector("#state").textContent);
 export const t = (k) => state.messages[k] || k;
 export async function req(url, body = {}, raw = false) {
   const res = await fetch(url, {
@@ -12,7 +15,17 @@ export async function req(url, body = {}, raw = false) {
     body: raw ? body : JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({ error: "internal_error" }));
-  if (!res.ok) throw Error(t(data.error));
+  if (!res.ok) {
+    const d = data.diagnostic;
+    if (d)
+      throw Error(
+        t("theme_diagnostic")
+          .replace("{line}", d.line)
+          .replace("{kind}", t("theme_error_" + d.kind))
+          .replace("{token}", () => d.token),
+      );
+    throw Error(t(data.error));
+  }
   return data;
 }
 export const api = (name, data) => req("/api/v1/" + name, data);
@@ -120,20 +133,21 @@ export function SignIn({
       )}
       <div className="row">
         <button disabled={a.busy}>{t("login")}</button>
-        {!init && window.PublicKeyCredential && (
-          <button
-            type="button"
-            className="secondary"
-            onClick={() =>
-              a.run(async () => {
-                await ceremony(false);
-                onDone();
-              })
-            }
-          >
-            {t("passkey")}
-          </button>
-        )}
+        {!init &&
+          (typeof window === "undefined" || window.PublicKeyCredential) && (
+            <button
+              type="button"
+              className="secondary"
+              onClick={() =>
+                a.run(async () => {
+                  await ceremony(false);
+                  onDone();
+                })
+              }
+            >
+              {t("passkey")}
+            </button>
+          )}
       </div>
       <Notice action={a} />
     </form>

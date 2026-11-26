@@ -50,3 +50,55 @@ Declare color controls inside the same file. The selected value is available as 
 Preview a theme and its unsaved options from the timeline before activation. The preview ticket for an uploaded file lasts five minutes. Close and reopen the preview to refresh it. Its preview frame is sandboxed and contains no session controls or executable theme code. Open `/?recover=1` in an owner session to restore a usable view. Offline recovery is available through the CLI. The complete Paper and Index files demonstrate different timelines and entry layouts.
 
 The option type defaults to `color`. Use `select` with localized `choices` to offer fonts or layout presets, `range` with `min`, `max`, and an optional `px`, `rem`, or `%` unit for spacing, and `toggle` for a numeric CSS switch. Defaults and persisted values pass the same type-specific checks. Paper includes working font and spacing controls.
+
+### Layouts for short posts and Articles
+
+A translation with a title or more than 280 visible characters is an Article. The timeline displays an excerpt and the permalink displays the full body. To give each a different structure, define `item-short`, `item-article`, `item-short-detail`, or `item-article-detail`. A permalink first tries its detail template, then the type-specific template, then `item`. Every variant accepts the same slots as `item`.
+
+Use `data-if="article"`, `short`, `detail`, or `list` on an item container, slot, or localized label. For example, an Article card can place the author at the top and the permalink below its excerpt.
+
+```html
+<template id="item-article">
+  <header><slot name="author"></slot><slot name="title"></slot></header>
+  <section><slot name="body"></slot><slot name="media"></slot></section>
+  <footer>
+    <slot name="readmore"></slot><slot name="date"></slot>
+    <slot name="tags"></slot><slot name="actions"></slot>
+  </footer>
+</template>
+```
+
+Replace `byline` with both `author` and `date` to position them independently. Add `avatar` and `status` wherever you want the initial, pin, or draft indicator. The default byline includes all four. When you omit `readmore`, the compiler places the Article link after `body`.
+
+### Shared palette and responsive CSS
+
+Set custom properties on `:root` to style the timeline, permalink, footer, and the controls inside the login, composer, and settings shadow roots. Ordinary selectors stay within the public themed layout. The following properties are shared across the application.
+
+| Properties | Appearance |
+| --- | --- |
+| `--canvas`, `--surface`, `--subtle` | Page, panel and input backgrounds, secondary surfaces |
+| `--ink`, `--muted`, `--line` | Primary text, secondary text and borders |
+| `--accent`, `--on-accent`, `--accent-surface` | Buttons, links, selected states and their foregrounds |
+| `--focus`, `--shadow`, `--panel-shadow`, `--backdrop` | Keyboard focus, menus, dialog shadows and overlays |
+| `--footer-surface`, `--footer-ink` | Footer background and link text |
+| `--ui-font`, `--scheme` | Local font stack and native control color scheme |
+
+Define your own variables in a class or on the root. Use CSS comments, child and descendant selectors, and interactive states including `:hover`, `:focus-visible`, `:focus-within`, `:active`, `:checked`, and `:disabled`. A style element can contain regular `@media` blocks or use a `media` attribute. Both accept width breakpoints, preferred color schemes, and reduced-motion preferences. Option overrides are emitted after theme rules.
+
+```css
+:root { --accent: #85462e; --surface: #fffaf2; }
+.read-post:focus-visible { outline: 2px solid var(--accent); }
+@media (prefers-color-scheme: dark) {
+  :root { --scheme: dark; --canvas: #171419; --surface: #211d24; --ink: #f7edf0; }
+}
+```
+
+See `themes/dusk.html` for a complete light and dark palette. A range can use fractional bounds and a positive numeric `step`, such as `"min":0.5,"max":2,"step":0.25,"unit":"rem","default":"0.75"`. Steps are counted from the minimum. Omitting the step accepts any in-range decimal. The server validates overrides for every theme on save. When importing an updated schema in Appearance, compatible overrides carry forward.
+
+### Validate, preview and manage revisions
+
+Run `th0ughts -file ./my-theme.html theme-check` locally, before uploading anything. Add `-lang tr` before the command for Turkish diagnostics. The UI and API also report the line, the affected rule or field, and its token.
+
+In **Settings → Appearance**, upload an HTML file, choose **Preview**, and select the timeline, a short permalink, an Article card or permalink, sign-in, composer, or settings. The controls shown in previews are inert snapshots rendered from the application components. **Save** commits the new active revision and site settings together. A failed save keeps the last published revision visible.
+
+**Download theme file** exports the selected source. **Version history** lists earlier distinct revisions, newest first. Restoring a revision takes effect immediately and keeps the replaced version in history. To delete a custom theme, activate another theme first, then select the inactive custom theme and choose **Delete theme**. Built-in themes are protected. Site backups include custom themes and their revision histories, and the importer accepts earlier backups containing a single previous revision.

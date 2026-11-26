@@ -61,6 +61,6 @@ func (s *Server) restore(w http.ResponseWriter, r *http.Request) {
 	s.cache = &pageCache{}
 	s.S = feed.New(s.S.DB)
 	s.L.Service = s.S
-	s.T = feed.NewThemes(s.S.DB)
+	s.T = s.S.Themes
 	respond(w, true)
 }

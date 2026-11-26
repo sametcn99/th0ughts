@@ -25,6 +25,7 @@ import (
 	"github.com/sametcn99/th0ughts/feed"
 	"github.com/sametcn99/th0ughts/server"
 	"github.com/sametcn99/th0ughts/storage"
+	theme "github.com/sametcn99/th0ughts/themes"
 )
 
 type options struct {
@@ -52,7 +53,7 @@ func run() error {
 	flag.Usage = func() {
 		fmt.Fprintln(flag.CommandLine.Output(), server.Labels(o.lang)["cli_help"])
 		labels := server.Labels(o.lang)
-		for _, name := range append([]string{"serve", "setup", "setup-storage", "recover", "theme-reset", "login", "mcp", "upload", "backup", "restore"}, server.CommandNames()...) {
+		for _, name := range append([]string{"serve", "setup", "setup-storage", "recover", "theme-reset", "theme-check", "login", "mcp", "upload", "backup", "restore"}, server.CommandNames()...) {
 			description := labels["cli_"+name]
 			if description == "" {
 				description = labels[name]
@@ -71,6 +72,26 @@ func run() error {
 	}
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
+	if cmd == "theme-check" {
+		f, e := os.Open(o.file)
+		if e != nil {
+			return e
+		}
+		defer f.Close()
+		b, e := io.ReadAll(io.LimitReader(f, 65537))
+		if e != nil {
+			return e
+		}
+		design, e := theme.Compile(string(b))
+		var d *theme.Diagnostic
+		if errors.As(e, &d) {
+			return errors.New(d.Localize(server.Labels(o.lang)))
+		}
+		if e != nil {
+			return e
+		}
+		return json.NewEncoder(os.Stdout).Encode(design)
+	}
 	if cmd == "setup-storage" {
 		return prepare(o)
 	}
@@ -104,10 +125,7 @@ func run() error {
 				return e
 			}
 			v.Theme = "paper"
-			if _, e = s.T.Install(ctx, feed.Actor{Owner: true}, s.DefaultTheme(), ""); e != nil {
-				return e
-			}
-			return s.S.SaveSettings(ctx, feed.Actor{Owner: true}, v)
+			return s.T.Publish(ctx, feed.Actor{Owner: true}, v, s.DefaultTheme())
 		}
 		httpd := http.Server{Addr: o.listen, Handler: s, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 2 * time.Minute, WriteTimeout: 3 * time.Minute, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 32 << 10}
 		listener, e := net.Listen("tcp", o.listen)
@@ -154,9 +172,15 @@ func run() error {
 		}
 		if resp.StatusCode >= 300 {
 			defer resp.Body.Close()
-			var v map[string]string
+			var v struct {
+				Error      string            `json:"error"`
+				Diagnostic *theme.Diagnostic `json:"diagnostic"`
+			}
 			json.NewDecoder(resp.Body).Decode(&v)
-			if label := server.Labels(o.lang)[v["error"]]; label != "" {
+			if v.Diagnostic != nil {
+				return nil, errors.New(v.Diagnostic.Localize(server.Labels(o.lang)))
+			}
+			if label := server.Labels(o.lang)[v.Error]; label != "" {
 				return nil, errors.New(label)
 			}
 			return nil, fmt.Errorf("HTTP %d", resp.StatusCode)

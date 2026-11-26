@@ -29,8 +29,14 @@ try:
     request("/auth/bootstrap",{"master":key})
     request("/auth/setup",{"password":secrets.token_urlsafe(24)})
     post = request("/api/v1/posts",{"original":"en","text":{"en":{"body":"Persisted post","published":True}}})
+    theme = '<meta name="theme" content="compose" title="Compose">'
+    site = request("/api/v1/get_settings", {})
+    site["theme"] = "compose"
+    request("/api/v1/publish_theme", {"source": theme, "settings": site})
     docker("down")
     docker("up","-d","--wait","--wait-timeout","180")
+    assert request("/api/v1/get_settings", {})["theme"] == "compose"
+    assert request("/api/v1/get_theme", {"id": "compose"})["source"] == theme
     restored=request("/api/v1/posts/"+post["id"])
     assert restored["text"]["en"]["body"]=="Persisted post"
 finally:

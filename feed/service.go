@@ -66,6 +66,7 @@ type Post struct {
 	Revision int                    `json:"revision,omitempty"`
 }
 type Settings struct {
+	refs        map[string][]string
 	Name        string                       `json:"name"`
 	Description string                       `json:"description,omitempty"`
 	Author      string                       `json:"author"`
@@ -76,13 +77,14 @@ type Settings struct {
 	Options     map[string]map[string]string `json:"options"`
 }
 type Service struct {
+	Themes  *Themes
 	DB      storage.Store
 	Version atomic.Uint64
 	mu      sync.Mutex
 	index   map[string]searchEntry
 }
 
-func New(db storage.Store) *Service { return &Service{DB: db} }
+func New(db storage.Store) *Service { return &Service{DB: db, Themes: NewThemes(db)} }
 func ID(n int) string               { b := make([]byte, n); rand.Read(b); return hex.EncodeToString(b) }
 func Read[T any](ctx context.Context, db storage.Store, kind, id string) (T, error) {
 	var v T
@@ -101,16 +103,20 @@ func Write(ctx context.Context, db storage.Store, k, id string, v any, rank int6
 }
 func Locale(s string) bool { return s == "en" || s == "tr" }
 func (s *Service) Settings(ctx context.Context) (Settings, error) {
-	v, e := Read[Settings](ctx, s.DB, "site", "settings")
-	if errors.Is(e, storage.ErrMissing) {
-		return Settings{Name: "th0ughts", Lang: "en", Theme: "paper", Options: map[string]map[string]string{}}, nil
+	rec, e := s.Themes.record(ctx)
+	if e == nil {
+		e = s.Themes.normalize(ctx, &rec.Settings)
 	}
-	return v, e
+	return rec.Settings, e
 }
 func (s *Service) SaveSettings(ctx context.Context, a Actor, v Settings) error {
-	if !a.Can("settings") {
-		return Denied
+	e := s.Themes.Publish(ctx, a, v, "")
+	if e == nil {
+		s.Version.Add(1)
 	}
+	return e
+}
+func validateSettings(v *Settings) error {
 	if !Locale(v.Lang) || v.Name == "" || !storage.ValidKey(v.Theme) || len(v.Name) > 150 || len(v.Description) > 1000 {
 		return Invalid
 	}
@@ -127,11 +133,7 @@ func (s *Service) SaveSettings(ctx context.Context, a Actor, v Settings) error {
 		}
 		v.URL = strings.TrimRight(v.URL, "/")
 	}
-	e := Write(ctx, s.DB, "site", "settings", v, 0, true)
-	if e == nil {
-		s.Version.Add(1)
-	}
-	return e
+	return nil
 }
 
 // Attachments returns shared media followed by this translation's attachments.

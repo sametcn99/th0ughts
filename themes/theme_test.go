@@ -44,3 +44,32 @@ func FuzzCompile(f *testing.F) {
 		}
 	})
 }
+
+func TestThemeVariantsAndDiagnostics(t *testing.T) {
+	const meta = "<meta name=theme content=test title=Test>\n"
+	const fields = "<slot name=author></slot><slot name=date></slot><slot name=title></slot><slot name=body></slot><slot name=media></slot><slot name=tags></slot><slot name=actions></slot>"
+	source := meta + "<template id=item-article-detail><header data-if=detail>" + fields + "</header></template>"
+	design, e := Compile(source)
+	if e != nil {
+		t.Fatal(e)
+	}
+	parts := map[string]string{"author": "Ada", "date": "June", "body": "Text", "readmore": "Read"}
+	full := design.RenderLocale("item", parts, "en", map[string]bool{"article": true, "detail": true})
+	if !strings.Contains(full, "<header") || !strings.Contains(full, "AdaJuneTextRead") {
+		t.Fatal(full)
+	}
+	short := design.RenderLocale("item", parts, "en", map[string]bool{"short": true, "detail": true})
+	if strings.Contains(short, "<header") {
+		t.Fatal(short)
+	}
+	_, e = Compile(meta + "<style>\n/* two\nlines */\n.entry:hover {\n mystery: red;\n}\n</style>")
+	d, ok := e.(*Diagnostic)
+	if !ok || d.Line != 6 || d.Kind != "property" || d.Token != "mystery" {
+		t.Fatal(e)
+	}
+	for _, rule := range []string{":root{display:none}", ".entry:visited{color:red}", "@media print{.entry{color:blue}}", ":root{--surface:url(example)}"} {
+		if _, e = Compile(meta + "<style>" + rule + "</style>"); e == nil {
+			t.Fatal(rule)
+		}
+	}
+}

@@ -85,9 +85,28 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 	login := r.URL.Path == "/login"
 	rss := r.URL.Path == "/feed.xml"
 	private := a.Owner && !login && !rss && !isMD && q.Get("view") != "public"
+	preview := a.Owner && q.Has("preview")
+	screen := ""
+	if preview {
+		screen = q.Get("screen")
+	}
+	sample := preview && !login && (q.Get("sample") == "1" || screen == "short" || screen == "article" || screen == "article-list")
+	if screen == "composer" || screen == "settings" {
+		private = true
+	}
 	page := feed.Page{}
 	f := feed.Filter{Search: q.Get("q"), Tag: q.Get("tag"), Cursor: q.Get("cursor"), Lang: lang, Private: private, Limit: 20}
-	if !login {
+	if sample {
+		title := words["sample_title"]
+		if screen == "short" {
+			title = ""
+		}
+		now := time.Now().UnixMilli()
+		page.Posts = []feed.Post{{ID: "sample", Original: lang, Created: now, Updated: now, Text: map[string]feed.Translation{lang: {Body: words["sample_body"], Title: title, Published: true}}, Tags: []string{"th0ughts"}}}
+		if screen == "short" || screen == "article" {
+			id = "sample"
+		}
+	} else if !login {
 		if id != "" {
 			p, e := h.S.Get(ctx, a, id, private)
 			if e != nil {
@@ -137,7 +156,6 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	themeID := site.Theme
-	preview := a.Owner && q.Has("preview")
 	if preview {
 		themeID = q.Get("preview")
 	}
@@ -152,7 +170,7 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 		}
 		design = value.(theme.Theme)
 	} else {
-		design, e = h.T.Load(ctx, themeID)
+		design, e = h.T.LoadAt(ctx, themeID, site)
 		if e != nil {
 			fail(w, e)
 			return
@@ -196,14 +214,11 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	if preview && q.Get("sample") == "1" && !login {
-		page.Posts = []feed.Post{{ID: "sample", Original: lang, Created: time.Now().UnixMilli(), Text: map[string]feed.Translation{lang: {Body: words["sample_body"], Title: words["sample_title"], Published: true}}, Tags: []string{"th0ughts"}}}
-	}
 	if id == "" && !login {
 		canonical = listingURL(base, lang, f)
 	}
 	var head strings.Builder
-	fmt.Fprintf(&head, "<!doctype html><html lang=\"%s\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"color-scheme\" content=\"light\"><title>%s</title>", lang, esc(title))
+	fmt.Fprintf(&head, "<!doctype html><html lang=\"%s\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"color-scheme\" content=\"light dark\"><title>%s</title>", lang, esc(title))
 	meta := func(k, v string) {
 		attribute := "property"
 		if strings.HasPrefix(k, "twitter:") {
@@ -307,14 +322,34 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 		parts["settings"] = "<section id=\"settings\" class=\"secure-slot\"></section>"
 	}
 	if preview {
-		parts["composer"] = ""
-		parts["settings"] = ""
-		if private {
-			parts["composer"] = "<section class=\"preview-control\">" + esc(words["write"]) + "</section>"
-			parts["settings"] = "<section class=\"preview-control\">" + esc(words["settings"]) + "</section>"
+		for _, name := range []string{"composer", "settings", "login"} {
+			parts[name] = ""
+		}
+		control := func(name string) string {
+			markup, _ := assets.ReadFile("preview/" + lang + "-" + name + ".html")
+			return `<section inert id="` + name + `" class="secure-slot"><template shadowrootmode="open"><link rel="stylesheet" href="` + assetURL("panel.css") + `">` + string(markup) + `</template></section>`
+		}
+		if login {
+			parts["login"] = control("login")
+		}
+		if private && !login {
+			parts["composer"] = control("composer")
+			if screen == "settings" {
+				parts["settings"] = control("settings")
+			} else {
+				parts["settings"] = control("launcher")
+			}
+		}
+		if screen == "composer" || screen == "settings" {
+			for _, k := range []string{"filters", "posts", "pagination"} {
+				parts[k] = ""
+			}
+			if screen == "settings" {
+				parts["composer"] = ""
+			}
 		}
 	}
-	out := head.String() + "<div class=\"themed\">" + design.RenderLocale(view, parts, lang, map[string]bool{"owner": private}) + "</div>"
+	out := head.String() + "<div class=\"themed\">" + design.RenderLocale(view, parts, lang, map[string]bool{"owner": private, "detail": id != "", "list": id == "" && !login}) + "</div>"
 	out += `<footer class="site-footer"><a href="https://github.com/sametcn99/th0ughts">` + esc(words["host_your_own"]) + `</a></footer>`
 	tools := []Command{}
 	for _, op := range commands {

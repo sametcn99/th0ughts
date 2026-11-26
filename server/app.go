@@ -25,7 +25,7 @@ import (
 	theme "github.com/sametcn99/th0ughts/themes"
 )
 
-//go:embed assets/* locales/*.json
+//go:embed assets/* locales/*.json preview/*.html
 var assets embed.FS
 
 type ticket struct {
@@ -128,13 +128,16 @@ func (s *Server) connect(ctx context.Context, c storage.Config) error {
 	s.cache = &pageCache{}
 	s.cfg = c
 	s.S = feed.New(db)
-	s.T = feed.NewThemes(db)
+	s.T = s.S.Themes
 	s.A = feed.NewAuth(db, s.v)
 	s.L = &feed.Library{Service: s.S, Dir: filepath.Join(s.dir, "media"), Vault: s.v}
 	if e = s.L.RepairUploads(ctx); e != nil {
 		return e
 	}
-	return s.L.RollbackImport(ctx)
+	if e = s.L.RollbackImport(ctx); e != nil {
+		return e
+	}
+	return s.T.Reclaim(ctx)
 }
 func (s *Server) Close() error { return errors.Join(s.S.DB.Close(), s.instance.Unlock()) }
 func (s *Server) issueTicket(value any, binding string) string {
@@ -285,6 +288,8 @@ func errorStatus(e error) (int, string) {
 	case errors.Is(e, feed.Denied):
 		code = 403
 		msg = "forbidden"
+	case isThemeError(e):
+		return 400, "invalid_theme"
 	case errors.Is(e, feed.Invalid):
 		code = 400
 		msg = "invalid_input"
@@ -297,11 +302,17 @@ func errorStatus(e error) (int, string) {
 	}
 	return code, msg
 }
+func isThemeError(e error) bool { var d *theme.Diagnostic; return errors.As(e, &d) }
 func fail(w http.ResponseWriter, e error) {
 	code, msg := errorStatus(e)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(map[string]string{"error": msg})
+	body := map[string]any{"error": msg}
+	var d *theme.Diagnostic
+	if errors.As(e, &d) {
+		body["diagnostic"] = d
+	}
+	json.NewEncoder(w).Encode(body)
 }
 func decode(w http.ResponseWriter, r *http.Request, to any) error {
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)

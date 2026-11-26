@@ -3,6 +3,7 @@ WORKDIR /src
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY web web
+COPY server/locales server/locales
 RUN bun run build
 
 FROM golang:1.27.4-alpine AS build
@@ -11,6 +12,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 COPY --from=web /src/server/assets/owner.js server/assets/owner.js
+COPY --from=web /src/server/preview server/preview
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/th0ughts ./cmd/th0ughts
 
 FROM alpine:3.23

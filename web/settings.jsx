@@ -67,8 +67,10 @@ function FilePicker({ label, accept, onSelect }) {
   );
 }
 
-export default function Settings() {
-  const [savedSection] = useState(() => history.state?.savedSettingsSection);
+export default function Settings({ previewSection } = {}) {
+  const [savedSection] = useState(
+    () => previewSection ?? history.state?.savedSettingsSection,
+  );
   const [open, show] = useState(sections.includes(savedSection)),
     [tab, setTab] = useState(
       sections.includes(savedSection) ? savedSection : "site",
@@ -79,7 +81,10 @@ export default function Settings() {
     [preview, setPreview] = useState(false),
     [draft, setDraft] = useState(null),
     [asOwner, as] = useState(false),
-    [sample, setSample] = useState(false);
+    [sample, setSample] = useState(false),
+    [screen, setScreen] = useState("feed"),
+    [versions, setVersions] = useState(null),
+    [revision, setRevision] = useState(0);
   const [name, setName] = useState(""),
     [days, setDays] = useState(30),
     [scopes, setScopes] = useState(["posts:read"]),
@@ -167,6 +172,7 @@ export default function Settings() {
   const active = available.find((item) => item.id === prefs.theme);
   const previewURL = new URLSearchParams({
     preview: prefs.theme,
+    screen,
     view: asOwner ? "owner" : "public",
     lang: state.lang,
     sample: sample ? "1" : "0",
@@ -180,9 +186,16 @@ export default function Settings() {
   const save = () =>
     a.run(async () => {
       if (draft?.theme.id === prefs.theme) {
-        await api("install_theme", { source: draft.source });
+        await api("publish_theme", { settings: prefs, source: draft.source });
+      } else {
+        const options = { ...prefs.options };
+        if (draft) {
+          const id = draft.theme.id;
+          if (state.site.options?.[id]) options[id] = state.site.options[id];
+          else delete options[id];
+        }
+        await api("save_settings", { ...prefs, options });
       }
-      await api("save_settings", prefs);
       history.replaceState({ ...history.state, savedSettingsSection: tab }, "");
       locationReload();
     });
@@ -209,6 +222,7 @@ export default function Settings() {
         <dialog
           className="panel settings-dialog"
           ref={dialog}
+          open={previewSection ? true : undefined}
           aria-labelledby="settings-heading"
           onClose={() => {
             show(false);
@@ -333,7 +347,11 @@ export default function Settings() {
                     {t("active_theme")}
                     <select
                       value={prefs.theme}
-                      onChange={(e) => set("theme", e.target.value)}
+                      disabled={a.busy}
+                      onChange={(e) => {
+                        setVersions(null);
+                        set("theme", e.target.value);
+                      }}
                     >
                       {available.map((k) => (
                         <option key={k.id} value={k.id}>
@@ -406,6 +424,7 @@ export default function Settings() {
                                   type={o.type === "range" ? "range" : "color"}
                                   min={o.min ?? 0}
                                   max={o.max}
+                                  step={o.step ?? "any"}
                                   value={v}
                                   onChange={(e) => change(e.target.value)}
                                 />
@@ -424,6 +443,7 @@ export default function Settings() {
                         if (!preview && draft?.theme.id === prefs.theme) {
                           const result = await api("preview_theme", {
                             source: draft.source,
+                            options: prefs.options,
                           });
                           setDraft({ ...result, source: draft.source });
                         }
@@ -451,10 +471,34 @@ export default function Settings() {
                         />
                         {t("sample")}
                       </label>
+                      <label>
+                        {t("preview_screen")}
+                        <select
+                          value={screen}
+                          onChange={(e) => setScreen(e.target.value)}
+                        >
+                          {[
+                            "feed",
+                            "short",
+                            "article-list",
+                            "article",
+                            "login",
+                            "composer",
+                            "settings",
+                          ].map((k) => (
+                            <option key={k} value={k}>
+                              {t("preview_" + k)}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
                       <iframe
                         title={t("preview_holder")}
                         sandbox=""
-                        src={"/?" + previewURL.toString()}
+                        src={
+                          (screen === "login" ? "/login?" : "/?") +
+                          previewURL.toString()
+                        }
                       />
                     </>
                   )}
@@ -468,9 +512,21 @@ export default function Settings() {
                           const source = await f.text();
                           const result = await api("preview_theme", {
                             source,
+                            options: prefs.options,
                           });
                           setDraft({ ...result, source });
-                          set("theme", result.theme.id);
+                          setVersions(null);
+                          setPrefs((p) => {
+                            const options = result.options || {};
+                            return {
+                              ...p,
+                              theme: result.theme.id,
+                              options: {
+                                ...p.options,
+                                [result.theme.id]: options,
+                              },
+                            };
+                          });
                         }, t("theme_ready"));
                       }}
                     />
@@ -478,17 +534,136 @@ export default function Settings() {
                     <div className="row">
                       <button
                         className="secondary"
+                        disabled={a.busy}
                         onClick={() =>
                           a.run(async () => {
-                            await api("install_theme", {
-                              rollback: prefs.theme,
+                            const source =
+                              draft?.theme.id === prefs.theme
+                                ? draft.source
+                                : (await api("get_theme", { id: prefs.theme }))
+                                    .source;
+                            const url = URL.createObjectURL(
+                              new Blob([source], { type: "text/html" }),
+                            );
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.download = prefs.theme + ".html";
+                            link.click();
+                            setTimeout(() => URL.revokeObjectURL(url), 1000);
+                          }, "")
+                        }
+                      >
+                        {t("download_theme")}
+                      </button>
+                      <button
+                        className="secondary"
+                        disabled={
+                          a.busy || !themes.some((x) => x.id === prefs.theme)
+                        }
+                        onClick={() =>
+                          a.run(async () => {
+                            const v = await api("get_theme", {
+                              id: prefs.theme,
                             });
+                            setVersions(
+                              [v.previous, ...(v.history || [])].filter(
+                                Boolean,
+                              ),
+                            );
+                            setRevision(0);
+                          }, "")
+                        }
+                      >
+                        {t("theme_history")}
+                      </button>
+                      {themes.some((x) => x.id === prefs.theme && !x.builtin) &&
+                        prefs.theme !== state.site.theme && (
+                          <button
+                            className="secondary"
+                            onClick={() => {
+                              if (confirm(t("confirm_theme_delete")))
+                                a.run(async () => {
+                                  await api("delete_theme", {
+                                    id: prefs.theme,
+                                  });
+                                  setThemes(await api("list_themes"));
+                                  setVersions(null);
+                                  setDraft(null);
+                                  setPrefs((p) => {
+                                    const options = { ...p.options };
+                                    delete options[p.theme];
+                                    return {
+                                      ...p,
+                                      theme: state.site.theme,
+                                      options,
+                                    };
+                                  });
+                                });
+                            }}
+                          >
+                            {t("delete_theme")}
+                          </button>
+                        )}
+                    </div>
+                    {versions &&
+                      (versions.length ? (
+                        <label>
+                          {t("theme_revision")}
+                          <select
+                            value={revision}
+                            onChange={(e) =>
+                              setRevision(Number(e.target.value))
+                            }
+                          >
+                            {versions.map((source, i) => (
+                              <option key={i} value={i}>
+                                {t("previous_version").replace("{n}", i + 1)}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      ) : (
+                        <p>{t("no_revisions")}</p>
+                      ))}
+                    <div className="row">
+                      <button
+                        className="secondary"
+                        disabled={
+                          a.busy ||
+                          !themes.find((x) => x.id === prefs.theme)?.revisions
+                        }
+                        onClick={() =>
+                          a.run(async () => {
+                            await api(
+                              "install_theme",
+                              versions?.length
+                                ? { source: versions[revision] }
+                                : { rollback: prefs.theme },
+                            );
+                            setVersions(null);
                             setDraft(null);
                             setThemes(await api("list_themes"));
+                            if (dirty) {
+                              const saved = await api("get_settings");
+                              setPrefs((p) => ({
+                                ...p,
+                                options: {
+                                  ...p.options,
+                                  [prefs.theme]:
+                                    saved.options?.[prefs.theme] || {},
+                                },
+                              }));
+                              return;
+                            }
+                            history.replaceState(
+                              { ...history.state, savedSettingsSection: tab },
+                              "",
+                            );
+                            locationReload();
                           })
                         }
                       >
-                        {t("rollback")}
+                        {t(versions?.length ? "restore_version" : "rollback")}
                       </button>
                     </div>
                   </fieldset>

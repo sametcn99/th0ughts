@@ -31,7 +31,19 @@ func (l *Library) Export(ctx context.Context, a Actor, w io.Writer) error {
 	if e != nil {
 		return e
 	}
-	for _, kind := range []string{"post", "theme", "media"} {
+	catalog := l.Service.Themes
+	ids, e := catalog.ids(ctx, m.Site.refs, false)
+	if e != nil {
+		return e
+	}
+	for _, id := range ids {
+		v, e := catalog.sourceAt(ctx, id, m.Site.refs)
+		if e != nil {
+			return e
+		}
+		m.Themes = append(m.Themes, v)
+	}
+	for _, kind := range []string{"post", "media"} {
 		rows, e := l.Service.DB.List(ctx, storage.Query{Kind: kind})
 		if e != nil {
 			return e
@@ -44,12 +56,6 @@ func (l *Library) Export(ctx context.Context, a Actor, w io.Writer) error {
 					return e
 				}
 				m.Posts = append(m.Posts, p)
-			case "theme":
-				var t Version
-				if e = json.Unmarshal(r.Data, &t); e != nil {
-					return e
-				}
-				m.Themes = append(m.Themes, t)
 			case "media":
 				med, f, e := l.Open(ctx, a, r.ID)
 				if e != nil {
@@ -81,7 +87,7 @@ func (l *Library) Export(ctx context.Context, a Actor, w io.Writer) error {
 
 type importLog struct {
 	Posts, Themes, Media []string
-	Site                 *Settings
+	Site                 *siteRecord
 }
 
 func (l *Library) RollbackImport(ctx context.Context) error {
@@ -114,13 +120,14 @@ func (l *Library) RollbackImport(ctx context.Context) error {
 			return e
 		}
 	}
+	l.Service.Themes.clearCache()
 	return l.Service.DB.Delete(ctx, "system", "import")
 }
 func (l *Library) Import(ctx context.Context, a Actor, z *zip.Reader) (err error) {
 	if !a.Recent() {
 		return Denied
 	}
-	for _, k := range []string{"post", "theme", "media"} {
+	for _, k := range []string{"post", "media"} {
 		r, e := l.Service.DB.List(ctx, storage.Query{Kind: k, Limit: 1})
 		if e != nil {
 			return e
@@ -155,9 +162,16 @@ func (l *Library) Import(ctx context.Context, a Actor, z *zip.Reader) (err error
 	if e != nil || m.Version != 1 {
 		return Invalid
 	}
-	old, e := l.Service.Settings(ctx)
+	old, e := l.Service.Themes.record(ctx)
 	if e != nil {
 		return e
+	}
+	ids, e := l.Service.Themes.ids(ctx, old.Refs, false)
+	if e != nil {
+		return e
+	}
+	if len(ids) > 0 {
+		return Conflict
 	}
 	j := importLog{Site: &old}
 	seen := map[string]bool{}
@@ -196,8 +210,12 @@ func (l *Library) Import(ctx context.Context, a Actor, z *zip.Reader) (err error
 		if e != nil {
 			return Invalid
 		}
-		if v.Previous != "" {
-			if _, e = theme.Compile(v.Previous); e != nil {
+		if slices.Contains(j.Themes, t.ID) {
+			return Invalid
+		}
+		for _, source := range sources(v)[1:] {
+			past, e := theme.Compile(source)
+			if e != nil || past.ID != t.ID {
 				return Invalid
 			}
 		}
@@ -243,8 +261,18 @@ func (l *Library) Import(ctx context.Context, a Actor, z *zip.Reader) (err error
 			return e
 		}
 	}
+	if len(old.Refs) > 0 {
+		old.Refs = nil
+		if e = Write(ctx, l.Service.DB, "site", "settings", old, 0, true); e != nil {
+			return e
+		}
+	}
+	l.Service.Themes.clearCache()
 	if _, e = NewThemes(l.Service.DB).Load(ctx, m.Site.Theme); e != nil {
 		return Invalid
+	}
+	if e = l.Service.Themes.normalize(ctx, &m.Site); e != nil {
+		return e
 	}
 	if e = l.Service.SaveSettings(ctx, a, m.Site); e != nil {
 		return e

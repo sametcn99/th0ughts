@@ -242,6 +242,83 @@
     "height": 744
   },
   {
+    "id": "preview-short",
+    "group": "appearance",
+    "title": {
+      "en": "Short post permalink preview",
+      "tr": "Kısa gönderi önizlemesi"
+    },
+    "file": "preview-short.webp",
+    "width": 900,
+    "height": 744
+  },
+  {
+    "id": "preview-article-list",
+    "group": "appearance",
+    "title": {
+      "en": "Article card preview",
+      "tr": "Makale kartı önizlemesi"
+    },
+    "file": "preview-article-list.webp",
+    "width": 900,
+    "height": 744
+  },
+  {
+    "id": "preview-article",
+    "group": "appearance",
+    "title": {
+      "en": "Full Article preview",
+      "tr": "Makale sayfası önizlemesi"
+    },
+    "file": "preview-article.webp",
+    "width": 900,
+    "height": 744
+  },
+  {
+    "id": "preview-login",
+    "group": "appearance",
+    "title": {
+      "en": "Sign-in preview",
+      "tr": "Giriş ekranı önizlemesi"
+    },
+    "file": "preview-login.webp",
+    "width": 900,
+    "height": 744
+  },
+  {
+    "id": "preview-composer",
+    "group": "appearance",
+    "title": {
+      "en": "Composer preview",
+      "tr": "Düzenleyici önizlemesi"
+    },
+    "file": "preview-composer.webp",
+    "width": 900,
+    "height": 744
+  },
+  {
+    "id": "preview-settings",
+    "group": "appearance",
+    "title": {
+      "en": "Settings dialog preview",
+      "tr": "Ayarlar penceresi önizlemesi"
+    },
+    "file": "preview-settings.webp",
+    "width": 900,
+    "height": 744
+  },
+  {
+    "id": "theme-history",
+    "group": "appearance",
+    "title": {
+      "en": "Theme downloads and revision history",
+      "tr": "Tema indirme ve sürüm geçmişi"
+    },
+    "file": "theme-history.webp",
+    "width": 900,
+    "height": 744
+  },
+  {
     "id": "tokens",
     "group": "access",
     "title": {
@@ -348,6 +425,17 @@
       "tr": "Starter teması"
     },
     "file": "theme-starter.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "theme-dusk",
+    "group": "appearance",
+    "title": {
+      "en": "Dusk theme",
+      "tr": "Dusk teması"
+    },
+    "file": "theme-dusk.webp",
     "width": 1120,
     "height": 860
   },
