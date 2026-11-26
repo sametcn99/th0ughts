@@ -1,0 +1,64 @@
+<meta name="theme" content="postmark" title="Postmark">
+<script type="application/json" id="options">
+[
+  {"key":"sealing-ink","labels":{"en":"Seal ink","tr":"Mühür mürekkebi"},"default":"#963b39"},
+  {"key":"letter-gap","type":"range","labels":{"en":"Gap between letters","tr":"Gönderiler arası boşluk"},"min":8,"max":32,"unit":"px","default":"18"}
+]
+</script>
+<style>
+:root {
+  --canvas: #ede5d3;
+  --surface: #fffaf0;
+  --subtle: #f5eddc;
+  --ink: #312e26;
+  --muted: #655a48;
+  --line: #b8a98b;
+  --accent: #863a35;
+  --on-accent: #fffaf0;
+  --accent-surface: #f4e2d9;
+  --focus: #245e78;
+}
+:root { --ui-font: Georgia, serif; --footer-surface: #e7ddc8; }
+.desk { max-width: 46rem; margin: 22px auto; padding: 0 18px; border: 0; background: var(--canvas); }
+.desk .mast { padding: 23px 20px 16px; background: linear-gradient(125deg, #a14a42 0 25%, #fdf6e7 25% 50%, #48657a 50% 75%, #fdf6e7 75% 100%) 0 0 / 42px 6px repeat-x, var(--surface); border: 1px solid var(--line); }
+.desk .wordmark { font-size: 32px; font-style: italic; font-weight: 500; }
+.desk .language-picker { font-family: system-ui, sans-serif; }
+.desk .intro { padding: 18px 0 5px; }
+.desk .intro h1 { font-size: 25px; font-weight: 500; }
+.desk .search { padding: 6px 0 18px; border: 0; }
+.desk .rss, .desk .search input, .desk .search button { border-radius: 3px; }
+.desk .entries { display: grid; gap: var(--letter-gap); background: var(--canvas); }
+.desk .entry { padding: 19px clamp(16px, 4vw, 35px); border: 1px solid var(--line); box-shadow: 0 3px 0 #dfd4bb; }
+.letter-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.postage { display: flex; align-items: center; gap: 6px; border: 3px double var(--sealing-ink); border-radius: 16px; color: var(--sealing-ink); padding: 3px 10px; }
+.postage a { color: inherit; font-family: monospace; font-size: 0.75rem; text-decoration: none; }
+.letter-top strong { font-style: italic; font-size: 1.1rem; font-weight: 500; }
+.letter-body { margin: 9px 0; }
+.letter-body .prose { font-size: 1.1rem; line-height: 1.6; }
+.letter-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.letter-foot .tag { font-style: italic; }
+.desk .attachment { border-radius: 1px; }
+.desk .comment-thread { background: var(--surface); }
+.envelope { max-width: 34rem; }
+@media (max-width: 650px) {
+  .desk { margin: 12px auto; padding: 0 12px; }
+  .desk .mast { padding-inline: 12px; }
+}
+</style>
+<template id="feed">
+  <main class="desk">
+    <slot name="header"></slot><slot name="filters"></slot><slot name="composer"></slot><slot name="settings"></slot>
+    <slot name="posts"></slot><slot name="pagination"></slot>
+  </main>
+</template>
+<template id="post">
+  <main class="desk"><slot name="header"></slot><slot name="composer"></slot><slot name="settings"></slot><slot name="posts"></slot><slot name="comments"></slot><slot name="pagination"></slot></main>
+</template>
+<template id="login">
+  <main class="desk envelope"><slot name="header"></slot><slot name="login"></slot></main>
+</template>
+<template id="item">
+  <header class="letter-top"><slot name="author"></slot><div class="postage"><slot name="status"></slot><slot name="date"></slot></div></header>
+  <section class="letter-body"><slot name="title"></slot><slot name="body"></slot><slot name="media"></slot></section>
+  <footer class="letter-foot"><slot name="tags"></slot><slot name="actions"></slot></footer>
+</template>

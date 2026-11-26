@@ -1,0 +1,63 @@
+<meta name="theme" content="risograph" title="Risograph">
+<script type="application/json" id="options">
+[
+  {"key":"registration","type":"range","labels":{"en":"Print offset","tr":"Baskı ofseti"},"min":0,"max":8,"unit":"px","default":"4"},
+  {"key":"stock","labels":{"en":"Masthead color","tr":"Başlık zemin rengi"},"default":"#f9ca49"}
+]
+</script>
+<style>
+:root {
+  --canvas: #e8dff1;
+  --surface: #fffdf5;
+  --subtle: #f1eaf4;
+  --ink: #282032;
+  --muted: #594e63;
+  --line: #423448;
+  --accent: #633183;
+  --on-accent: #fffdf5;
+  --accent-surface: #e4d4ed;
+  --focus: #883617;
+}
+:root { --footer-surface: #282032; --footer-ink: #fffdf5; }
+.press { max-width: 54rem; margin: 22px auto; padding: 0 22px 24px; background: var(--canvas); border: 0; }
+.press .mast { padding: 16px 20px; background: var(--stock); border: 2px solid var(--ink); box-shadow: var(--registration) var(--registration) 0 var(--ink); }
+.press .wordmark { font-size: clamp(24px, 4vw, 40px); font-weight: 900; letter-spacing: -0.07em; }
+.press .mark { color: var(--ink); }
+.press .language-picker summary, .press .search input, .press .search button, .press .rss { border: 1px solid var(--ink); border-radius: 0; background: var(--surface); }
+.press .intro { padding: 22px 0 6px; }
+.press .intro h1 { font-size: 24px; font-weight: 850; }
+.press .search { padding: 4px 0 14px; border: 0; }
+.press .entries { display: grid; gap: 16px; background: var(--canvas); }
+.press .entry { border: 2px solid var(--ink); padding: 0; box-shadow: var(--registration) var(--registration) 0 var(--ink); }
+.imprint { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 6px 16px; border: solid var(--ink); border-width: 0 0 1px; background: var(--accent-surface); }
+.imprint a { font-family: monospace; font-size: 12px; color: var(--ink); }
+.imprint strong { letter-spacing: 0.045em; text-transform: uppercase; font-size: 13px; }
+.press .article-preview .imprint { background: var(--stock); }
+.impression { padding: 10px 16px 4px; }
+.impression h2 { font-size: clamp(21px, 3vw, 30px); line-height: 1.1; }
+.impression .attachment { border-radius: 0; }
+.press-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 0 16px 8px; }
+.press-foot .tag { border: 1px solid var(--line); padding: 1px 6px; color: var(--ink); font-family: monospace; }
+.press-access { max-width: 33rem; }
+@media (max-width: 650px) {
+  .press { padding: 0 14px 18px; margin: 12px auto; }
+  .press .mast { padding: 10px 12px; }
+}
+</style>
+<template id="feed">
+  <main class="press">
+    <slot name="header"></slot><slot name="filters"></slot><slot name="composer"></slot><slot name="settings"></slot>
+    <slot name="posts"></slot><slot name="pagination"></slot>
+  </main>
+</template>
+<template id="post">
+  <main class="press"><slot name="header"></slot><slot name="composer"></slot><slot name="settings"></slot><slot name="posts"></slot><slot name="comments"></slot><slot name="pagination"></slot></main>
+</template>
+<template id="login">
+  <main class="press press-access"><slot name="header"></slot><slot name="login"></slot></main>
+</template>
+<template id="item">
+  <header class="imprint"><slot name="author"></slot><slot name="status"></slot><slot name="date"></slot></header>
+  <section class="impression"><slot name="title"></slot><slot name="body"></slot><slot name="media"></slot></section>
+  <footer class="press-foot"><slot name="tags"></slot><slot name="actions"></slot></footer>
+</template>

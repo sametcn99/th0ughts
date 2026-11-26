@@ -9,6 +9,20 @@ The same UTF-8 HTML file can be uploaded at runtime or added to `themes/` in a p
 
 The metadata names the stable theme ID and its display name. The default provides every layout you omit. Selecting a file creates a session-bound preview. Saving installs and activates the file. When replacing a theme with the same ID, its previous source remains available for rollback. Site preferences are stored by theme ID.
 
+## Built-in layouts
+
+Select a theme under **Settings → Appearance → Active theme**. Use **Preview** to compare it with your current layout before saving.
+
+| Theme | Feed layout | Adjustable details |
+| --- | --- | --- |
+| Switchyard | Compact dark rows with a separate timestamp column and amber signal stripe | Signal color and row padding |
+| Postmark | Cream letter sheets with airmail edging and a date stamp | Seal ink and space between letters |
+| Contact Sheet | A dark three-column proof sheet with images above their captions, collapsing to a single column on phones | Frame color and gutter width |
+| Lagoon | A mint sidebar alongside a stream of rounded speech bubbles | Sidebar color and bubble corners |
+| Risograph | Bold masthead, ink outlines, and offset shadows on stacked print cards | Masthead stock color and print offset |
+
+Paper, Index, Dusk, and Starter are also included. All nine themes are available as single files in the repository’s `themes/` directory.
+
 ## Share your theme
 
 Download your HTML file from **Settings → Appearance → Download theme file**. Start a discussion with the theme name as the title and link the file or paste its source. A screenshot helps readers decide whether to try it. [Share a theme](https://github.com/sametcn99/th0ughts/discussions/new?category=show-and-tell)

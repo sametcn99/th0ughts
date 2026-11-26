@@ -1,0 +1,65 @@
+<meta name="theme" content="switchyard" title="Switchyard">
+<script type="application/json" id="options">
+[
+  {"key":"signal","labels":{"en":"Signal stripe","tr":"Sinyal şeridi"},"default":"#ffbd48"},
+  {"key":"row-inset","type":"range","labels":{"en":"Row padding","tr":"Satır iç boşluğu"},"min":8,"max":28,"unit":"px","default":"14"}
+]
+</script>
+<style>
+:root {
+  --canvas: #111817;
+  --surface: #1b2422;
+  --subtle: #23302d;
+  --ink: #eef6ec;
+  --muted: #b7c7bc;
+  --line: #44554d;
+  --accent: #ffcc69;
+  --on-accent: #21271e;
+  --accent-surface: #374130;
+  --focus: #ffd687;
+}
+:root { --scheme: dark; --ui-font: system-ui, sans-serif; --shadow: #0d1513; --panel-shadow: #0c1210; }
+.board { max-width: 58rem; margin: 24px auto; background: var(--surface); border: 1px solid var(--line); }
+.board .mast { padding: 14px 22px; border: 0; border-style: solid; border-width: 6px 0 0; border-color: var(--signal); }
+.board .wordmark { font-family: monospace; font-size: 23px; letter-spacing: -0.05em; }
+.board .mark { color: var(--signal); }
+.board .language-picker summary, .board .rss, .board .search input, .board .search button { border-radius: 2px; }
+.board .intro { padding: 18px 22px 6px; }
+.board .intro h1 { font-family: monospace; font-size: 1.5rem; }
+.board .search { padding: 8px 22px 18px; }
+.board .search button { background: var(--accent); color: var(--on-accent); }
+.board-row { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: 20px; }
+.entry { padding: var(--row-inset) 22px; }
+.board-clock { display: flex; flex-direction: column; gap: 5px; color: var(--muted); font-family: monospace; font-size: 0.82rem; }
+.board-clock strong { color: var(--ink); }
+.board-clock a { text-decoration: none; color: var(--signal); }
+.board-tail { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.board .entry h2 { margin-block: 0 6px; }
+.board .tag { font-family: monospace; color: var(--muted); }
+.board .attachment, .board .thread-node { border-radius: 2px; }
+.board-access { max-width: 31rem; }
+@media (max-width: 650px) {
+  .board { margin: 0 auto; border-width: 0; }
+  .board-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .board-clock { flex-direction: row; flex-wrap: wrap; gap: 10px; }
+  .entry { padding-inline: 16px; }
+}
+</style>
+<template id="feed">
+  <main class="board">
+    <header><slot name="header"></slot><slot name="filters"></slot></header>
+    <slot name="composer"></slot><slot name="settings"></slot><slot name="posts"></slot><slot name="pagination"></slot>
+  </main>
+</template>
+<template id="post">
+  <main class="board"><slot name="header"></slot><slot name="composer"></slot><slot name="settings"></slot><slot name="posts"></slot><slot name="comments"></slot><slot name="pagination"></slot></main>
+</template>
+<template id="login">
+  <main class="board board-access"><slot name="header"></slot><slot name="login"></slot></main>
+</template>
+<template id="item">
+  <div class="board-row">
+    <aside class="board-clock"><slot name="date"></slot><slot name="author"></slot><slot name="status"></slot></aside>
+    <section><slot name="title"></slot><slot name="body"></slot><slot name="media"></slot><footer class="board-tail"><slot name="tags"></slot><slot name="actions"></slot></footer></section>
+  </div>
+</template>

@@ -1,0 +1,71 @@
+<meta name="theme" content="lagoon" title="Lagoon">
+<script type="application/json" id="options">
+[
+  {"key":"bubble-radius","type":"range","labels":{"en":"Bubble corners","tr":"Balon köşeleri"},"min":6,"max":32,"unit":"px","default":"22"},
+  {"key":"current","labels":{"en":"Sidebar color","tr":"Kenar çubuğu rengi"},"default":"#b9ddd0"}
+]
+</script>
+<style>
+:root {
+  --canvas: #eef7f3;
+  --surface: #ffffff;
+  --subtle: #edf6f2;
+  --ink: #153c33;
+  --muted: #46665b;
+  --line: #bad5c9;
+  --accent: #14634c;
+  --on-accent: #ffffff;
+  --accent-surface: #d8eee4;
+  --focus: #006b73;
+}
+:root { --footer-surface: #deeee6; }
+.harbor { display: grid; grid-template-columns: minmax(13rem, 17rem) minmax(0, 41rem); align-items: start; justify-content: center; gap: 24px; max-width: 64rem; margin: 28px auto; padding-inline: 18px; border: 0; background: var(--canvas); }
+.quay { background: var(--current); border-radius: 22px; padding: 18px; }
+.quay .mast { flex-direction: column; align-items: start; padding: 0; gap: 12px; border: 0; background: transparent; }
+.quay .wordmark { font-size: 26px; }
+.quay .intro { padding: 24px 0 6px; align-items: start; }
+.quay .intro h1 { font-size: 20px; }
+.quay .search { flex-wrap: wrap; padding: 6px 0; border: 0; }
+.quay .search input { width: 100%; }
+.quay .search button { border-radius: 14px; }
+.water { min-width: 0; }
+.water .entries { background: transparent; }
+.water .entry { padding: 0 0 14px 48px; border: 0; background: transparent; }
+.bubble { border: 1px solid var(--line); background: var(--surface); border-radius: 4px var(--bubble-radius) var(--bubble-radius); padding: 14px 18px; }
+.bubble .avatar { --spacing: 0px; }
+.bubble .byline { gap: 8px; }
+.bubble .attachment { border-radius: 12px; }
+.bubble-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.water .thread-node { border-radius: 12px; }
+.lagoon-access { max-width: 32rem; margin: 24px auto; padding: 12px; border: 0; border-radius: 22px; }
+.lagoon-access .mast { padding-inline: 12px; background: var(--surface); }
+@media (max-width: 750px) {
+  .harbor { display: block; margin: 10px auto; padding-inline: 10px; }
+  .quay { padding: 14px; margin: 0 0 14px; }
+  .quay .mast { flex-direction: row; align-items: center; }
+  .quay .intro { padding: 12px 0 2px; }
+  .water .entry { padding-inline: 42px 0; }
+  .bubble { padding: 12px; }
+}
+</style>
+<template id="feed">
+  <main class="harbor">
+    <aside class="quay"><slot name="header"></slot><slot name="filters"></slot></aside>
+    <section class="water"><slot name="composer"></slot><slot name="settings"></slot><slot name="posts"></slot><slot name="pagination"></slot></section>
+  </main>
+</template>
+<template id="post">
+  <main class="harbor">
+    <aside class="quay"><slot name="header"></slot></aside>
+    <section class="water"><slot name="composer"></slot><slot name="settings"></slot><slot name="posts"></slot><slot name="comments"></slot><slot name="pagination"></slot></section>
+  </main>
+</template>
+<template id="login">
+  <main class="lagoon-access"><slot name="header"></slot><slot name="login"></slot></main>
+</template>
+<template id="item">
+  <section class="bubble">
+    <slot name="byline"></slot><slot name="title"></slot><slot name="body"></slot><slot name="media"></slot>
+    <footer class="bubble-foot"><slot name="tags"></slot><slot name="actions"></slot></footer>
+  </section>
+</template>

@@ -190,6 +190,7 @@ function screenshotWriter(staging, encoder) {
     manifest.push({
       id,
       group,
+      ...(options.theme && {theme: options.theme}),
       title: { en, tr },
       file,
       width: png.readUInt32BE(16),
@@ -566,7 +567,8 @@ async function captureSettings(owner, shot) {
 }
 
 async function captureThemesAndMobile(owner, reader, data, shot) {
-  for (const theme of ["index", "starter", "dusk"]) {
+  const catalog = await data.api("list_themes");
+  for (const {id: theme, name} of catalog.filter(t => t.builtin && t.id !== "paper")) {
     await data.api("save_settings", { ...data.site, theme });
     await reader.emulateMedia({colorScheme:theme==="dusk"?"dark":"light"});
     await navigate(reader, "/?lang=en");
@@ -574,8 +576,9 @@ async function captureThemesAndMobile(owner, reader, data, shot) {
       reader,
       "theme-" + theme,
       "appearance",
-      theme.charAt(0).toUpperCase() + theme.slice(1) + " theme",
-      theme.charAt(0).toUpperCase() + theme.slice(1) + " teması",
+      name + " theme",
+      name + " teması",
+      { theme: name },
     );
   }
   await reader.emulateMedia({colorScheme:"light"});

@@ -418,8 +418,33 @@
     "height": 744
   },
   {
+    "id": "theme-contact-sheet",
+    "group": "appearance",
+    "theme": "Contact Sheet",
+    "title": {
+      "en": "Contact Sheet theme",
+      "tr": "Contact Sheet teması"
+    },
+    "file": "theme-contact-sheet.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "theme-dusk",
+    "group": "appearance",
+    "theme": "Dusk",
+    "title": {
+      "en": "Dusk theme",
+      "tr": "Dusk teması"
+    },
+    "file": "theme-dusk.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
     "id": "theme-index",
     "group": "appearance",
+    "theme": "Index",
     "title": {
       "en": "Index theme",
       "tr": "Index teması"
@@ -429,8 +454,45 @@
     "height": 860
   },
   {
+    "id": "theme-lagoon",
+    "group": "appearance",
+    "theme": "Lagoon",
+    "title": {
+      "en": "Lagoon theme",
+      "tr": "Lagoon teması"
+    },
+    "file": "theme-lagoon.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "theme-postmark",
+    "group": "appearance",
+    "theme": "Postmark",
+    "title": {
+      "en": "Postmark theme",
+      "tr": "Postmark teması"
+    },
+    "file": "theme-postmark.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "theme-risograph",
+    "group": "appearance",
+    "theme": "Risograph",
+    "title": {
+      "en": "Risograph theme",
+      "tr": "Risograph teması"
+    },
+    "file": "theme-risograph.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
     "id": "theme-starter",
     "group": "appearance",
+    "theme": "Starter",
     "title": {
       "en": "Starter theme",
       "tr": "Starter teması"
@@ -440,13 +502,14 @@
     "height": 860
   },
   {
-    "id": "theme-dusk",
+    "id": "theme-switchyard",
     "group": "appearance",
+    "theme": "Switchyard",
     "title": {
-      "en": "Dusk theme",
-      "tr": "Dusk teması"
+      "en": "Switchyard theme",
+      "tr": "Switchyard teması"
     },
-    "file": "theme-dusk.webp",
+    "file": "theme-switchyard.webp",
     "width": 1120,
     "height": 860
   },

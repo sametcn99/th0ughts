@@ -63,8 +63,7 @@ function Themes({ prefix, t, lang }) {
       <div className="specimens">
         {[
           ["timeline", "Paper"],
-          ["theme-index", "Index"],
-          ["theme-dusk", "Dusk"],
+          ...shots.filter((shot) => shot.theme).map((shot) => [shot.id, shot.theme]),
         ].map(([id, name]) => {
           const shot = shotById[id];
           const src = prefix + "screenshots/" + shot.file;
@@ -75,6 +74,7 @@ function Themes({ prefix, t, lang }) {
                   src={src}
                   width={shot.width}
                   height={shot.height}
+                  loading="lazy"
                   alt={shot.title[lang]}
                 />
               </a>

@@ -79,7 +79,7 @@ Run `bun run build:pages` to render the English and Turkish React site into `pag
 
 <!-- gallery:start -->
 <details>
-<summary>Application screenshots (52)</summary>
+<summary>Application screenshots (57)</summary>
 
 Build the Go binary (see Local development), install Chromium with `bun run --bun playwright install chromium`, and run `bun run screenshots` to refresh this gallery. The script creates and removes its own demo instance.
 
@@ -235,17 +235,37 @@ Build the Go binary (see Local development), install Chromium with `bun run --bu
 
 ![Single-use recovery codes](https://sametcn99.github.io/th0ughts/screenshots/recovery-codes.webp)
 
+**Contact Sheet theme**
+
+![Contact Sheet theme](https://sametcn99.github.io/th0ughts/screenshots/theme-contact-sheet.webp)
+
+**Dusk theme**
+
+![Dusk theme](https://sametcn99.github.io/th0ughts/screenshots/theme-dusk.webp)
+
 **Index theme**
 
 ![Index theme](https://sametcn99.github.io/th0ughts/screenshots/theme-index.webp)
+
+**Lagoon theme**
+
+![Lagoon theme](https://sametcn99.github.io/th0ughts/screenshots/theme-lagoon.webp)
+
+**Postmark theme**
+
+![Postmark theme](https://sametcn99.github.io/th0ughts/screenshots/theme-postmark.webp)
+
+**Risograph theme**
+
+![Risograph theme](https://sametcn99.github.io/th0ughts/screenshots/theme-risograph.webp)
 
 **Starter theme**
 
 ![Starter theme](https://sametcn99.github.io/th0ughts/screenshots/theme-starter.webp)
 
-**Dusk theme**
+**Switchyard theme**
 
-![Dusk theme](https://sametcn99.github.io/th0ughts/screenshots/theme-dusk.webp)
+![Switchyard theme](https://sametcn99.github.io/th0ughts/screenshots/theme-switchyard.webp)
 
 **Mobile timeline in Turkish**
 

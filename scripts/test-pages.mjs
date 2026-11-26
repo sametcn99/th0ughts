@@ -63,7 +63,7 @@ try {
     await expect(page.locator("h1")).toHaveText(
       lang === "en" ? "Quick start" : "Hızlı kurulum",
     );
-    await expect(page.locator("#themes figure a").nth(1)).toHaveAttribute(
+    await expect(page.locator("#themes figure").filter({ hasText: "Index" }).locator("a")).toHaveAttribute(
       "href",
       /theme-index.webp$/,
     );
@@ -83,6 +83,12 @@ try {
     const manifest = await (
       await page.request.get(origin + "/th0ughts/screenshots/manifest.json")
     ).json();
+    const themeShots = manifest.filter((shot) => shot.theme);
+    await expect(page.locator("#themes figure")).toHaveCount(themeShots.length + 1);
+    for (const shot of themeShots) {
+      const specimen = page.locator("#themes figure").filter({ hasText: shot.theme });
+      await expect(specimen.locator("a")).toHaveAttribute("href", new RegExp(shot.file + "$"));
+    }
     await expect(page.locator(".card")).toHaveCount(manifest.length);
     for (const shot of manifest) {
       assert(

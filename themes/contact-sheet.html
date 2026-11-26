@@ -1,0 +1,71 @@
+<meta name="theme" content="contact-sheet" title="Contact Sheet">
+<script type="application/json" id="options">
+[
+  {"key":"sheet-gap","type":"range","labels":{"en":"Gutter width","tr":"Kart aralığı"},"min":1,"max":14,"unit":"px","default":"3"},
+  {"key":"frame","labels":{"en":"Frame color","tr":"Çerçeve rengi"},"default":"#393a3c"}
+]
+</script>
+<style>
+:root {
+  --canvas: #141416;
+  --surface: #242427;
+  --subtle: #303033;
+  --ink: #f6f4ee;
+  --muted: #c1beb9;
+  --line: #49484b;
+  --accent: #f2df9b;
+  --on-accent: #242427;
+  --accent-surface: #3d3b34;
+  --focus: #f8d66f;
+}
+:root { --scheme: dark; --footer-surface: #141416; --panel-shadow: #0b0b0c; }
+.lightbox { max-width: 72rem; margin: 0 auto; background: var(--canvas); border: 0; padding: 0 24px 24px; }
+.lightbox .mast { background: var(--canvas); padding: 17px 0; border-color: var(--frame); }
+.lightbox .wordmark { font-size: 27px; letter-spacing: -0.06em; }
+.lightbox .mark { color: var(--ink); }
+.lightbox .intro { padding: 18px 0 6px; }
+.lightbox .intro h1 { font-size: 1.65rem; }
+.lightbox .search { max-width: 36rem; padding: 4px 0 18px; border: 0; }
+.lightbox .search input, .lightbox .search button, .lightbox .language-picker summary { border-radius: 2px; }
+.sheet .entries { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sheet-gap); background: var(--frame); padding: var(--sheet-gap); }
+.lightbox .entry { padding: 0; border: 0; min-width: 0; }
+.print-image { background: #101012; }
+.print-image a { display: block; }
+.lightbox .print-image img { display: block; width: 100%; border-radius: 0; }
+.caption { padding: 18px; }
+.caption .prose { line-height: 1.5; }
+.caption-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 5px; color: var(--muted); font-family: monospace; font-size: 0.79rem; }
+.caption-meta a { color: var(--muted); }
+.caption-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.caption-foot .tag { color: var(--muted); }
+.lightbox .entry h2 { font-size: 22px; line-height: 1.13; }
+.lightbox-detail { max-width: 52rem; }
+.lightbox-access { max-width: 36rem; }
+@media (max-width: 900px) {
+  .sheet .entries { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 650px) {
+  .lightbox { padding: 0 12px 16px; }
+  .sheet .entries { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+<template id="feed">
+  <main class="lightbox sheet">
+    <slot name="header"></slot><slot name="filters"></slot><slot name="composer"></slot><slot name="settings"></slot>
+    <slot name="posts"></slot><slot name="pagination"></slot>
+  </main>
+</template>
+<template id="post">
+  <main class="lightbox lightbox-detail"><slot name="header"></slot><slot name="composer"></slot><slot name="settings"></slot><slot name="posts"></slot><slot name="comments"></slot><slot name="pagination"></slot></main>
+</template>
+<template id="login">
+  <main class="lightbox lightbox-access"><slot name="header"></slot><slot name="login"></slot></main>
+</template>
+<template id="item">
+  <section data-if="media" class="print-image"><slot name="media"></slot></section>
+  <div class="caption">
+    <header class="caption-meta"><slot name="author"></slot><slot name="status"></slot><slot name="date"></slot></header>
+    <slot name="title"></slot><slot name="body"></slot>
+    <footer class="caption-foot"><slot name="tags"></slot><slot name="actions"></slot></footer>
+  </div>
+</template>

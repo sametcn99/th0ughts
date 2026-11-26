@@ -21,7 +21,7 @@ export const text = {
       "The installer asks for a database, port and installation directory.",
     themeTitle: "Themes",
     themeIntro:
-      "The same feed in three themes. Each theme is one HTML file with its own layout and CSS.",
+      "The same feed in the built-in themes. Each theme is one HTML file with its own layout and CSS.",
     themeGuide: "Write a theme",
     communityThemes: "Community themes",
     shareTheme: "Share your theme",
@@ -126,7 +126,7 @@ export const text = {
     quickNote: "Sihirbaz veritabanını, portu ve kurulum dizinini sorar.",
     themeTitle: "Temalar",
     themeIntro:
-      "Aynı akışın üç farklı temadaki görünümü. Her tema, kendi yerleşimini ve CSS kurallarını içeren tek bir HTML dosyasıdır.",
+      "Aynı akışın yerleşik temalardaki görünümü. Her tema, kendi yerleşimini ve CSS kurallarını içeren tek bir HTML dosyasıdır.",
     themeGuide: "Tema yazma rehberi",
     communityThemes: "Topluluk temaları",
     shareTheme: "Temanı paylaş",

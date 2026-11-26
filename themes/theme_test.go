@@ -16,8 +16,18 @@ func TestCatalog(t *testing.T) {
 			for _, f := range fields {
 				parts[f] = "(" + f + ")"
 			}
-			out := design.Render(view, parts)
+			if view == "item" {
+				parts["author"] = "(author)"
+				parts["date"] = "(date)"
+			}
+			out := design.RenderLocale(view, parts, "en", map[string]bool{"media": true})
 			for _, f := range fields {
+				if f == "byline" && !strings.Contains(out, parts[f]) {
+					if strings.Count(out, parts["author"]) != 1 || strings.Count(out, parts["date"]) != 1 {
+						t.Fatal(id, view, "missing author or date")
+					}
+					continue
+				}
 				if strings.Count(out, parts[f]) != 1 {
 					t.Fatal(id, view, f)
 				}
