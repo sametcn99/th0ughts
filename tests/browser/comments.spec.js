@@ -81,19 +81,6 @@ test("guest email, image moderation and nested replies", async ({
     await settings
       .getByRole("button", { name: "Comments", exact: true })
       .click();
-    await settings
-      .getByText("Verification email delivery", { exact: true })
-      .click();
-    await settings.getByLabel("SMTP server").fill(mail.relay.host);
-    await settings
-      .getByLabel("Port", { exact: true })
-      .fill(String(mail.relay.port));
-    await settings.getByLabel("Connection security").selectOption("tls");
-    await settings.getByLabel("Sender email address").fill(mail.relay.from);
-    await settings.getByRole("button", { name: "Save mail settings" }).click();
-    await expect(settings.locator(".mail-settings .notice")).toHaveText(
-      "Saved.",
-    );
     const hook = settings.locator(".webhook-settings");
     await hook.locator("summary").click();
     await hook.getByLabel("Send comment events").check();
@@ -112,7 +99,7 @@ test("guest email, image moderation and nested replies", async ({
     const page = await guest.newPage();
     await page.goto("/?post=" + post.id);
     const thread = page.locator("#comments");
-    async function submit(email, body, images = false) {
+    async function submit(email, body, images = false, requireCode = false) {
       const form = thread.locator("form");
       await form.getByLabel("Your comment").fill(body);
       await form.getByLabel("Email (private)").fill(email);
@@ -130,24 +117,29 @@ test("guest email, image moderation and nested replies", async ({
             })),
           );
       }
-      await form
-        .getByRole("button", { name: "Send verification code" })
-        .click();
-      await expect(form.getByLabel("Email verification code")).toBeVisible();
-      expect(mail.codes.get(email)).toMatch(/^\d{6}$/);
-      await form
-        .getByLabel("Email verification code")
-        .fill(mail.codes.get(email));
+      if (requireCode) {
+        await form
+          .getByRole("button", { name: "Send verification code" })
+          .click();
+        await expect(form.getByLabel("Email verification code")).toBeVisible();
+        expect(mail.codes.get(email)).toMatch(/^\d{6}$/);
+        await form
+          .getByLabel("Email verification code")
+          .fill(mail.codes.get(email));
+      } else {
+        await expect(form.getByRole("button", { name: "Send verification code" })).toHaveCount(0);
+      }
       await form.getByRole("button", { name: "Submit comment" }).click();
     }
     const photo = await (
       await import("node:fs/promises")
     ).readFile("scripts/fixtures/great-wave.jpg");
     await thread.getByRole("button", { name: "Add a comment" }).click();
-    await submit("reader@example.com", "A **guest** note.", true);
+    await submit("reader@iana.org", "A **guest** note.", true);
     await expect(thread.getByRole("status")).toContainText(
       "Submitted for approval",
     );
+    expect(mail.codes.size).toBe(0);
     await expect(thread.locator(".thread-node")).toHaveCount(0);
     await panel.reload();
     await panel.getByRole("button", { name: "Settings", exact: true }).click();
@@ -165,13 +157,28 @@ test("guest email, image moderation and nested replies", async ({
       "Unknown user",
     );
     expect((await guest.request.get(src)).status()).toBe(200);
+    await settings
+      .getByText("Verification email delivery", { exact: true })
+      .click();
+    await settings.getByLabel("SMTP server").fill(mail.relay.host);
+    await settings
+      .getByLabel("Port", { exact: true })
+      .fill(String(mail.relay.port));
+    await settings.getByLabel("Connection security").selectOption("tls");
+    await settings.getByLabel("Sender email address").fill(mail.relay.from);
+    await settings.getByRole("button", { name: "Save mail settings" }).click();
+    await expect(settings.locator(".mail-settings .notice")).toHaveText(
+      "Saved.",
+    );
+    await settings.getByLabel("Require a code sent by email").check();
     await settings.getByLabel("Guest comments").selectOption("open");
     await settings.getByRole("button", { name: "Save", exact: true }).click();
     await expect(settings.locator(".settings-footer .notice")).toHaveText(
       "Saved.",
     );
+    await page.reload();
     await thread.getByRole("button", { name: "Reply", exact: true }).click();
-    await submit("another@example.com", "A nested reply");
+    await submit("another@iana.org", "A nested reply", false, true);
     await expect(thread.locator(".comment-branch")).toContainText(
       "A nested reply",
     );
@@ -199,7 +206,7 @@ test("guest email, image moderation and nested replies", async ({
     expect(events[2].event.data.parent).toBe(root.id);
     expect(events[0].event.data.images).toHaveLength(2);
     expect(events[3].event.data).not.toHaveProperty("body");
-    expect(JSON.stringify(events)).not.toContain("reader@example.com");
+    expect(JSON.stringify(events)).not.toContain("reader@iana.org");
     expect(await api("/api/v1/get_comment_webhook")).toMatchObject({hasSecret:true,last:{state:"delivered",code:204}});
     await api("/api/v1/set_thread_lock", { id: post.id, closed: true });
     await page.reload();

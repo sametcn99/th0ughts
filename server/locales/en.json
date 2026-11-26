@@ -218,7 +218,7 @@
   "invalid_email": "Enter a valid email address.",
   "invalid_comment_code": "The code is incorrect, expired, or already used. Request a new one if needed.",
   "mail_unavailable": "The verification email could not be sent. Try again later.",
-  "comment_rate": "Too many email requests. Try again later.",
+  "comment_rate": "Too many comment requests. Try again later.",
   "comment_mail_subject": "Your th0ughts comment verification code",
   "comment_mail_body": "Your code is {code}. Enter it in the comment form within ten minutes. If you did not request it, you can ignore this email.",
   "unknown_user": "Unknown user",
@@ -273,10 +273,10 @@
   "comment_mode": "Guest comments",
   "comments_off": "Off — hide discussions",
   "comments_review": "Review each comment before publishing",
-  "comments_open": "Publish after email verification",
+  "comments_open": "Publish immediately",
   "allow_markdown": "Allow Markdown formatting",
   "max_images": "Maximum images per comment",
-  "comment_setup_hint": "Configure a mail server below to accept replies. Readers verify their email without creating an account.",
+  "comment_setup_hint": "The server checks whether the email domain can receive mail before accepting a comment.",
   "thread_context": "Conversation path",
   "all_comments": "All comments",
   "set_thread_lock": "Lock or reopen a post discussion",
@@ -298,5 +298,9 @@
   "webhook_refresh": "Refresh delivery status",
   "webhook_delivered": "Delivered",
   "webhook_failed": "Attempts exhausted",
-  "webhook_retrying": "Retry scheduled"
+  "webhook_retrying": "Retry scheduled",
+  "require_comment_code": "Require a code sent by email",
+  "optional_mail_hint": "Configure verification email delivery below so guests can receive their code.",
+  "comment_dns_unavailable": "The email domain could not be checked. Try again later.",
+  "email_code_required": "This site now requires an email code. Reload the page to submit your comment."
 }

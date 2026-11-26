@@ -13,9 +13,10 @@ import (
 )
 
 type CommentPolicy struct {
-	Mode     string `json:"mode"`
-	Markdown bool   `json:"markdown"`
-	Images   int    `json:"images"`
+	RequireEmailCode bool   `json:"requireEmailCode"`
+	Mode             string `json:"mode"`
+	Markdown         bool   `json:"markdown"`
+	Images           int    `json:"images"`
 }
 
 func (p CommentPolicy) Enabled() bool { return p.Mode == "review" || p.Mode == "open" }
@@ -121,6 +122,18 @@ func (s *Service) CommentList(ctx context.Context, a Actor, f CommentQuery, queu
 // SubmitVerifiedComment accepts a guest whose mailbox the transport has verified.
 // The server supplies all identity, hierarchy and moderation fields.
 func (l *Library) SubmitVerifiedComment(ctx context.Context, post, parent, name, body, format string, images [][]byte) (Comment, error) {
+	return l.submitComment(ctx, post, parent, name, body, format, images, true)
+}
+
+// SubmitDomainCheckedComment accepts a guest address validated by the transport's
+// DNS check. Recheck the current policy at commit time in case the owner enabled codes.
+func (l *Library) SubmitDomainCheckedComment(ctx context.Context, post, parent, name, body, format string, images [][]byte) (Comment, error) {
+	return l.submitComment(ctx, post, parent, name, body, format, images, false)
+}
+
+var EmailCodeRequired = errors.New("email_code_required")
+
+func (l *Library) submitComment(ctx context.Context, post, parent, name, body, format string, images [][]byte, mailboxVerified bool) (Comment, error) {
 	s := l.Service
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -128,6 +141,9 @@ func (l *Library) SubmitVerifiedComment(ctx context.Context, post, parent, name,
 	policy, e := s.CommentPolicy(ctx, post, true)
 	if e != nil {
 		return c, e
+	}
+	if policy.RequireEmailCode && !mailboxVerified {
+		return c, EmailCodeRequired
 	}
 	name = strings.TrimSpace(name)
 	body = strings.TrimSpace(body)
@@ -166,6 +182,9 @@ func (l *Library) SubmitVerifiedComment(ctx context.Context, post, parent, name,
 	rec, e := s.Themes.record(ctx)
 	if e != nil {
 		return Comment{}, e
+	}
+	if rec.Comments.RequireEmailCode && !mailboxVerified {
+		return Comment{}, EmailCodeRequired
 	}
 	if !rec.Comments.Enabled() {
 		return Comment{}, CommentsClosed

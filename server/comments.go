@@ -54,57 +54,69 @@ func (s *Server) submitComment(w http.ResponseWriter, r *http.Request) {
 		fail(w, e)
 		return
 	}
-	finish, e := s.guest.reserve(r.Header.Get("X-Comment-Challenge"), post, r.Header.Get("X-Comment-Code"))
-	if e != nil {
+	submit := s.L.SubmitDomainCheckedComment
+	done := false
+	if p.RequireEmailCode {
+		finish, err := s.guest.reserve(r.Header.Get("X-Comment-Challenge"), post, r.Header.Get("X-Comment-Code"))
+		if err != nil {
+			fail(w, err)
+			return
+		}
+		defer func() { finish(done) }()
+		submit = s.L.SubmitVerifiedComment
+	} else if e = s.guest.allowRequest(r.RemoteAddr); e != nil {
 		fail(w, e)
 		return
 	}
-	done := false
-	defer func() { finish(done) }()
 	r.Body = http.MaxBytesReader(w, r.Body, int64(p.Images*commentImageLimit+65536))
-	reader, e := r.MultipartReader()
-	if e != nil {
+	// Spool large file parts to disk and validate the email before decoding images.
+	if e = r.ParseMultipartForm(64 << 10); e != nil {
 		fail(w, feed.Invalid)
 		return
 	}
-	fields := map[string]string{}
-	var images [][]byte
-	for {
-		part, e := reader.NextPart()
-		if e == io.EOF {
-			break
-		}
-		if e != nil {
+	form := r.MultipartForm
+	defer form.RemoveAll()
+	for key, values := range form.Value {
+		if len(values) != 1 || len(values[0]) > 24000 || !(key == "name" || key == "format" || key == "body" || key == "parent" || key == "email" && !p.RequireEmailCode) {
 			fail(w, feed.Invalid)
 			return
 		}
-		k := part.FormName()
-		if k == "image" {
-			if len(images) >= p.Images {
-				fail(w, feed.Invalid)
-				return
-			}
-			b, e := guestImage(ctx, part)
-			if e != nil {
-				fail(w, e)
-				return
-			}
-			images = append(images, b)
-		} else {
-			if _, used := fields[k]; used || !(k == "name" || k == "format" || k == "body" || k == "parent") {
-				fail(w, feed.Invalid)
-				return
-			}
-			b, e := io.ReadAll(io.LimitReader(part, 24001))
-			if e != nil || len(b) > 24000 {
-				fail(w, feed.Invalid)
-				return
-			}
-			fields[k] = string(b)
-		}
-		part.Close()
 	}
-	c, e := s.L.SubmitVerifiedComment(ctx, post, fields["parent"], fields["name"], fields["body"], first(fields["format"], "text"), images)
+	files := form.File["image"]
+	if len(form.File) > 0 && (len(form.File) != 1 || len(files) == 0) || len(files) > p.Images {
+		fail(w, feed.Invalid)
+		return
+	}
+	if !p.RequireEmailCode {
+		address, err := mailbox(r.PostFormValue("email"))
+		if err == nil {
+			err = checkMailDomain(ctx, address, s.guest.resolver)
+		}
+		if err != nil {
+			fail(w, err)
+			return
+		}
+	}
+	var images [][]byte
+	for _, file := range files {
+		if file.Size > commentImageLimit {
+			fail(w, feed.Invalid)
+			return
+		}
+		f, err := file.Open()
+		if err != nil {
+			fail(w, err)
+			return
+		}
+		b, err := guestImage(ctx, f)
+		f.Close()
+		if err != nil {
+			fail(w, err)
+			return
+		}
+		images = append(images, b)
+	}
+	c, e := submit(ctx, post, r.PostFormValue("parent"), r.PostFormValue("name"), r.PostFormValue("body"), first(r.PostFormValue("format"), "text"), images)
 	if e != nil {
 		fail(w, e)
 		return

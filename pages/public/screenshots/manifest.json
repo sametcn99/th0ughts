@@ -528,6 +528,17 @@
     "height": 466
   },
   {
+    "id": "comment-verification",
+    "group": "publishing",
+    "title": {
+      "en": "Guest comment verification policy",
+      "tr": "Ziyaretçi yorumlarında e-posta doğrulama ayarı"
+    },
+    "file": "comment-verification.webp",
+    "width": 629,
+    "height": 291
+  },
+  {
     "id": "comment-webhook",
     "group": "publishing",
     "title": {
@@ -536,7 +547,7 @@
     },
     "file": "comment-webhook.webp",
     "width": 629,
-    "height": 496
+    "height": 497
   },
   {
     "id": "comment-moderation",

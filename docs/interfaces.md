@@ -65,7 +65,11 @@ Use the shared `service.Themes` catalog when embedding the service. `publish_the
 
 Read the first 20 root comments with `list_comments` and a `post` ID. Pass a `parent` comment ID to read a branch or the returned `next` value as `cursor` to continue. Each item includes `hasReplies`. The `comment_context` command accepts an `id` and returns its visible ancestors and the selected comment. A link to a specific reply uses `/?post=POST_ID#comment-COMMENT_ID`.
 
-A guest first sends `{"post":"POST_ID","email":"reader@example.org","lang":"en"}` to `POST /api/v1/comment-code`. The response contains a challenge ID. Submit a multipart form to `POST /api/v1/comments/POST_ID` with the `X-Comment-Challenge` and `X-Comment-Code` headers. The six-digit code goes to the guest's inbox and expires after ten minutes. Supported form fields are `name`, `body`, `format` (`text` or `markdown`), optional `parent`, and repeated `image` parts. Each successful submission consumes the code. The response status field is `pending` or `approved`.
+Read `comments.requireEmailCode` from `get_settings` to choose the submission flow. By default, submit a multipart form directly to `POST /api/v1/comments/POST_ID` with the required `email` field. The server validates the address syntax and DNS mail route before recording the comment. An invalid address returns HTTP 400; a temporary DNS failure returns HTTP 503 and the guest can retry.
+
+When `requireEmailCode` is true, send `post`, `email` and optional `lang` to `POST /api/v1/comment-code` first. After DNS validation, the guest receives a six-digit code and the response contains a challenge ID. Submit the same multipart form with the `X-Comment-Challenge` and `X-Comment-Code` headers and omit the email field. The challenge is bound to the post, expires after ten minutes and is consumed on success.
+
+Both flows accept `name`, `body`, `format` (`text` or `markdown`), optional `parent`, and repeated `image` file parts. The response status is `pending` or `approved`.
 
 Owners use `pending_comments` with the `pending` or `published` status filter, `moderate_comment` with an `id` and an `approve` or `delete` action, and `set_thread_lock` with a post `id` and a `closed` boolean. These commands use the same permission checks across HTTP, CLI, and MCP.
 
@@ -75,7 +79,7 @@ Under **Settings → Comments → Signed comment webhook**, enter your receiver'
 
 | Event | When it is queued |
 | --- | --- |
-| `comment.created` | A verified guest submits a root comment or reply. The initial status is `pending` or `approved`. |
+| `comment.created` | A guest submits a root comment or reply. The initial status is `pending` or `approved`. |
 | `comment.approved` | The owner approves a pending comment. |
 | `comment.deleted` | The owner deletes a comment. The payload retains thread identifiers and timestamps and omits the deleted content. |
 

@@ -360,12 +360,15 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 				fail(w, e)
 				return
 			}
-			relay, e := h.relay(ctx)
-			if e != nil {
-				fail(w, e)
-				return
+			readonly = page.Posts[0].CommentsClosed
+			if site.Comments.RequireEmailCode && !readonly {
+				relay, err := h.relay(ctx)
+				if err != nil {
+					fail(w, err)
+					return
+				}
+				readonly = relay.Host == ""
 			}
-			readonly = page.Posts[0].CommentsClosed || relay.Host == ""
 			var fallback strings.Builder
 			fallback.WriteString(`<section id="comments" class="comment-thread"><h2>` + esc(words["comments"]) + "</h2>")
 			for _, c := range thread.Items {

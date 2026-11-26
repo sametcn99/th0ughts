@@ -92,7 +92,10 @@ func (s *Server) saveRelay(ctx context.Context, a feed.Actor, m mailRelay) error
 	if e != nil {
 		return e
 	}
-	return feed.Write(ctx, s.S.DB, "config", "comment-mail", s.v.Seal("comment-mail", b), 0, false)
+	if e = feed.Write(ctx, s.S.DB, "config", "comment-mail", s.v.Seal("comment-mail", b), 0, false); e == nil {
+		s.S.Version.Add(1)
+	}
+	return e
 }
 func sendCommentMail(ctx context.Context, m mailRelay, to, subject, body string) error {
 	ctx, cancel := context.WithTimeout(ctx, 12*time.Second)
@@ -156,49 +159,63 @@ type mailWindow struct {
 	n     int
 }
 type guestMail struct {
+	resolver   mailDNS
 	mu         sync.Mutex
 	challenges map[string]*commentChallenge
 	limits     map[string]mailWindow
 	send       func(context.Context, mailRelay, string, string, string) error
 }
 
-func (g *guestMail) issue(post, email, ip, code string) (string, error) {
+func (g *guestMail) allowRequest(remote string) error {
+	ip, _, err := net.SplitHostPort(remote)
+	if err != nil {
+		ip = remote
+	}
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	now := time.Now()
-	if g.challenges == nil {
-		g.challenges = map[string]*commentChallenge{}
-		g.limits = map[string]mailWindow{}
-	}
-	for k, v := range g.challenges {
-		if now.After(v.until) {
-			delete(g.challenges, k)
-		}
+	if g.limits == nil {
+		g.limits = make(map[string]mailWindow)
 	}
 	for k, v := range g.limits {
 		if now.After(v.until) {
 			delete(g.limits, k)
 		}
 	}
-	type quota struct {
-		k      string
-		max    int
-		period time.Duration
+	keys := []string{"all", "ip:" + ip}
+	if g.limits[keys[0]].n >= 120 || g.limits[keys[1]].n >= 12 {
+		return commentRate
 	}
-	quotas := []quota{{"all", 120, time.Hour}, {"ip:" + ip, 12, time.Hour}, {"email:" + feed.Digest(strings.ToLower(email)), 1, time.Minute}}
-	for _, q := range quotas {
-		if g.limits[q.k].n >= q.max {
-			return "", commentRate
-		}
-	}
-	for _, q := range quotas {
-		v := g.limits[q.k]
+	for _, key := range keys {
+		v := g.limits[key]
 		if v.n == 0 {
-			v.until = now.Add(q.period)
+			v.until = now.Add(time.Hour)
 		}
 		v.n++
-		g.limits[q.k] = v
+		g.limits[key] = v
 	}
+	return nil
+}
+func (g *guestMail) issue(post, email, code string) (string, error) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	now := time.Now()
+	if g.challenges == nil {
+		g.challenges = make(map[string]*commentChallenge)
+	}
+	if g.limits == nil {
+		g.limits = make(map[string]mailWindow)
+	}
+	for k, v := range g.challenges {
+		if now.After(v.until) {
+			delete(g.challenges, k)
+		}
+	}
+	key := "email:" + feed.Digest(strings.ToLower(email))
+	if now.Before(g.limits[key].until) {
+		return "", commentRate
+	}
+	g.limits[key] = mailWindow{until: now.Add(time.Minute), n: 1}
 	id := feed.ID(24)
 	g.challenges[id] = &commentChallenge{post: post, digest: feed.Digest(id + code), until: now.Add(10 * time.Minute)}
 	return id, nil
@@ -232,12 +249,25 @@ func (s *Server) requestCode(w http.ResponseWriter, r *http.Request) {
 		fail(w, e)
 		return
 	}
-	if _, e := s.S.CommentPolicy(r.Context(), x.Post, true); e != nil {
+	policy, e := s.S.CommentPolicy(r.Context(), x.Post, true)
+	if e != nil {
+		fail(w, e)
+		return
+	}
+	if !policy.RequireEmailCode {
+		fail(w, feed.Denied)
+		return
+	}
+	if e = s.guest.allowRequest(r.RemoteAddr); e != nil {
 		fail(w, e)
 		return
 	}
 	address, e := mailbox(x.Email)
 	if e != nil {
+		fail(w, e)
+		return
+	}
+	if e = checkMailDomain(r.Context(), address, s.guest.resolver); e != nil {
 		fail(w, e)
 		return
 	}
@@ -252,8 +282,7 @@ func (s *Server) requestCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	code := fmt.Sprintf("%06d", n.Int64())
-	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-	id, e := s.guest.issue(x.Post, address, ip, code)
+	id, e := s.guest.issue(x.Post, address, code)
 	if e != nil {
 		fail(w, e)
 		return

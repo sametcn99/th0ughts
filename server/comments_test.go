@@ -19,7 +19,7 @@ import (
 
 func TestCodeOnlyWorksOnceForItsPost(t *testing.T) {
 	var g guestMail
-	id, e := g.issue("post", "reader@example.org", "127.0.0.1", "123456")
+	id, e := g.issue("post", "reader@example.org", "123456")
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -40,10 +40,10 @@ func TestCodeOnlyWorksOnceForItsPost(t *testing.T) {
 	if _, e = g.reserve(id, "post", "123456"); !errors.Is(e, invalidCode) {
 		t.Fatal("reuse", e)
 	}
-	if _, e = g.issue("post", "reader@example.org", "other", "010101"); !errors.Is(e, commentRate) {
+	if _, e = g.issue("post", "reader@example.org", "010101"); !errors.Is(e, commentRate) {
 		t.Fatal(e)
 	}
-	id, _ = g.issue("post", "next@example.org", "local", "111111")
+	id, _ = g.issue("post", "next@example.org", "111111")
 	g.challenges[id].until = time.Now().Add(-time.Minute)
 	if _, e = g.reserve(id, "post", "111111"); !errors.Is(e, invalidCode) {
 		t.Fatal("expired", e)
@@ -142,6 +142,7 @@ func TestThreadRoutesRejectInvalidEmailAndUnverifiedUploads(t *testing.T) {
 	ctx := context.Background()
 	site, _ := s.S.Settings(ctx)
 	site.Comments.Mode = "review"
+	site.Comments.RequireEmailCode = true
 	s.S.SaveSettings(ctx, a, site)
 	p, _ := s.S.Save(ctx, a, feed.Post{Original: "en", Text: map[string]feed.Translation{"en": {Body: "A note", Published: true}}})
 	for _, tc := range []struct{ path, body, code string }{{"/api/v1/comment-code", `{"post":"` + p.ID + `","email":"invalid"}`, "invalid_email"}, {"/api/v1/comments/" + p.ID, "", "invalid_comment_code"}} {

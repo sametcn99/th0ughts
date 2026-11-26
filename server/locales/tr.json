@@ -218,7 +218,7 @@
   "invalid_email": "Geçerli bir e-posta adresi gir.",
   "invalid_comment_code": "Kod yanlış, süresi dolmuş veya kullanılmış. Gerekirse yeni kod iste.",
   "mail_unavailable": "Doğrulama e-postası gönderilemedi. Daha sonra tekrar dene.",
-  "comment_rate": "Çok fazla e-posta isteği gönderildi. Daha sonra tekrar dene.",
+  "comment_rate": "Çok fazla yorum isteği gönderildi. Daha sonra tekrar dene.",
   "comment_mail_subject": "th0ughts yorum doğrulama kodun",
   "comment_mail_body": "Kodun {code}. On dakika içinde yorum formuna gir. Bu kodu sen istemediysen e-postayı yok sayabilirsin.",
   "unknown_user": "Bilinmeyen kullanıcı",
@@ -273,10 +273,10 @@
   "comment_mode": "Ziyaretçi yorumları",
   "comments_off": "Kapalı — konuşmaları gizle",
   "comments_review": "Her yorumu yayımlamadan önce onayla",
-  "comments_open": "E-posta doğrulamasından sonra yayımla",
+  "comments_open": "Hemen yayımla",
   "allow_markdown": "Markdown biçimlendirmesine izin ver",
   "max_images": "Yorum başına en fazla görsel",
-  "comment_setup_hint": "Yanıt kabul etmek için aşağıdan e-posta sunucusunu ayarla. Okurlar hesap oluşturmadan e-posta adreslerini doğrular.",
+  "comment_setup_hint": "Sunucu, yorumu kabul etmeden önce e-posta alan adının posta alıp alamadığını kontrol eder.",
   "thread_context": "Konuşma yolu",
   "all_comments": "Tüm yorumlar",
   "set_thread_lock": "Gönderi yorumlarını kilitle veya aç",
@@ -298,5 +298,9 @@
   "webhook_refresh": "Teslimat durumunu yenile",
   "webhook_delivered": "Teslim edildi",
   "webhook_failed": "Denemeler tükendi",
-  "webhook_retrying": "Yeniden denenecek"
+  "webhook_retrying": "Yeniden denenecek",
+  "require_comment_code": "E-posta ile doğrulama kodu iste",
+  "optional_mail_hint": "Ziyaretçilerin kod alabilmesi için aşağıdan doğrulama e-postası gönderimini ayarla.",
+  "comment_dns_unavailable": "E-posta alan adı şu anda kontrol edilemiyor. Daha sonra tekrar dene.",
+  "email_code_required": "Bu site artık e-posta kodu istiyor. Yorumu göndermek için sayfayı yenile."
 }

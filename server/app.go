@@ -291,6 +291,10 @@ func errorStatus(e error) (int, string) {
 	code := 500
 	msg := "internal_error"
 	switch {
+	case errors.Is(e, dnsUnavailable):
+		return 503, e.Error()
+	case errors.Is(e, feed.EmailCodeRequired):
+		return 409, e.Error()
 	case errors.Is(e, invalidEmail), errors.Is(e, invalidCode):
 		return 400, e.Error()
 	case errors.Is(e, mailUnavailable):

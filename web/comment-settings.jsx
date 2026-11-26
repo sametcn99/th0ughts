@@ -361,6 +361,12 @@ export default function CommentSettings({ policy, change }) {
           </select>
         </label>
         <p>{t("comment_setup_hint")}</p>
+        <label className="check">
+          <input type="checkbox" checked={!!policy.requireEmailCode}
+            onChange={(e) => update("requireEmailCode", e.target.checked)} />
+          {t("require_comment_code")}
+        </label>
+        {policy.requireEmailCode && <p>{t("optional_mail_hint")}</p>}
       </fieldset>
       <MailSettings />
       <CommentWebhook />

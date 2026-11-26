@@ -53,7 +53,7 @@ function GuestForm({ parent = "", cancel, submitted }) {
     setBusy(true);
     setError("");
     try {
-      if (!challenge) {
+      if (policy.requireEmailCode && !challenge) {
         const result = await req("/api/v1/comment-code", {
           email: address,
           post: state.threadPost,
@@ -66,6 +66,7 @@ function GuestForm({ parent = "", cancel, submitted }) {
       for (const k of ["name", "body"]) payload.set(k, data.get(k));
       payload.set("parent", parent);
       payload.set("format", format);
+      if (!policy.requireEmailCode) payload.set("email", address);
       for (const f of files) payload.append("image", f);
       const response = await fetch(
         "/api/v1/comments/" + encodeURIComponent(state.threadPost),
@@ -73,8 +74,10 @@ function GuestForm({ parent = "", cancel, submitted }) {
           method: "POST",
           headers: {
             "X-Th0ughts-Request": "1",
-            "X-Comment-Challenge": challenge,
-            "X-Comment-Code": code,
+            ...(policy.requireEmailCode && {
+              "X-Comment-Challenge": challenge,
+              "X-Comment-Code": code,
+            }),
           },
           body: payload,
         },
@@ -195,7 +198,7 @@ function GuestForm({ parent = "", cancel, submitted }) {
           {t(
             busy
               ? "working"
-              : challenge
+              : challenge || !policy.requireEmailCode
                 ? "submit_comment"
                 : "send_comment_code",
           )}

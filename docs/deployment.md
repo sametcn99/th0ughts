@@ -52,11 +52,13 @@ Both platform files expose the container port internally, use `/healthz`, and mo
 
 ## Guest comments and verification mail
 
-Comments are off on new and upgraded sites. Open **Settings → Comments → Verification email delivery** and enter the SMTP host, port, sender, and any required credentials. Choose STARTTLS (typically port 587) or implicit TLS (typically 465). The relay must accept mail from your instance and present a certificate trusted by the server. The master key encrypts relay credentials in the database. Restoring a portable backup onto a new instance requires configuring its relay again.
+Enable guest comments in **Settings → Comments**. Choose **Review each comment before publishing** or **Publish immediately** and save. Both modes require a syntactically valid email address and a domain with a mail route in DNS. The server checks for MX records, rejects a null MX and falls back to A/AAAA when MX records are absent. A temporary DNS failure asks the guest to retry. DNS checks establish domain-level routing. Mailbox ownership requires an inbox code. [SMTP mail routing](https://www.rfc-editor.org/rfc/rfc5321#section-5.1) · [Null MX](https://www.rfc-editor.org/rfc/rfc7505)
 
-Choose **Review each comment before publishing** or **Publish after email verification**, then save. Set the image limit to zero to disable uploads and use the Markdown switch to control formatting. Switching guest comments off hides all threads and their images from readers. Closing an individual post keeps approved conversations readable.
+**Require a code sent by email** is off by default, including when upgrading from a version without this setting. To enable it, open **Verification email delivery** and configure a trusted SMTP relay using STARTTLS (typically port 587) or implicit TLS (typically 465). Save the relay, enable the checkbox and save the comment settings. The master key encrypts relay credentials. Configure the relay again after restoring a portable backup to a new instance.
 
-Guests receive a one-use mailbox code for each submission. Display names are optional. Email addresses and codes are excluded from published comments and portable backups. Each comment accepts up to 6,000 characters and up to four JPEG, PNG, or WebP images of 4 MiB each, subject to the owner's settings. The server decodes images and re-encodes them as JPEG before storing them on disk or S3.
+Set the image limit to zero to disable uploads and use the Markdown switch to control formatting. Switching guest comments off hides all threads and their images from readers. Closing an individual post keeps approved conversations readable.
+
+Display names are optional. Email addresses and codes are excluded from published comments and portable backups. Each comment accepts up to 6,000 characters and up to four JPEG, PNG, or WebP images of 4 MiB each, subject to the owner's settings. The server decodes images and re-encodes them as JPEG before storing them on disk or S3.
 
 Use the moderation queue to approve or delete submissions. Deleting a published comment removes its content and images while keeping replies in context. The moderation interface does not offer text editing. Backups preserve the tree, attachments, pending submissions, moderation states, and post locks.
 
