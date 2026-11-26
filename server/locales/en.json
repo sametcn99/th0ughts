@@ -282,5 +282,21 @@
   "set_thread_lock": "Lock or reopen a post discussion",
   "post_locks": "Individual post discussions",
   "choose_post": "Choose a post",
-  "unlock_post": "Reopen this post for replies"
+  "unlock_post": "Reopen this post for replies",
+  "signed_comment_webhook": "Signed comment webhook",
+  "get_comment_webhook": "Read comment webhook settings and delivery status",
+  "configure_comment_webhook": "Configure the signed comment webhook",
+  "enable_comment_webhook": "Send comment events",
+  "webhook_event_hint": "Send new comments, including those awaiting approval, replies and moderation events to your HTTPS endpoint.",
+  "webhook_endpoint": "Receiver URL (HTTPS)",
+  "webhook_secret": "Signing secret",
+  "webhook_secret_hint": "Share a random secret of at least 32 characters with your receiver. Leave blank to keep the key for the same URL.",
+  "save_webhook": "Save webhook",
+  "webhook_last": "Last attempt · {time} · {state} · #{attempt} ({code})",
+  "webhook_no_response": "no HTTP response",
+  "webhook_no_delivery": "No deliveries recorded yet.",
+  "webhook_refresh": "Refresh delivery status",
+  "webhook_delivered": "Delivered",
+  "webhook_failed": "Attempts exhausted",
+  "webhook_retrying": "Retry scheduled"
 }

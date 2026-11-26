@@ -61,7 +61,9 @@ var commands = []Command{
 	command("set_thread_lock", "owner", false, func(c context.Context, s *Server, a feed.Actor, x struct {
 		ID     string `json:"id"`
 		Closed bool   `json:"closed"`
-	}) (any, error) { return true, s.S.LockThread(c, a, x.ID, x.Closed) }),
+	}) (any, error) {
+		return true, s.S.LockThread(c, a, x.ID, x.Closed)
+	}),
 	command("list_comments", "", true, func(c context.Context, s *Server, a feed.Actor, x feed.CommentQuery) (any, error) {
 		return s.threadPage(c, a, x, false)
 	}),
@@ -73,6 +75,12 @@ var commands = []Command{
 		Action string `json:"action"`
 	}) (any, error) {
 		return true, s.L.Moderate(c, a, x.ID, x.Action)
+	}),
+	command("get_comment_webhook", "owner", true, func(c context.Context, s *Server, a feed.Actor, _ empty) (any, error) {
+		return s.L.CommentWebhook(c, a)
+	}),
+	command("configure_comment_webhook", "owner", false, func(c context.Context, s *Server, a feed.Actor, x feed.CommentWebhookSettings) (any, error) {
+		return true, s.L.ConfigureCommentWebhook(c, a, x)
 	}),
 	command("get_comment_mail", "owner", true, func(c context.Context, s *Server, a feed.Actor, _ empty) (any, error) {
 		m, e := s.relay(c)

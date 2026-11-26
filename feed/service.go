@@ -80,15 +80,19 @@ type Settings struct {
 	Options     map[string]map[string]string `json:"options"`
 }
 type Service struct {
-	Themes  *Themes
-	DB      storage.Store
-	Version atomic.Uint64
-	mu      sync.Mutex
-	index   map[string]searchEntry
+	Themes       *Themes
+	DB           storage.Store
+	Version      atomic.Uint64
+	mu           sync.Mutex
+	hookWake     chan struct{}
+	hookDelivery sync.Mutex
+	index        map[string]searchEntry
 }
 
-func New(db storage.Store) *Service { return &Service{DB: db, Themes: NewThemes(db)} }
-func ID(n int) string               { b := make([]byte, n); rand.Read(b); return hex.EncodeToString(b) }
+func New(db storage.Store) *Service {
+	return &Service{DB: db, Themes: NewThemes(db), hookWake: make(chan struct{}, 1)}
+}
+func ID(n int) string { b := make([]byte, n); rand.Read(b); return hex.EncodeToString(b) }
 func Read[T any](ctx context.Context, db storage.Store, kind, id string) (T, error) {
 	var v T
 	r, e := db.Get(ctx, kind, id)
@@ -281,6 +285,9 @@ func (s *Service) deletePost(ctx context.Context, a Actor, id string, discard fu
 	defer s.mu.Unlock()
 	if !storage.ValidKey(id) {
 		return Invalid
+	}
+	if e := s.resolveHookIntent(ctx); e != nil {
+		return e
 	}
 	if e := Write(ctx, s.DB, "thread_gc", id, true, 0, false); e != nil {
 		return e

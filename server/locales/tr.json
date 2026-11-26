@@ -282,5 +282,21 @@
   "set_thread_lock": "Gönderi yorumlarını kilitle veya aç",
   "post_locks": "Gönderiye özel yorum ayarları",
   "choose_post": "Bir gönderi seç",
-  "unlock_post": "Bu gönderiyi yanıtlara aç"
+  "unlock_post": "Bu gönderiyi yanıtlara aç",
+  "signed_comment_webhook": "İmzalı yorum webhook’u",
+  "get_comment_webhook": "Yorum webhook ayarlarını ve teslimat durumunu oku",
+  "configure_comment_webhook": "İmzalı yorum webhook’unu yapılandır",
+  "enable_comment_webhook": "Yorum olaylarını gönder",
+  "webhook_event_hint": "Yeni yorumları (onay bekleyenler dahil), yanıtları ve moderasyon olaylarını HTTPS adresine gönderir.",
+  "webhook_endpoint": "Alıcı adresi (HTTPS)",
+  "webhook_secret": "İmzalama anahtarı",
+  "webhook_secret_hint": "Alıcıyla en az 32 karakterlik rastgele bir anahtar paylaş. Aynı adresin anahtarını korumak için alanı boş bırak.",
+  "save_webhook": "Webhook’u kaydet",
+  "webhook_last": "Son deneme · {time} · {state} · #{attempt} ({code})",
+  "webhook_no_response": "HTTP yanıtı yok",
+  "webhook_no_delivery": "Henüz kayıtlı teslimat yok.",
+  "webhook_refresh": "Teslimat durumunu yenile",
+  "webhook_delivered": "Teslim edildi",
+  "webhook_failed": "Denemeler tükendi",
+  "webhook_retrying": "Yeniden denenecek"
 }

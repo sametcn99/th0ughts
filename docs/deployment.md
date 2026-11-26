@@ -59,3 +59,5 @@ Choose **Review each comment before publishing** or **Publish after email verifi
 Guests receive a one-use mailbox code for each submission. Display names are optional. Email addresses and codes are excluded from published comments and portable backups. Each comment accepts up to 6,000 characters and up to four JPEG, PNG, or WebP images of 4 MiB each, subject to the owner's settings. The server decodes images and re-encodes them as JPEG before storing them on disk or S3.
 
 Use the moderation queue to approve or delete submissions. Deleting a published comment removes its content and images while keeping replies in context. The moderation interface does not offer text editing. Backups preserve the tree, attachments, pending submissions, moderation states, and post locks.
+
+To notify another service when guests comment or you moderate a thread, open **Signed comment webhook** in the same settings panel. Configure one trusted HTTPS receiver and signing secret per site. The panel shows the time and HTTP result of the most recent attempt. [Events, retry schedule and receiver verification example](interfaces.md#signed-comment-webhooks)

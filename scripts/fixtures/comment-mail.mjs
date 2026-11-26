@@ -76,6 +76,7 @@ export async function openCommentInbox() {
   await once(server, "listening");
   return {
     cert,
+    key,
     codes,
     relay: {
       host: "127.0.0.1",

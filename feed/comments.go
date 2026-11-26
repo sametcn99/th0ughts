@@ -176,6 +176,9 @@ func (l *Library) SubmitVerifiedComment(ctx context.Context, post, parent, name,
 	if rec.Comments.Mode == "open" {
 		c.Status = "approved"
 	}
+	if e = l.stageCommentEvent(ctx, "comment.created", c); e != nil {
+		return Comment{}, e
+	}
 	if e = Write(ctx, s.DB, "comment", c.ID, c, c.Created, c.Status == "approved"); e != nil {
 		return Comment{}, e
 	}
@@ -218,9 +221,18 @@ func (l *Library) Moderate(ctx context.Context, a Actor, id, action string) erro
 		if c.Status == "deleted" {
 			return Conflict
 		}
+		if c.Status == "approved" {
+			return nil
+		}
 		c.Status = "approved"
+		if e = l.stageCommentEvent(ctx, "comment.approved", c); e != nil {
+			return e
+		}
 		return Write(ctx, s.DB, "comment", id, c, c.Created, true)
 	case "delete":
+		if c.Status == "deleted" {
+			return nil
+		}
 		if e = s.trackImages(ctx, c); e != nil {
 			return e
 		}
@@ -229,14 +241,17 @@ func (l *Library) Moderate(ctx context.Context, a Actor, id, action string) erro
 		if e != nil {
 			return e
 		}
+		c.Status = "deleted"
+		c.Body = ""
+		c.Name = ""
+		c.Format = ""
+		c.Images = nil
+		if e = l.stageCommentEvent(ctx, "comment.deleted", c); e != nil {
+			return e
+		}
 		if len(children) == 0 {
 			e = s.DB.Delete(ctx, "comment", id)
 		} else {
-			c.Status = "deleted"
-			c.Body = ""
-			c.Name = ""
-			c.Format = ""
-			c.Images = nil
 			e = Write(ctx, s.DB, "comment", id, c, c.Created, true)
 		}
 		if e != nil {

@@ -1,8 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
+import { createServer } from "node:https";
+import { createHmac } from "node:crypto";
 import { randomBytes } from "node:crypto";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { once } from "node:events";
@@ -14,6 +16,19 @@ test("guest email, image moderation and nested replies", async ({
   const mail = await openCommentInbox(),
     dir = await mkdtemp(join(tmpdir(), "th0ughts-thread-")),
     key = randomBytes(32).toString("hex");
+  const events = [];
+  const hookSecret = randomBytes(32).toString("hex");
+  const receiver = createServer({key: await readFile(mail.key), cert: await readFile(mail.cert)}, async (req, res) => {
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const body = Buffer.concat(chunks);
+    const timestamp = req.headers["x-th0ughts-timestamp"];
+    const signature = "v1=" + createHmac("sha256", hookSecret).update(timestamp + ".").update(body).digest("hex");
+    events.push({event:JSON.parse(body), valid: signature === req.headers["x-th0ughts-signature"] && Math.abs(Date.now()/1000 - Number(timestamp)) < 300});
+    res.writeHead(204).end();
+  });
+  receiver.listen(0, "127.0.0.1");
+  await once(receiver, "listening");
   const app = spawn(
     process.env.TEST_BINARY || "bin/th0ughts",
     ["-listen", "127.0.0.1:0", "-data", dir, "serve"],
@@ -79,6 +94,14 @@ test("guest email, image moderation and nested replies", async ({
     await expect(settings.locator(".mail-settings .notice")).toHaveText(
       "Saved.",
     );
+    const hook = settings.locator(".webhook-settings");
+    await hook.locator("summary").click();
+    await hook.getByLabel("Send comment events").check();
+    await hook.getByLabel("Receiver URL (HTTPS)").fill("https://127.0.0.1:" + receiver.address().port);
+    await hook.getByLabel("Signing secret").fill(hookSecret);
+    await hook.getByRole("button", {name:"Save webhook"}).click();
+    await expect(hook.locator(".notice")).toHaveText("Saved.");
+    await expect(hook.getByLabel("Signing secret")).toHaveValue("");
     await settings.getByLabel("Guest comments").selectOption("review");
     await settings.getByLabel("Maximum images per comment").selectOption("2");
     await settings.getByLabel("Allow Markdown formatting").check();
@@ -167,6 +190,17 @@ test("guest email, image moderation and nested replies", async ({
     await thread.getByRole("button", { name: "Show replies" }).click();
     await expect(thread).toContainText("Deleted comment");
     await expect(thread).toContainText("A nested reply");
+    await expect.poll(() => events.length).toBe(4);
+    expect(events.every(x => x.valid)).toBe(true);
+    expect(new Set(events.map(x => x.event.id)).size).toBe(4);
+    expect(events.map(x => [x.event.type,x.event.data.status])).toEqual([
+      ["comment.created","pending"], ["comment.approved","approved"], ["comment.created","approved"], ["comment.deleted","deleted"]
+    ]);
+    expect(events[2].event.data.parent).toBe(root.id);
+    expect(events[0].event.data.images).toHaveLength(2);
+    expect(events[3].event.data).not.toHaveProperty("body");
+    expect(JSON.stringify(events)).not.toContain("reader@example.com");
+    expect(await api("/api/v1/get_comment_webhook")).toMatchObject({hasSecret:true,last:{state:"delivered",code:204}});
     await api("/api/v1/set_thread_lock", { id: post.id, closed: true });
     await page.reload();
     await expect(
@@ -184,6 +218,8 @@ test("guest email, image moderation and nested replies", async ({
     await owner?.close();
     app.kill("SIGTERM");
     await closed;
+    receiver.closeAllConnections();
+    await new Promise(resolve => receiver.close(resolve));
     await mail.close();
     await rm(dir, { recursive: true, force: true });
   }

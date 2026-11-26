@@ -28,7 +28,7 @@ func auditAction(r *http.Request) string {
 			return name
 		}
 	}
-	for _, name := range []string{"save_settings", "configure_media", "create_token", "revoke_token", "install_theme", "publish_theme", "delete_theme", "restore"} {
+	for _, name := range []string{"configure_comment_webhook", "save_settings", "configure_media", "create_token", "revoke_token", "install_theme", "publish_theme", "delete_theme", "restore"} {
 		if r.URL.Path == "/api/v1/"+name {
 			return name
 		}

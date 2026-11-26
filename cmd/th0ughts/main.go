@@ -138,6 +138,10 @@ func run() error {
 			defer done()
 			httpd.Shutdown(c)
 		}()
+		workerCtx, stopWorker := context.WithCancel(ctx)
+		workerDone := make(chan struct{})
+		go func() { defer close(workerDone); s.RunCommentWebhooks(workerCtx) }()
+		defer func() { stopWorker(); <-workerDone }()
 		fmt.Fprintln(os.Stderr, "Listening on", listener.Addr())
 		e = httpd.Serve(listener)
 		if errors.Is(e, http.ErrServerClosed) {

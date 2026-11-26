@@ -647,6 +647,13 @@ async function captureComments(owner,reader,data,mail,shot){
   await shot(reader,"guest-comment","reader","Guest comment form","Ziyaretçi yorum formu",{target:thread.locator("form")});
   await owner.setViewportSize({width:1120,height:860});await navigate(owner,"/?lang=en");await button(owner,"Settings").click();
   const panel=owner.locator("#settings .settings-dialog");await button(panel,"Comments").click();await expect(panel.locator(".moderation-entry")).toContainText("Sarah");
+  const webhook = panel.locator(".webhook-settings");
+  await webhook.locator("summary").click();
+  await webhook.getByLabel("Send comment events").check();
+  await webhook.getByLabel("Receiver URL (HTTPS)").fill("https://example.org/hooks/comments");
+  await webhook.scrollIntoViewIfNeeded();
+  await shot(owner, "comment-webhook", "publishing", "Signed comment webhook settings", "İmzalı yorum webhook ayarları", {target:webhook});
+  await webhook.locator("summary").click();
   await panel.locator(".moderation-entry").scrollIntoViewIfNeeded();await shot(owner,"comment-moderation","publishing","Comment settings and moderation queue","Yorum ayarları ve moderasyon kuyruğu",{target:panel});
 }
 

@@ -528,6 +528,17 @@
     "height": 466
   },
   {
+    "id": "comment-webhook",
+    "group": "publishing",
+    "title": {
+      "en": "Signed comment webhook settings",
+      "tr": "İmzalı yorum webhook ayarları"
+    },
+    "file": "comment-webhook.webp",
+    "width": 629,
+    "height": 496
+  },
+  {
     "id": "comment-moderation",
     "group": "publishing",
     "title": {

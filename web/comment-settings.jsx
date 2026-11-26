@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { api, t, Field, Notice, useAction, state } from "./shared.jsx";
 import { CommentBody } from "./comments.jsx";
 
+import CommentWebhook from "./comment-webhook.jsx";
+
 function MailSettings() {
   const [relay, setRelay] = useState(null),
     [reload, refresh] = useState(0),
@@ -361,6 +363,7 @@ export default function CommentSettings({ policy, change }) {
         <p>{t("comment_setup_hint")}</p>
       </fieldset>
       <MailSettings />
+      <CommentWebhook />
       <PostLocks />
       <Moderation />
     </>
