@@ -156,5 +156,21 @@
   "month_9": "Sep",
   "month_10": "Oct",
   "month_11": "Nov",
-  "month_12": "Dec"
+  "month_12": "Dec",
+  "theme_ready": "Theme ready to preview.",
+  "passkey_label": "Passkey",
+  "settings_section": "Section",
+  "retry": "Try again",
+  "public_profile": "Public profile",
+  "site_details": "Site details",
+  "theme_options": "Theme options",
+  "theme_files": "Theme file",
+  "passkey_help": "Use your device to sign in.",
+  "auth_app": "Authenticator app",
+  "auth_help": "Get sign-in codes from your authenticator.",
+  "permissions": "Permissions",
+  "issued_tokens": "Issued tokens",
+  "backups": "Backups",
+  "unsaved": "Unsaved changes",
+  "session": "Session"
 }

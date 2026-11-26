@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   state,
   t,
@@ -11,9 +11,68 @@ import {
   ceremony,
 } from "./shared.jsx";
 const sections = ["site", "appearance", "security", "tokens", "storage"];
+const iconPaths = {
+  site: "M3 5h18v14H3z M3 9h18 M7 5v4",
+  appearance:
+    "M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1-3.7c-1.1-.8-.6-2.8.9-2.8H17a4 4 0 0 0 4-4C21 6.4 17 3 12 3z M7 10h.01 M10 7h.01 M15 7h.01 M18 10h.01",
+  security: "M12 3l8 3v6c0 4-4 7-8 9-4-2-8-5-8-9V6z M8.5 11.5l2.5 2.5 4.5-5",
+  tokens: "M14 4a5 5 0 0 0-6 7L3 16v5h5v-3h3v-3l2-2a5 5 0 1 0 1-9z M15 7h.01",
+  storage: "M3 7l2-4h14l2 4v12H3z M3 13h18 M6 16h.01 M10 16h.01",
+  settings: "M3 6h5m4 0h9M3 12h10m4 0h4M3 18h3m4 0h11 M8 4v4m5 2v4m-7 2v4",
+  close: "M6 6l12 12M18 6L6 18",
+};
+function Icon({ name }) {
+  return (
+    <svg
+      aria-hidden="true"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d={iconPaths[name]} />
+    </svg>
+  );
+}
+
+function FilePicker({ label, accept, onSelect }) {
+  const [filename, setFilename] = useState("");
+  return (
+    <label>
+      {t(label)}
+      <span className="file-picker">
+        <span className="file-button" aria-hidden="true">
+          {t("select_file")}
+        </span>
+        <span className="file-name" aria-hidden="true">
+          {filename || accept}
+        </span>
+        <input
+          type="file"
+          aria-label={t(label)}
+          accept={accept}
+          onChange={(event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            setFilename(file.name);
+            onSelect(file);
+          }}
+        />
+      </span>
+    </label>
+  );
+}
+
 export default function Settings() {
-  const [open, show] = useState(false),
-    [tab, setTab] = useState("site"),
+  const [savedSection] = useState(() => history.state?.savedSettingsSection);
+  const [open, show] = useState(sections.includes(savedSection)),
+    [tab, setTab] = useState(
+      sections.includes(savedSection) ? savedSection : "site",
+    ),
     [prefs, setPrefs] = useState(state.site),
     [themes, setThemes] = useState([]),
     [tokens, setTokens] = useState([]),
@@ -38,14 +97,70 @@ export default function Settings() {
       tls: true,
     });
   const a = useAction();
+  const launcher = useRef(null);
+  const dialog = useRef(null);
   useEffect(() => {
-    if (open)
-      a.run(async () => {
-        if (tab === "appearance") setThemes(await api("list_themes"));
-        if (tab === "tokens") setTokens(await api("list_tokens"));
-      });
-  }, [open, tab]);
-  const set = (k, v) => setPrefs((p) => ({ ...p, [k]: v }));
+    if (savedSection) {
+      const next = { ...history.state };
+      delete next.savedSettingsSection;
+      history.replaceState(next, "");
+      a.set(t("saved"));
+    }
+  }, [savedSection]);
+  const content = useRef(null);
+  const [loadError, setLoadError] = useState("");
+  const [loadAttempt, retry] = useState(0);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    dialog.current.showModal();
+    document.documentElement.classList.add("settings-open");
+    return () => document.documentElement.classList.remove("settings-open");
+  }, [open]);
+  useEffect(() => {
+    let current = true;
+    setLoadError("");
+    const command =
+      tab === "appearance"
+        ? "list_themes"
+        : tab === "tokens"
+          ? "list_tokens"
+          : null;
+    setLoading(Boolean(open && command));
+    if (open && command) {
+      api(command)
+        .then((items) => {
+          if (current)
+            (tab === "appearance" ? setThemes : setTokens)(items || []);
+        })
+        .catch((error) => {
+          if (current) setLoadError(error.message);
+        })
+        .finally(() => {
+          if (current) setLoading(false);
+        });
+    }
+    return () => {
+      current = false;
+    };
+  }, [open, tab, loadAttempt]);
+  function selectSection(next) {
+    setTab(next);
+    a.set("");
+    verify(false);
+    if (content.current) content.current.scrollTop = 0;
+  }
+  function close() {
+    dialog.current.close();
+  }
+  const editable = tab === "site" || tab === "appearance";
+  const dirty =
+    JSON.stringify(prefs) !== JSON.stringify(state.site) ||
+    draft?.theme.id === prefs.theme;
+  const set = (k, v) => {
+    a.set("");
+    setPrefs((p) => ({ ...p, [k]: v }));
+  };
   const available = draft
     ? [...themes.filter((item) => item.id !== draft.theme.id), draft.theme]
     : themes;
@@ -68,389 +183,567 @@ export default function Settings() {
         await api("install_theme", { source: draft.source });
       }
       await api("save_settings", prefs);
+      history.replaceState({ ...history.state, savedSettingsSection: tab }, "");
       locationReload();
     });
   const locationReload = () => window.location.reload();
   return (
     <>
-      <div className="toolbar">
+      <link rel="stylesheet" href="/assets/settings.css" />
+      <div className="toolbar settings-launch">
         <button
           className="secondary"
+          ref={launcher}
+          aria-haspopup="dialog"
           aria-expanded={open}
-          onClick={() => show(!open)}
+          onClick={() => show(true)}
         >
-          {t(open ? "close" : "settings")}
+          <Icon name="settings" />
+          {t("settings")}
         </button>
-        <a href={"/?view=public&lang=" + state.lang}>{t("reader")}</a>
+        <a href={"/?view=public&lang=" + state.lang}>
+          {t("reader")} <span aria-hidden="true">↗</span>
+        </a>
       </div>
       {open && (
-        <section className="panel">
-          <h2>{t("settings")}</h2>
-          <div className="tabs">
-            {sections.map((k) => (
-              <button
-                key={k}
-                aria-pressed={tab === k}
-                onClick={() => setTab(k)}
-              >
-                {t(k)}
-              </button>
-            ))}
-          </div>
-          {tab === "site" && (
-            <>
-              {["name", "description", "author", "url", "cover"].map((k) => (
-                <Field
+        <dialog
+          className="panel settings-dialog"
+          ref={dialog}
+          aria-labelledby="settings-heading"
+          onClose={() => {
+            show(false);
+            launcher.current?.focus();
+            verify(false);
+            issued("");
+            codes("");
+            setSecret("");
+            setOTP("");
+            a.set("");
+          }}
+        >
+          <header className="settings-heading">
+            <h2 id="settings-heading">{t("settings")}</h2>
+            <button
+              className="close-settings"
+              aria-label={t("close")}
+              onClick={close}
+            >
+              <Icon name="close" />
+            </button>
+          </header>
+          <div className="settings-layout">
+            <nav className="settings-nav" aria-label={t("settings_section")}>
+              {sections.map((k) => (
+                <button
                   key={k}
-                  label={k}
-                  value={prefs[k]}
-                  onChange={(v) => set(k, v)}
-                />
+                  aria-pressed={tab === k}
+                  disabled={a.busy}
+                  onClick={() => selectSection(k)}
+                >
+                  <Icon name={k} />
+                  {t(k)}
+                </button>
               ))}
-              <label>
-                {t("default_lang")}
-                <select
-                  value={prefs.lang}
-                  onChange={(e) => set("lang", e.target.value)}
-                >
-                  <option value="en">{t("lang_en")}</option>
-                  <option value="tr">{t("lang_tr")}</option>
-                </select>
-              </label>
-              <button onClick={save}>{t("save")}</button>
-            </>
-          )}
-          {tab === "appearance" && (
-            <>
-              <label>
-                {t("active_theme")}
-                <select
-                  value={prefs.theme}
-                  onChange={(e) => set("theme", e.target.value)}
-                >
-                  {available.map((k) => (
-                    <option key={k.id} value={k.id}>
-                      {k.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              {active?.missing?.length > 0 && (
-                <p role="status">
-                  {t("theme_missing").replace(
-                    "{items}",
-                    active.missing.join(", "),
-                  )}
-                </p>
-              )}
-              {(active?.options || []).map((o) => {
-                const v = prefs.options?.[prefs.theme]?.[o.key] ?? o.default;
-                const change = (value) =>
-                  set("options", {
-                    ...prefs.options,
-                    [prefs.theme]: {
-                      ...prefs.options?.[prefs.theme],
-                      [o.key]: value,
-                    },
-                  });
-                const label = (labels) =>
-                  labels[state.lang] || labels.en || Object.values(labels)[0];
-                return (
-                  <label key={o.key}>
-                    {label(o.labels)}
-                    {o.type === "select" ? (
-                      <select
-                        value={v}
-                        onChange={(e) => change(e.target.value)}
-                      >
-                        {o.choices.map((c) => (
-                          <option key={c.value} value={c.value}>
-                            {label(c.labels)}
-                          </option>
-                        ))}
-                      </select>
-                    ) : o.type === "toggle" ? (
-                      <input
-                        type="checkbox"
-                        checked={v === "1"}
-                        onChange={(e) => change(e.target.checked ? "1" : "0")}
-                      />
-                    ) : (
-                      <input
-                        type={o.type === "range" ? "range" : "color"}
-                        min={o.min ?? 0}
-                        max={o.max}
-                        value={v}
-                        onChange={(e) => change(e.target.value)}
-                      />
-                    )}
-                  </label>
-                );
-              })}
-              <label>
-                {t("upload_theme")}
-                <input
-                  type="file"
-                  accept=".html"
-                  onChange={(e) => {
-                    const f = e.target.files[0];
-                    if (f)
-                      a.run(async () => {
-                        const source = await f.text();
-                        const result = await api("preview_theme", { source });
-                        setDraft({ ...result, source });
-                        set("theme", result.theme.id);
-                      });
-                  }}
-                />
-              </label>
-              <div className="row">
-                <button onClick={save}>{t("save")}</button>
-                <button
-                  className="secondary"
-                  onClick={() =>
-                    a.run(async () => {
-                      if (!preview && draft?.theme.id === prefs.theme) {
-                        const result = await api("preview_theme", {
-                          source: draft.source,
-                        });
-                        setDraft({ ...result, source: draft.source });
-                      }
-                      setPreview(!preview);
-                    })
-                  }
-                >
-                  {t("preview")}
-                </button>
-                <button
-                  className="secondary"
-                  onClick={() =>
-                    a.run(async () => {
-                      await api("install_theme", { rollback: prefs.theme });
-                      setDraft(null);
-                      setThemes(await api("list_themes"));
-                    })
-                  }
-                >
-                  {t("rollback")}
-                </button>
-              </div>
-              {preview && (
-                <>
-                  <label className="check">
-                    <input
-                      type="checkbox"
-                      checked={asOwner}
-                      onChange={(e) => as(e.target.checked)}
-                    />
-                    {t("owner")}
-                  </label>
-                  <label className="check">
-                    <input
-                      type="checkbox"
-                      checked={sample}
-                      onChange={(e) => setSample(e.target.checked)}
-                    />
-                    {t("sample")}
-                  </label>
-                  <iframe
-                    title={t("preview_holder")}
-                    sandbox=""
-                    src={"/?" + previewURL.toString()}
-                  />
-                </>
-              )}
-            </>
-          )}
-          {tab === "security" && (
-            <>
-              <div className="row">
-                <button onClick={() => a.run(() => ceremony(true))}>
-                  {t("new_passkey")}
-                </button>
-                <button
-                  onClick={() =>
-                    a.run(async () => {
-                      const x = await req("/auth/otp-begin");
-                      setSecret(x.secret);
-                    })
-                  }
-                >
-                  {t("enable_totp")}
-                </button>
-              </div>
-              {secret && (
-                <>
-                  <p>{t("otp_hint")}</p>
-                  <code>{secret}</code>
-                  <Field label="otp" value={otp} onChange={setOTP} />
-                  <button
-                    onClick={() =>
-                      a.run(async () => {
-                        codes(
-                          (await req("/auth/otp-finish", { code: otp })).join(
-                            "\n",
-                          ),
-                        );
-                        setSecret("");
-                        setOTP("");
-                      })
-                    }
-                  >
-                    {t("save")}
-                  </button>
-                </>
-              )}
-              {recovery && (
-                <>
-                  <p>{t("recovery")}</p>
-                  <output>{recovery}</output>
-                </>
-              )}
-            </>
-          )}
-          {tab === "tokens" && (
-            <>
-              <Field label="token_name" value={name} onChange={setName} />
-              <Field
-                label="expiry"
-                type="number"
-                value={days}
-                min={1}
-                max={365}
-                onChange={setDays}
-              />
-              {["posts:read", "posts:write", "settings", "themes", "media"].map(
-                (k) => (
-                  <label className="check" key={k}>
-                    <input
-                      type="checkbox"
-                      checked={scopes.includes(k)}
-                      onChange={(e) =>
-                        setScopes(
-                          e.target.checked
-                            ? [...scopes, k]
-                            : scopes.filter((s) => s !== k),
-                        )
-                      }
-                    />
-                    {t(k)}
-                  </label>
-                ),
-              )}
-              <button
-                onClick={() =>
-                  a.run(async () => {
-                    issued(
-                      await api("create_token", {
-                        name,
-                        scopes,
-                        expires: new Date(
-                          Date.now() + Number(days) * 86400000,
-                        ).toISOString(),
-                      }),
-                    );
-                    setTokens(await api("list_tokens"));
-                  })
-                }
+            </nav>
+            <label className="section-select">
+              <Icon name={tab} />
+              <span className="visually-hidden">{t("settings_section")}</span>
+              <select
+                aria-label={t("settings_section")}
+                value={tab}
+                disabled={a.busy}
+                onChange={(e) => selectSection(e.target.value)}
               >
-                {t("create")}
-              </button>
-              {token && (
-                <>
-                  <p>{t("copy_token")}</p>
-                  <output>{token}</output>
-                </>
-              )}
-              {tokens.map((x) => (
-                <p key={x.id}>
-                  {x.grant.name}{" "}
+                {sections.map((k) => (
+                  <option value={k} key={k}>
+                    {t(k)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <section
+              className="settings-content"
+              aria-labelledby="section-heading"
+              ref={content}
+            >
+              <h3 id="section-heading">{t(tab)}</h3>
+              {loading && <p role="status">{t("working")}</p>}
+              {loadError && (
+                <p role="alert">
+                  {loadError}{" "}
                   <button
                     className="secondary"
+                    onClick={() => retry((n) => n + 1)}
+                  >
+                    {t("retry")}
+                  </button>
+                </p>
+              )}
+              {tab === "site" && (
+                <>
+                  <fieldset>
+                    <legend>{t("public_profile")}</legend>
+                    <div className="field-pair">
+                      {["name", "author"].map((k) => (
+                        <Field
+                          key={k}
+                          label={k}
+                          value={prefs[k]}
+                          onChange={(v) => set(k, v)}
+                        />
+                      ))}
+                    </div>
+                    <label>
+                      {t("description")}
+                      <textarea
+                        rows={2}
+                        value={prefs.description || ""}
+                        onChange={(e) => set("description", e.target.value)}
+                      />
+                    </label>
+                  </fieldset>
+                  <fieldset>
+                    <legend>{t("site_details")}</legend>
+                    <Field
+                      label="url"
+                      value={prefs.url}
+                      onChange={(v) => set("url", v)}
+                    />
+                    <Field
+                      label="cover"
+                      value={prefs.cover}
+                      onChange={(v) => set("cover", v)}
+                    />
+                    <label>
+                      {t("default_lang")}
+                      <select
+                        value={prefs.lang}
+                        onChange={(e) => set("lang", e.target.value)}
+                      >
+                        <option value="en">{t("lang_en")}</option>
+                        <option value="tr">{t("lang_tr")}</option>
+                      </select>
+                    </label>
+                  </fieldset>
+                </>
+              )}
+              {tab === "appearance" && (
+                <>
+                  <label>
+                    {t("active_theme")}
+                    <select
+                      value={prefs.theme}
+                      onChange={(e) => set("theme", e.target.value)}
+                    >
+                      {available.map((k) => (
+                        <option key={k.id} value={k.id}>
+                          {k.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {active?.missing?.length > 0 && (
+                    <p role="status">
+                      {t("theme_missing").replace(
+                        "{items}",
+                        active.missing.join(", "),
+                      )}
+                    </p>
+                  )}
+                  {active?.options?.length > 0 && (
+                    <fieldset>
+                      <legend>{t("theme_options")}</legend>
+                      <div className="option-grid">
+                        {active.options.map((o) => {
+                          const v =
+                            prefs.options?.[prefs.theme]?.[o.key] ?? o.default;
+                          const change = (value) =>
+                            set("options", {
+                              ...prefs.options,
+                              [prefs.theme]: {
+                                ...prefs.options?.[prefs.theme],
+                                [o.key]: value,
+                              },
+                            });
+                          const label = (labels) =>
+                            labels[state.lang] ||
+                            labels.en ||
+                            Object.values(labels)[0];
+                          return (
+                            <label key={o.key}>
+                              <span>
+                                {label(o.labels)}
+                                {["color", "range"].includes(
+                                  o.type || "color",
+                                ) && (
+                                  <small aria-hidden="true">
+                                    {v}
+                                    {o.type === "range" ? o.unit : ""}
+                                  </small>
+                                )}
+                              </span>
+                              {o.type === "select" ? (
+                                <select
+                                  value={v}
+                                  onChange={(e) => change(e.target.value)}
+                                >
+                                  {o.choices.map((c) => (
+                                    <option key={c.value} value={c.value}>
+                                      {label(c.labels)}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : o.type === "toggle" ? (
+                                <input
+                                  type="checkbox"
+                                  checked={v === "1"}
+                                  onChange={(e) =>
+                                    change(e.target.checked ? "1" : "0")
+                                  }
+                                />
+                              ) : (
+                                <input
+                                  type={o.type === "range" ? "range" : "color"}
+                                  min={o.min ?? 0}
+                                  max={o.max}
+                                  value={v}
+                                  onChange={(e) => change(e.target.value)}
+                                />
+                              )}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </fieldset>
+                  )}
+                  <button
+                    className="secondary"
+                    aria-expanded={preview}
                     onClick={() =>
                       a.run(async () => {
-                        await api("revoke_token", { id: x.id });
+                        if (!preview && draft?.theme.id === prefs.theme) {
+                          const result = await api("preview_theme", {
+                            source: draft.source,
+                          });
+                          setDraft({ ...result, source: draft.source });
+                        }
+                        setPreview(!preview);
+                      }, "")
+                    }
+                  >
+                    {t("preview")}
+                  </button>
+                  {preview && (
+                    <>
+                      <label className="check">
+                        <input
+                          type="checkbox"
+                          checked={asOwner}
+                          onChange={(e) => as(e.target.checked)}
+                        />
+                        {t("owner")}
+                      </label>
+                      <label className="check">
+                        <input
+                          type="checkbox"
+                          checked={sample}
+                          onChange={(e) => setSample(e.target.checked)}
+                        />
+                        {t("sample")}
+                      </label>
+                      <iframe
+                        title={t("preview_holder")}
+                        sandbox=""
+                        src={"/?" + previewURL.toString()}
+                      />
+                    </>
+                  )}
+                  <fieldset>
+                    <legend>{t("theme_files")}</legend>
+                    <FilePicker
+                      label="upload_theme"
+                      accept=".html"
+                      onSelect={(f) => {
+                        a.run(async () => {
+                          const source = await f.text();
+                          const result = await api("preview_theme", {
+                            source,
+                          });
+                          setDraft({ ...result, source });
+                          set("theme", result.theme.id);
+                        }, t("theme_ready"));
+                      }}
+                    />
+
+                    <div className="row">
+                      <button
+                        className="secondary"
+                        onClick={() =>
+                          a.run(async () => {
+                            await api("install_theme", {
+                              rollback: prefs.theme,
+                            });
+                            setDraft(null);
+                            setThemes(await api("list_themes"));
+                          })
+                        }
+                      >
+                        {t("rollback")}
+                      </button>
+                    </div>
+                  </fieldset>
+                </>
+              )}
+              {tab === "security" && (
+                <>
+                  <div className="method-row">
+                    <div>
+                      <h4>{t("passkey_label")}</h4>
+                      <p>{t("passkey_help")}</p>
+                    </div>
+                    <button onClick={() => a.run(() => ceremony(true))}>
+                      {t("new_passkey")}
+                    </button>
+                  </div>
+                  <div className="method-row">
+                    <div>
+                      <h4>{t("auth_app")}</h4>
+                      <p>{t("auth_help")}</p>
+                    </div>
+                    <button
+                      className="secondary"
+                      onClick={() =>
+                        a.run(async () => {
+                          const x = await req("/auth/otp-begin");
+                          setSecret(x.secret);
+                        })
+                      }
+                    >
+                      {t("enable_totp")}
+                    </button>
+                  </div>
+                  {secret && (
+                    <>
+                      <p>{t("otp_hint")}</p>
+                      <code>{secret}</code>
+                      <Field label="otp" value={otp} onChange={setOTP} />
+                      <button
+                        onClick={() =>
+                          a.run(async () => {
+                            codes(
+                              (
+                                await req("/auth/otp-finish", { code: otp })
+                              ).join("\n"),
+                            );
+                            setSecret("");
+                            setOTP("");
+                          })
+                        }
+                      >
+                        {t("save")}
+                      </button>
+                    </>
+                  )}
+                  {recovery && (
+                    <>
+                      <p>{t("recovery")}</p>
+                      <output>{recovery}</output>
+                    </>
+                  )}
+                </>
+              )}
+              {tab === "tokens" && (
+                <>
+                  <div className="field-pair">
+                    <Field label="token_name" value={name} onChange={setName} />
+                    <Field
+                      label="expiry"
+                      type="number"
+                      value={days}
+                      min={1}
+                      max={365}
+                      onChange={setDays}
+                    />
+                  </div>
+                  <fieldset>
+                    <legend>{t("permissions")}</legend>
+                    <div className="scope-grid">
+                      {[
+                        "posts:read",
+                        "posts:write",
+                        "settings",
+                        "themes",
+                        "media",
+                      ].map((k) => (
+                        <label className="check" key={k}>
+                          <input
+                            type="checkbox"
+                            checked={scopes.includes(k)}
+                            onChange={(e) =>
+                              setScopes(
+                                e.target.checked
+                                  ? [...scopes, k]
+                                  : scopes.filter((s) => s !== k),
+                              )
+                            }
+                          />
+                          {t(k)}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <button
+                    disabled={
+                      loading ||
+                      a.busy ||
+                      !name.trim() ||
+                      !scopes.length ||
+                      !Number.isInteger(Number(days)) ||
+                      days < 1 ||
+                      days > 365
+                    }
+                    onClick={() =>
+                      a.run(async () => {
+                        issued(
+                          await api("create_token", {
+                            name,
+                            scopes,
+                            expires: new Date(
+                              Date.now() + Number(days) * 86400000,
+                            ).toISOString(),
+                          }),
+                        );
                         setTokens(await api("list_tokens"));
                       })
                     }
                   >
-                    {t("revoke")}
+                    {t("create")}
                   </button>
-                </p>
-              ))}
-            </>
-          )}
-          {tab === "storage" && (
-            <>
-              <label>
-                {t("media")}
-                <select
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                >
-                  <option value="disk">{t("disk")}</option>
-                  <option>S3</option>
-                </select>
-              </label>
-              {location === "S3" &&
-                ["endpoint", "bucket", "access", "secret"].map((k) => (
-                  <Field
-                    key={k}
-                    label={k}
-                    value={s3[k]}
-                    type={k === "secret" ? "password" : "text"}
-                    onChange={(v) => config({ ...s3, [k]: v })}
-                  />
-                ))}
-              <button
-                onClick={() =>
-                  a.run(() =>
-                    api("configure_media", location === "disk" ? {} : s3),
-                  )
-                }
-              >
+                  {token && (
+                    <>
+                      <p>{t("copy_token")}</p>
+                      <output>{token}</output>
+                    </>
+                  )}
+                  {tokens.length > 0 && (
+                    <h4 className="group-heading">{t("issued_tokens")}</h4>
+                  )}
+                  {tokens.map((x) => (
+                    <p className="grant-row" key={x.id}>
+                      {x.grant.name}{" "}
+                      <button
+                        className="secondary"
+                        onClick={() =>
+                          a.run(async () => {
+                            await api("revoke_token", { id: x.id });
+                            setTokens(await api("list_tokens"));
+                          })
+                        }
+                      >
+                        {t("revoke")}
+                      </button>
+                    </p>
+                  ))}
+                </>
+              )}
+              {tab === "storage" && (
+                <>
+                  <label>
+                    {t("media")}
+                    <select
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    >
+                      <option value="disk">{t("disk")}</option>
+                      <option>S3</option>
+                    </select>
+                  </label>
+                  {location === "S3" &&
+                    ["endpoint", "bucket", "access", "secret"].map((k) => (
+                      <Field
+                        key={k}
+                        label={k}
+                        value={s3[k]}
+                        type={k === "secret" ? "password" : "text"}
+                        onChange={(v) => config({ ...s3, [k]: v })}
+                      />
+                    ))}
+                  <button
+                    onClick={() =>
+                      a.run(() =>
+                        api("configure_media", location === "disk" ? {} : s3),
+                      )
+                    }
+                  >
+                    {t("save")}
+                  </button>
+                  <fieldset className="backup-group">
+                    <legend>{t("backups")}</legend>
+                    <p>
+                      <a href="/api/v1/backup">{t("backup")}</a>
+                    </p>
+                    <FilePicker
+                      label="restore"
+                      accept=".zip"
+                      onSelect={(f) => {
+                        if (confirm(t("confirm_restore")))
+                          a.run(async () => {
+                            await req("/api/v1/restore", f, true);
+                            locationReload();
+                          });
+                      }}
+                    />
+                  </fieldset>
+                </>
+              )}
+              {tab === "security" && (
+                <fieldset>
+                  <legend>{t("session")}</legend>
+                  <div className="row">
+                    <button
+                      className="secondary"
+                      onClick={() => verify(!reauth)}
+                    >
+                      {t("reauth")}
+                    </button>
+                    <button
+                      className="secondary"
+                      onClick={() =>
+                        a.run(async () => {
+                          await req("/auth/logout");
+                          sessionStorage.removeItem("editing");
+                          window.location.assign("/");
+                        })
+                      }
+                    >
+                      {t("logout")}
+                    </button>
+                  </div>
+                  {reauth && <SignIn reauth onDone={() => verify(false)} />}
+                </fieldset>
+              )}
+              {["tokens", "storage"].includes(tab) && (
+                <button className="verify-link" onClick={() => verify(!reauth)}>
+                  {t("reauth")}
+                </button>
+              )}
+              {tab !== "security" && reauth && (
+                <SignIn reauth onDone={() => verify(false)} />
+              )}
+            </section>
+          </div>
+          <footer className="settings-footer">
+            <Notice action={a} />
+            {editable && dirty && !a.message && !a.busy && (
+              <span className="dirty-state">{t("unsaved")}</span>
+            )}
+            {editable && (
+              <button disabled={a.busy || loading || !dirty} onClick={save}>
                 {t("save")}
               </button>
-              <p>
-                <a href="/api/v1/backup">{t("backup")}</a>
-              </p>
-              <label>
-                {t("restore")}
-                <input
-                  type="file"
-                  accept=".zip"
-                  onChange={(e) => {
-                    const f = e.target.files[0];
-                    if (f && confirm(t("confirm_restore")))
-                      a.run(async () => {
-                        await req("/api/v1/restore", f, true);
-                        locationReload();
-                      });
-                  }}
-                />
-              </label>
-            </>
-          )}
-          <Notice action={a} />
-          <div className="row">
-            <button className="secondary" onClick={() => verify(!reauth)}>
-              {t("reauth")}
-            </button>
-            <button
-              className="secondary"
-              onClick={() =>
-                a.run(async () => {
-                  await req("/auth/logout");
-                  sessionStorage.removeItem("editing");
-                  window.location.assign("/");
-                })
-              }
-            >
-              {t("logout")}
-            </button>
-          </div>
-          {reauth && <SignIn reauth onDone={() => verify(false)} />}
-        </section>
+            )}
+          </footer>
+        </dialog>
       )}
     </>
   );

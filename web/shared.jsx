@@ -31,13 +31,13 @@ export function mount(id, node) {
 export function useAction() {
   const [message, set] = useState("");
   const [busy, lock] = useState(false);
-  async function run(fn) {
+  async function run(fn, success = t("saved")) {
     if (busy) return;
     set("");
     lock(true);
     try {
       await fn();
-      set(t("saved"));
+      set(success);
     } catch (e) {
       set(e.message);
     } finally {

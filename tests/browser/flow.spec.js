@@ -140,9 +140,19 @@ for (const [lang, mobile] of [
           exact: true,
         })
         .click();
-      await page
-        .getByRole("button", { name: lang === "en" ? "Appearance" : "Görünüm" })
-        .click();
+      const settings = page.getByRole("dialog", { name: lang === "en" ? "Settings" : "Ayarlar" });
+      await expect(settings).toBeVisible();
+      await expect(settings.getByRole("button", {name: lang === "en" ? "Save" : "Kaydet", exact: true})).toBeDisabled();
+      await page.keyboard.press("Escape");
+      const settingsTrigger = page.getByRole("button", {name: lang === "en" ? "Settings" : "Ayarlar", exact: true});
+      await expect(settingsTrigger).toBeFocused();
+      await settingsTrigger.click();
+      if (mobile) {
+        await settings.getByRole("combobox", { name: "Bölüm", exact: true }).selectOption("appearance");
+        expect(await settings.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+      } else {
+        await settings.getByRole("button", {name: "Appearance"}).click();
+      }
       if (!mobile) {
         await page.getByLabel("Reading font").selectOption("monospace");
         await page
@@ -172,6 +182,9 @@ for (const [lang, mobile] of [
         })
         .click();
       await expect(page.locator(".index-layout")).toBeVisible();
+      await expect(settings.locator(".notice")).toHaveText(lang === "en" ? "Saved." : "Kaydedildi.");
+      await expect(settings.getByLabel(lang === "en" ? "Active theme" : "Etkin tema")).toHaveValue("index");
+      await page.keyboard.press("Escape");
       const publicCtx = await browser.newContext({
         baseURL: base,
         javaScriptEnabled: false,
@@ -222,7 +235,7 @@ for (const [lang, mobile] of [
             buffer: Buffer.from(text),
           });
           expect((await validated).ok()).toBe(true);
-          await expect(page.locator("#settings .notice")).toHaveText("Saved.");
+          await expect(page.locator("#settings .notice")).toHaveText("Theme ready to preview.");
           await expect(page.getByLabel("Active theme")).toHaveValue("folio");
         }
         await appearance();
@@ -241,6 +254,8 @@ for (const [lang, mobile] of [
         );
         await page.getByRole("button", { name: "Save", exact: true }).click();
         await expect(page.locator(".folio-first")).toBeVisible();
+        await expect(settings.locator(".notice")).toHaveText("Saved.");
+        await page.keyboard.press("Escape");
         await appearance();
         await uploadTheme(source("second"));
         const visitor = await browser.newContext({ baseURL: base });
@@ -252,9 +267,11 @@ for (const [lang, mobile] of [
           .click();
         await expect(frame.locator(".folio-second")).toBeVisible();
         await visitor.close();
-        await expect(page.locator("#settings .notice")).toHaveText("Saved.");
+        await expect(page.locator("#settings .dirty-state")).toHaveText("Unsaved changes");
         await page.getByRole("button", { name: "Save", exact: true }).click();
         await expect(page.locator(".folio-second")).toBeVisible();
+        await expect(settings.locator(".notice")).toHaveText("Saved.");
+        await page.keyboard.press("Escape");
         await appearance();
         await page
           .getByRole("button", { name: "Restore previous theme version" })

@@ -392,3 +392,5 @@ article.entry:has(.byline) {
     margin-top: 8px;
   }
 }
+
+html.settings-open { overflow: hidden; }

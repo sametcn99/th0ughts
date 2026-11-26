@@ -579,7 +579,7 @@ async function captureThemesAndMobile(owner, reader, data, shot) {
   await navigate(owner, "/?lang=tr");
   await button(owner, "Ayarlar").click();
   const panel = owner.locator("#settings .panel");
-  await panel.getByRole("button", { name: "Görünüm" }).click();
+  await panel.getByRole("combobox", { name: "Bölüm", exact: true }).selectOption("appearance");
   await panel.getByLabel("Etkin tema").waitFor();
   await shot(
     owner,

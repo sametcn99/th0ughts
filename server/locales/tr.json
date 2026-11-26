@@ -156,5 +156,21 @@
   "month_9": "Eylül",
   "month_10": "Ekim",
   "month_11": "Kasım",
-  "month_12": "Aralık"
+  "month_12": "Aralık",
+  "theme_ready": "Tema önizlemeye hazır.",
+  "passkey_label": "Geçiş anahtarı",
+  "settings_section": "Bölüm",
+  "retry": "Tekrar dene",
+  "public_profile": "Herkese açık profil",
+  "site_details": "Site bilgileri",
+  "theme_options": "Tema seçenekleri",
+  "theme_files": "Tema dosyası",
+  "passkey_help": "Cihazınla oturum aç.",
+  "auth_app": "Doğrulayıcı uygulama",
+  "auth_help": "Giriş kodlarını doğrulayıcı uygulamandan al.",
+  "permissions": "Yetkiler",
+  "issued_tokens": "Oluşturulan erişim anahtarları",
+  "backups": "Yedekler",
+  "unsaved": "Kaydedilmemiş değişiklikler",
+  "session": "Oturum"
 }
