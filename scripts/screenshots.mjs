@@ -127,7 +127,7 @@ async function seed(owner) {
       },
     },
   });
-  await api("save_post", {
+  const note = await api("save_post", {
     original: "en",
     pinned: true,
     text: {
@@ -155,7 +155,7 @@ async function seed(owner) {
       },
     },
   });
-  return { api, detail, draft, site: await api("get_settings") };
+  return { api, detail, draft, note, site: await api("get_settings") };
 }
 
 // Convert screenshots with the same Chromium that rendered them, so the capture
@@ -262,7 +262,31 @@ async function captureAccessSetup(owner, reader, master, shot) {
   );
 }
 
-async function captureReader(reader, detail, shot) {
+async function captureShortPost(reader, note, lang, shot) {
+  const body = note.text[lang].body;
+  await reader
+    .locator("article")
+    .filter({ hasText: body })
+    .locator(".byline a")
+    .click();
+  await expect(reader.locator("article")).toHaveCount(1);
+  await expect(reader.locator(".entry-detail .prose")).toHaveText(body);
+  await expect(reader).toHaveURL(
+    (url) =>
+      url.searchParams.get("post") === note.id &&
+      url.searchParams.get("lang") === lang,
+  );
+  const mobile = reader.viewportSize().width <= 650;
+  await shot(
+    reader,
+    mobile ? "mobile-short-post" : "short-post",
+    "reader",
+    mobile ? "A short post on mobile" : "A short post at its permanent link",
+    mobile ? "Mobilde kısa gönderi" : "Kalıcı bağlantısında kısa gönderi",
+  );
+}
+
+async function captureReader(reader, { detail, note }, shot) {
   await navigate(reader, "/?lang=en");
   await reader
     .locator(".attachment")
@@ -275,9 +299,15 @@ async function captureReader(reader, detail, shot) {
     "The public timeline",
     "Herkese açık zaman akışı",
   );
+  await captureShortPost(reader, note, "en", shot);
+  await navigate(reader, "/?lang=en");
   await reader.getByRole("link", { name: "Read article" }).click();
-  await expect(reader.locator(".entry-detail h1")).toHaveText(detail.text.en.title);
-  await expect(reader.locator(".entry-detail .prose")).toContainText("how much of the wave survives");
+  await expect(reader.locator(".entry-detail h1")).toHaveText(
+    detail.text.en.title,
+  );
+  await expect(reader.locator(".entry-detail .prose")).toContainText(
+    "how much of the wave survives",
+  );
   await reader.locator(".attachment").evaluate((img) => img.decode());
   await shot(
     reader,
@@ -522,6 +552,7 @@ async function captureThemesAndMobile(owner, reader, data, shot) {
     "Mobile timeline in Turkish",
     "Türkçe mobil zaman akışı",
   );
+  await captureShortPost(reader, data.note, "tr", shot);
   await navigate(reader, "/?lang=tr&post=" + data.detail.id);
   await shot(
     reader,
@@ -586,7 +617,7 @@ async function captureAll(staging, dataDir) {
     const shot = screenshotWriter(staging, encoder);
     await captureAccessSetup(owner, reader, master, shot);
     const data = await seed(owner);
-    await captureReader(reader, data.detail, shot);
+    await captureReader(reader, data, shot);
     await capturePublishing(owner, data.detail, data.draft, shot);
     await captureSettings(owner, shot);
     await captureThemesAndMobile(owner, reader, data, shot);

@@ -76,7 +76,7 @@ Run `bun run build:pages` to render the English and Turkish React site into `pag
 
 <!-- gallery:start -->
 <details>
-<summary>Application screenshots (34)</summary>
+<summary>Application screenshots (36)</summary>
 
 Build the Go binary (see Local development), install Chromium with `bun run --bun playwright install chromium`, and run `bun run screenshots` to refresh this gallery. The script creates and removes its own demo instance.
 
@@ -103,6 +103,10 @@ Build the Go binary (see Local development), install Chromium with `bun run --bu
 **Password, authenticator and passkey login**
 
 ![Password, authenticator and passkey login](https://sametcn99.github.io/th0ughts/screenshots/login.webp)
+
+**A short post at its permanent link**
+
+![A short post at its permanent link](https://sametcn99.github.io/th0ughts/screenshots/short-post.webp)
 
 **An article opened from the timeline**
 
@@ -203,6 +207,10 @@ Build the Go binary (see Local development), install Chromium with `bun run --bu
 **Mobile timeline in Turkish**
 
 ![Mobile timeline in Turkish](https://sametcn99.github.io/th0ughts/screenshots/mobile.webp)
+
+**A short post on mobile**
+
+![A short post on mobile](https://sametcn99.github.io/th0ughts/screenshots/mobile-short-post.webp)
 
 **Translated post on mobile**
 

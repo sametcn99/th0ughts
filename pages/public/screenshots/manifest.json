@@ -66,6 +66,17 @@
     "height": 860
   },
   {
+    "id": "short-post",
+    "group": "reader",
+    "title": {
+      "en": "A short post at its permanent link",
+      "tr": "Kalıcı bağlantısında kısa gönderi"
+    },
+    "file": "short-post.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
     "id": "post",
     "group": "reader",
     "title": {
@@ -337,6 +348,17 @@
       "tr": "Türkçe mobil zaman akışı"
     },
     "file": "mobile.webp",
+    "width": 390,
+    "height": 844
+  },
+  {
+    "id": "mobile-short-post",
+    "group": "reader",
+    "title": {
+      "en": "A short post on mobile",
+      "tr": "Mobilde kısa gönderi"
+    },
+    "file": "mobile-short-post.webp",
     "width": 390,
     "height": 844
   },
