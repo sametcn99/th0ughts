@@ -1,6 +1,9 @@
 {
   "language": "Language",
   "host_your_own": "host your own th0ughts",
+  "read_article": "Read article",
+  "compose_hint": "What’s on your mind?",
+  "post_options": "Post options",
   "timeline": "Timeline",
   "search": "Search",
   "search_hint": "Search thoughts…",

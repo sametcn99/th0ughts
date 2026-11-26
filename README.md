@@ -31,7 +31,7 @@ The application requires one environment variable, `TH0UGHTS_MASTER_KEY`. The in
 
 ## Publishing
 
-Choose **New post**, enter Markdown and optional tags or attachments, and select **Publish** or **Save draft**. English and Turkish tabs edit translations of the same post. **Original language** controls the fallback when a translation has not been published. The original must be published for the post to appear publicly. **Edit** opens its current revision. Concurrent edits return a conflict so another client's changes survive.
+Write directly in the timeline and select **Publish** or **Save draft**. Short posts appear in full. A title or more than 280 visible characters gives the post an article preview in the same timeline. Its permanent link opens the complete text and attachments. Use **Post options** to add a title, tags, media or a translation. English and Turkish tabs edit the same post. **Original language** controls the fallback when a translation has not been published. The original must be published for the post to appear publicly. **Edit** opens its current revision. Concurrent edits return a conflict so another client's changes survive.
 
 The language in a shared URL takes precedence over a saved reader preference, followed by the owner's default. A post keeps one ID across languages, theme changes, and backup restores. Public HTML contains canonical and alternate links, Open Graph, social cards, and JSON-LD. The default social image is generated locally.
 
@@ -104,9 +104,9 @@ Build the Go binary (see Local development), install Chromium with `bun run --bu
 
 ![Password, authenticator and passkey login](https://sametcn99.github.io/th0ughts/screenshots/login.webp)
 
-**A pinned post with an image**
+**An article opened from the timeline**
 
-![A pinned post with an image](https://sametcn99.github.io/th0ughts/screenshots/post.webp)
+![An article opened from the timeline](https://sametcn99.github.io/th0ughts/screenshots/post.webp)
 
 **Search results**
 

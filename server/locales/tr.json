@@ -1,6 +1,9 @@
 {
   "language": "Dil",
   "host_your_own": "th0ughts’u kendi sunucunda çalıştır",
+  "read_article": "Yazıyı oku",
+  "compose_hint": "Aklından ne geçiyor?",
+  "post_options": "Gönderi seçenekleri",
   "timeline": "Akış",
   "search": "Ara",
   "search_hint": "Gönderilerde ara…",

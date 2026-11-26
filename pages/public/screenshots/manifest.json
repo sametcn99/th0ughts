@@ -51,7 +51,7 @@
       "tr": "Harici veritabanına bağlantı"
     },
     "file": "setup-database.webp",
-    "width": 712,
+    "width": 698,
     "height": 389
   },
   {
@@ -69,8 +69,8 @@
     "id": "post",
     "group": "reader",
     "title": {
-      "en": "A pinned post with an image",
-      "tr": "Görselli sabitlenmiş gönderi"
+      "en": "An article opened from the timeline",
+      "tr": "Akıştan açılan bir yazı"
     },
     "file": "post.webp",
     "width": 1120,
@@ -139,8 +139,8 @@
       "tr": "Gönderi yazma"
     },
     "file": "compose.webp",
-    "width": 712,
-    "height": 739
+    "width": 666,
+    "height": 176
   },
   {
     "id": "edit-media",
@@ -150,8 +150,8 @@
       "tr": "Ekleri ve paylaşım bilgilerini düzenleme"
     },
     "file": "edit-media.webp",
-    "width": 712,
-    "height": 1009
+    "width": 698,
+    "height": 938
   },
   {
     "id": "translation",
@@ -161,8 +161,8 @@
       "tr": "Türkçe çeviri düzenleme"
     },
     "file": "translation.webp",
-    "width": 712,
-    "height": 1009
+    "width": 698,
+    "height": 938
   },
   {
     "id": "draft",
@@ -183,8 +183,8 @@
       "tr": "Site profili ve dil ayarları"
     },
     "file": "settings.webp",
-    "width": 712,
-    "height": 706
+    "width": 666,
+    "height": 705
   },
   {
     "id": "appearance",
@@ -194,7 +194,7 @@
       "tr": "Tema, yazı tipi ve boşluklar"
     },
     "file": "appearance.webp",
-    "width": 712,
+    "width": 666,
     "height": 620
   },
   {
@@ -205,8 +205,8 @@
       "tr": "Yayınlanan gönderilerle tema önizlemesi"
     },
     "file": "preview.webp",
-    "width": 712,
-    "height": 997
+    "width": 666,
+    "height": 996
   },
   {
     "id": "preview-owner",
@@ -216,8 +216,8 @@
       "tr": "Sahip önizlemesinde örnek içerik"
     },
     "file": "preview-owner.webp",
-    "width": 712,
-    "height": 997
+    "width": 666,
+    "height": 996
   },
   {
     "id": "tokens",
@@ -227,7 +227,7 @@
       "tr": "Yetki kapsamlı erişim anahtarı ayarları"
     },
     "file": "tokens.webp",
-    "width": 712,
+    "width": 666,
     "height": 558
   },
   {
@@ -238,7 +238,7 @@
       "tr": "Oluşturulan erişim anahtarı ve iptali"
     },
     "file": "token-issued.webp",
-    "width": 712,
+    "width": 666,
     "height": 686
   },
   {
@@ -249,7 +249,7 @@
       "tr": "Yerel depolama, yedekleme ve geri yükleme"
     },
     "file": "storage.webp",
-    "width": 712,
+    "width": 666,
     "height": 441
   },
   {
@@ -260,7 +260,7 @@
       "tr": "S3 uyumlu depolama"
     },
     "file": "storage-s3.webp",
-    "width": 712,
+    "width": 666,
     "height": 739
   },
   {
@@ -271,8 +271,8 @@
       "tr": "Geçiş anahtarı ve doğrulayıcı ayarları"
     },
     "file": "security.webp",
-    "width": 712,
-    "height": 258
+    "width": 666,
+    "height": 257
   },
   {
     "id": "reauth",
@@ -282,7 +282,7 @@
       "tr": "Hassas işlemler için kimlik doğrulama"
     },
     "file": "reauth.webp",
-    "width": 712,
+    "width": 666,
     "height": 567
   },
   {
@@ -293,7 +293,7 @@
       "tr": "Doğrulayıcı kurulumu"
     },
     "file": "authenticator.webp",
-    "width": 712,
+    "width": 666,
     "height": 462
   },
   {
@@ -304,7 +304,7 @@
       "tr": "Tek kullanımlık kurtarma kodları"
     },
     "file": "recovery-codes.webp",
-    "width": 712,
+    "width": 666,
     "height": 489
   },
   {
@@ -370,7 +370,7 @@
       "tr": "Mobilde görünüm ayarları"
     },
     "file": "mobile-appearance.webp",
-    "width": 342,
-    "height": 715
+    "width": 356,
+    "height": 714
   }
 ]

@@ -6,17 +6,23 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/sametcn99/th0ughts/feed"
 	theme "github.com/sametcn99/th0ughts/themes"
 )
 
-func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[string]string, site feed.Settings, design theme.Theme, private bool) string {
+const timelineTextLimit = 280
+const articleExcerptLength = 160
+
+func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[string]string, site feed.Settings, design theme.Theme, private, detail bool) string {
 	l, t := p.Select(lang)
 	dt := time.UnixMilli(p.Created).UTC()
 	parts := map[string]string{}
+	author := first(site.Author, site.Name)
+	initial, _ := utf8.DecodeRuneInString(strings.TrimSpace(author))
 	var by strings.Builder
-	fmt.Fprintf(&by, "<div class=\"byline\"><span class=\"avatar\" aria-hidden=\"true\">◒</span><strong>%s</strong><a href=\"%s\"><time datetime=\"%s\">%s</time></a>", esc(first(site.Author, site.Name)), esc(link("", p.ID, l)), dt.Format(time.RFC3339), esc(dateLabel(dt, words)))
+	fmt.Fprintf(&by, "<div class=\"byline\"><span class=\"avatar\" aria-hidden=\"true\">%s</span><strong>%s</strong><a href=\"%s\"><time datetime=\"%s\">%s</time></a>", esc(strings.ToUpper(string(initial))), esc(author), esc(link("", p.ID, l)), dt.Format(time.RFC3339), esc(dateLabel(dt, words)))
 	if p.Pinned {
 		fmt.Fprintf(&by, "<span>%s</span>", esc(words["pinned"]))
 	}
@@ -24,12 +30,33 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 		fmt.Fprintf(&by, "<span>%s</span>", esc(words["draft"]))
 	}
 	parts["byline"] = by.String() + "</div>"
-	if t.Title != "" {
-		parts["title"] = "<h2>" + esc(t.Title) + "</h2>"
+	rendered := bodyHTML(t.Body)
+	class := "entry"
+	attachments := p.Attachments(t)
+	permalink := esc(link("", p.ID, lang))
+	if detail {
+		class += " entry-detail"
 	}
-	parts["body"] = "<div class=\"prose\">" + bodyHTML(t.Body) + "</div>"
+	if t.Title != "" {
+		if detail {
+			parts["title"] = "<h1>" + esc(t.Title) + "</h1>"
+		} else {
+			parts["title"] = `<h2><a href="` + permalink + `">` + esc(t.Title) + "</a></h2>"
+		}
+	}
+	parts["body"] = `<div class="prose">` + rendered + "</div>"
+	if !detail && (t.Title != "" || utf8.RuneCountInString(t.Body) > timelineTextLimit) {
+		visible := plainHTML(rendered)
+		if t.Title != "" || utf8.RuneCountInString(visible) > timelineTextLimit {
+			class += " article-preview"
+			parts["body"] = `<div class="prose"><p>` + esc(excerpt(visible, articleExcerptLength)) + `</p></div><a class="read-post" href="` + permalink + `">` + esc(words["read_article"]) + ` <span aria-hidden="true">→</span></a>`
+			if len(attachments) > 1 {
+				attachments = attachments[:1]
+			}
+		}
+	}
 	var media, tags strings.Builder
-	for _, id := range p.Attachments(t) {
+	for _, id := range attachments {
 		m, e := feed.Read[feed.Media](r.Context(), s.S.DB, "media", id)
 		if e != nil {
 			continue
@@ -48,5 +75,5 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 	if private {
 		parts["actions"] = fmt.Sprintf("<button class=\"edit\" data-edit=\"%s\">%s</button>", esc(p.ID), esc(words["edit"]))
 	}
-	return "<article class=\"entry\" lang=\"" + esc(l) + "\">" + design.RenderLocale("item", parts, lang, map[string]bool{"owner": private, "pinned": p.Pinned, "draft": !t.Published, "media": len(p.Attachments(t)) > 0, "tags": len(p.Tags) > 0, "title": t.Title != ""}) + "</article>"
+	return "<article class=\"" + class + "\" lang=\"" + esc(l) + "\">" + design.RenderLocale("item", parts, lang, map[string]bool{"owner": private, "pinned": p.Pinned, "draft": !t.Published, "media": len(p.Attachments(t)) > 0, "tags": len(p.Tags) > 0, "title": t.Title != ""}) + "</article>"
 }

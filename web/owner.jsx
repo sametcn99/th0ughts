@@ -94,13 +94,21 @@ function savedDraft() {
   }
 }
 function Composer() {
-  const [post, set] = useState(savedDraft),
+  const [post, set] = useState(() => savedDraft() || blank()),
     [lang, langSet] = useState(post?.original || state.lang);
   const a = useAction();
+  const hasDraft = Boolean(
+    post.id ||
+    post.pinned ||
+    post.tags?.length ||
+    Object.values(post.text).some(
+      (tr) => tr.body || tr.title || tr.description || tr.media?.length,
+    ),
+  );
   useEffect(() => {
-    if (post) sessionStorage.setItem("editing", JSON.stringify(post));
+    if (hasDraft) sessionStorage.setItem("editing", JSON.stringify(post));
     else sessionStorage.removeItem("editing");
-  }, [post]);
+  }, [post, hasDraft]);
   useEffect(() => {
     const click = (e) => {
       const id = e.target.closest?.("[data-edit]")?.dataset.edit;
@@ -145,172 +153,176 @@ function Composer() {
       location.reload();
     });
   }
-  if (!post)
-    return (
-      <div className="toolbar">
-        <button
-          onClick={() => {
-            set(blank());
-            langSet(state.lang);
-          }}
-        >
-          ＋ {t("new")}
-        </button>
-        <Notice action={a} />
-      </div>
-    );
+  const hasContent = Boolean(tr.body?.trim() || shownMedia.length);
   return (
-    <section className="panel">
-      <h2>{t(post.id ? "edit" : "write")}</h2>
-      <div className="tabs">
-        {["en", "tr"].map((l) => (
-          <button
-            key={l}
-            lang={l}
-            aria-pressed={l === lang}
-            onClick={() => langSet(l)}
-          >
-            {t("lang_" + l)}
-          </button>
-        ))}
-      </div>
-      <label>
-        {t("original")}
-        <select
-          value={post.original}
-          onChange={(e) => edit("original", e.target.value)}
-        >
-          <option value="en">{t("lang_en")}</option>
-          <option value="tr">{t("lang_tr")}</option>
-        </select>
-      </label>
-      <Field
-        label="title"
-        value={tr.title}
-        onChange={(v) => setTr("title", v)}
-      />
-      <label>
-        {t("body")}
+    <section
+      className="panel compose-panel"
+      aria-label={t(post.id ? "edit" : "write")}
+    >
+      {post.id && <h2>{t("edit")}</h2>}
+      <label className="compose-body">
+        <span className="visually-hidden">{t("body")}</span>
         <textarea
+          placeholder={t("compose_hint")}
+          rows={2}
           value={tr.body}
           onChange={(e) => setTr("body", e.target.value)}
         />
       </label>
-      <Field
-        label="description"
-        value={tr.description}
-        onChange={(v) => setTr("description", v)}
-      />
-      <Field
-        label="tags"
-        value={(post.tags || []).join(",")}
-        onChange={(v) =>
-          edit(
-            "tags",
-            v.split(",").map((s) => s.trim()),
-          )
-        }
-      />
-      <label>
-        {t("media")}
-        <input
-          type="file"
-          multiple
-          accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm"
-          onChange={(e) => {
-            const files = [...e.target.files];
-            a.run(async () => {
-              for (const file of files) {
-                const m = await req("/api/v1/upload", file, true);
-                set((p) => ({
-                  ...p,
-                  text: {
-                    ...p.text,
-                    [lang]: {
-                      ...(p.text[lang] || translation()),
-                      media: [...(p.text[lang]?.media || []), m.id],
-                    },
-                  },
-                }));
-              }
-            });
-          }}
-        />
-      </label>
-      {shownMedia.length > 0 && (
-        <p>
-          {t(
-            "media_count_" +
-              new Intl.PluralRules(state.lang).select(shownMedia.length),
-          ).replace(
-            "{count}",
-            new Intl.NumberFormat(state.lang).format(shownMedia.length),
-          )}
-        </p>
-      )}
-      {shownMedia.length > 0 && (
+      <details className="compose-options" key={post.id || "new"}>
+        <summary>{t("post_options")}</summary>
+        <div className="tabs">
+          {["en", "tr"].map((l) => (
+            <button
+              key={l}
+              lang={l}
+              aria-pressed={l === lang}
+              onClick={() => langSet(l)}
+            >
+              {t("lang_" + l)}
+            </button>
+          ))}
+        </div>
         <label>
-          {t("post_cover")}
+          {t("original")}
           <select
-            value={tr.cover || ""}
-            onChange={(e) => setTr("cover", e.target.value)}
+            value={post.original}
+            onChange={(e) => edit("original", e.target.value)}
           >
-            <option value="">{t("automatic")}</option>
-            {shownMedia.map((id, index) => (
-              <option key={id} value={id}>
-                {tr.alt?.[id] || t("media") + " " + (index + 1)}
-              </option>
-            ))}
+            <option value="en">{t("lang_en")}</option>
+            <option value="tr">{t("lang_tr")}</option>
           </select>
         </label>
-      )}
-      {shownMedia.map((id) => (
-        <div key={id}>
-          <Field
-            label="alt"
-            value={tr.alt?.[id]}
-            onChange={(v) => setTr("alt", { ...tr.alt, [id]: v })}
-          />
-          <button
-            className="secondary"
-            onClick={() =>
-              post.media?.includes(id)
-                ? edit(
-                    "media",
-                    post.media.filter((m) => m !== id),
-                  )
-                : setTr(
-                    "media",
-                    tr.media.filter((m) => m !== id),
-                  )
-            }
-          >
-            {t("remove")}
-          </button>
-        </div>
-      ))}
-      <label className="check">
-        <input
-          type="checkbox"
-          checked={post.pinned}
-          onChange={(e) => edit("pinned", e.target.checked)}
+        <Field
+          label="title"
+          value={tr.title}
+          onChange={(v) => setTr("title", v)}
         />
-        {t("pin")}
-      </label>
+        <Field
+          label="description"
+          value={tr.description}
+          onChange={(v) => setTr("description", v)}
+        />
+        <Field
+          label="tags"
+          value={(post.tags || []).join(",")}
+          onChange={(v) =>
+            edit(
+              "tags",
+              v.split(",").map((s) => s.trim()),
+            )
+          }
+        />
+        <label>
+          {t("media")}
+          <input
+            type="file"
+            multiple
+            accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm"
+            onChange={(e) => {
+              const files = [...e.target.files];
+              a.run(async () => {
+                for (const file of files) {
+                  const m = await req("/api/v1/upload", file, true);
+                  set((p) => ({
+                    ...p,
+                    text: {
+                      ...p.text,
+                      [lang]: {
+                        ...(p.text[lang] || translation()),
+                        media: [...(p.text[lang]?.media || []), m.id],
+                      },
+                    },
+                  }));
+                }
+              });
+            }}
+          />
+        </label>
+        {shownMedia.length > 0 && (
+          <p>
+            {t(
+              "media_count_" +
+                new Intl.PluralRules(state.lang).select(shownMedia.length),
+            ).replace(
+              "{count}",
+              new Intl.NumberFormat(state.lang).format(shownMedia.length),
+            )}
+          </p>
+        )}
+        {shownMedia.length > 0 && (
+          <label>
+            {t("post_cover")}
+            <select
+              value={tr.cover || ""}
+              onChange={(e) => setTr("cover", e.target.value)}
+            >
+              <option value="">{t("automatic")}</option>
+              {shownMedia.map((id, index) => (
+                <option key={id} value={id}>
+                  {tr.alt?.[id] || t("media") + " " + (index + 1)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {shownMedia.map((id) => (
+          <div key={id}>
+            <Field
+              label="alt"
+              value={tr.alt?.[id]}
+              onChange={(v) => setTr("alt", { ...tr.alt, [id]: v })}
+            />
+            <button
+              className="secondary"
+              onClick={() =>
+                post.media?.includes(id)
+                  ? edit(
+                      "media",
+                      post.media.filter((m) => m !== id),
+                    )
+                  : setTr(
+                      "media",
+                      tr.media.filter((m) => m !== id),
+                    )
+              }
+            >
+              {t("remove")}
+            </button>
+          </div>
+        ))}
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={post.pinned}
+            onChange={(e) => edit("pinned", e.target.checked)}
+          />
+          {t("pin")}
+        </label>
+      </details>
       <div className="row">
-        <button disabled={a.busy} onClick={() => save(true)}>
+        <button disabled={a.busy || !hasContent} onClick={() => save(true)}>
           {t("publish")}
         </button>
         <button
           className="secondary"
-          disabled={a.busy}
+          disabled={a.busy || !hasContent}
           onClick={() => save(false)}
         >
           {t(tr.published ? "unpublish" : "save_draft")}
         </button>
-        <button className="secondary" onClick={() => set(null)}>
-          {t("cancel")}
-        </button>
+        {hasDraft && (
+          <button
+            className="secondary"
+            disabled={a.busy}
+            onClick={() => {
+              set(blank());
+              langSet(state.lang);
+            }}
+          >
+            {t("cancel")}
+          </button>
+        )}
         {post.id && (
           <button
             className="secondary"

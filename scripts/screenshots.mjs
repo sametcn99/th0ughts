@@ -33,10 +33,10 @@ async function listeningOrigin(stderr) {
   throw new Error("The screenshot server exited before startup");
 }
 
-async function publish(api, title, body, extra = {}) {
+async function publish(api, body, extra = {}) {
   return api("save_post", {
     original: "en",
-    text: { en: { title, body, published: true } },
+    text: { en: { body, published: true } },
     ...extra,
   });
 }
@@ -83,20 +83,17 @@ async function seed(owner) {
   ]) {
     await publish(
       api,
-      color + " study",
-      "Filed a new ink swatch in the studio color index.",
+      color + " ink looks completely different once it dries.",
       { tags: ["swatches"] },
     );
   }
   await publish(
     api,
-    "From the bindery",
-    "The new notebook opens completely flat. The smallest decisions are often the ones I notice every day.",
+    "Back from the bindery. The new notebook opens completely flat. The smallest decisions are often the ones I notice every day.",
     { tags: ["paper", "studio"] },
   );
   await publish(
     api,
-    "Paper, ink, pressure",
     "Leave one line unprinted. The paper does some of the drawing.",
     { tags: ["print", "studio"] },
   );
@@ -109,13 +106,12 @@ async function seed(owner) {
   const media = await uploaded.json();
   const detail = await api("save_post", {
     original: "en",
-    pinned: true,
     tags: ["print", "sketchbook"],
     media: [media.id],
     text: {
       en: {
         title: "A mountain between the waves",
-        body: "I came back to Hokusai for the blue and found myself following the white. Fuji fits inside the curve of a single wave.",
+        body: "I came back to Hokusai for the blue and found myself following the white. Fuji fits inside the curve of a single wave.\n\nI taped a small print above the workbench. From across the room the boats almost disappear. Up close, every hand has a job to do.\n\nTomorrow I want to try printing just the white space and see how much of the wave survives.",
         published: true,
         alt: {
           [media.id]: "Hokusai’s Great Wave, with Mount Fuji on the horizon",
@@ -123,7 +119,7 @@ async function seed(owner) {
       },
       tr: {
         title: "Dalgaların arasındaki dağ",
-        body: "Hokusai’nin mavisine dönüp beyaz çizgileri takip ettim. Fuji, tek bir dalganın kıvrımına sığıyor.",
+        body: "Hokusai’nin mavisine dönüp beyaz çizgileri takip ettim. Fuji, tek bir dalganın kıvrımına sığıyor.\n\nKüçük bir baskıyı tezgâhın üzerine astım. Odanın öteki ucundan tekneler neredeyse kayboluyor. Yakından bakınca her bir elin ne yaptığı seçiliyor.\n\nYarın yalnızca beyaz boşlukları basıp dalgadan geriye ne kaldığına bakacağım.",
         published: true,
         alt: {
           [media.id]: "Hokusai’nin Büyük Dalga baskısı ve ufuktaki Fuji Dağı",
@@ -131,12 +127,29 @@ async function seed(owner) {
       },
     },
   });
+  await api("save_post", {
+    original: "en",
+    pinned: true,
+    text: {
+      en: {
+        body: "I keep the first print, even when the ink slips. It tells me what to change on the second one.",
+        published: true,
+      },
+      tr: {
+        body: "Mürekkep kaysa bile ilk baskıyı saklıyorum. İkincisinde neyi değiştireceğimi gösteriyor.",
+        published: true,
+      },
+    },
+  });
+  await publish(
+    api,
+    "Left the sketchbook by the window. A sparrow did most of the posing today.",
+  );
   const draft = await api("save_post", {
     original: "en",
     tags: ["notebook"],
     text: {
       en: {
-        title: "A walk along the canal",
         body: "Bring the small sketchbook next time.",
         published: false,
       },
@@ -237,7 +250,7 @@ async function captureAccessSetup(owner, reader, master, shot) {
   await setup.getByRole("combobox").selectOption("sqlite");
   await setup.getByLabel("Password").fill(randomBytes(24).toString("hex"));
   await button(setup, "Set up your feed").click();
-  await owner.getByRole("button", { name: "New post" }).waitFor();
+  await owner.getByPlaceholder("What’s on your mind?").waitFor();
   await navigate(reader, "/login?lang=en");
   await reader.getByLabel("Password").waitFor();
   await shot(
@@ -262,14 +275,16 @@ async function captureReader(reader, detail, shot) {
     "The public timeline",
     "Herkese açık zaman akışı",
   );
-  await navigate(reader, "/?post=" + detail.id + "&lang=en");
+  await reader.getByRole("link", { name: "Read article" }).click();
+  await expect(reader.locator(".entry-detail h1")).toHaveText(detail.text.en.title);
+  await expect(reader.locator(".entry-detail .prose")).toContainText("how much of the wave survives");
   await reader.locator(".attachment").evaluate((img) => img.decode());
   await shot(
     reader,
     "post",
     "reader",
-    "A pinned post with an image",
-    "Görselli sabitlenmiş gönderi",
+    "An article opened from the timeline",
+    "Akıştan açılan bir yazı",
   );
   await navigate(reader, "/?q=bindery&lang=en");
   await expect(reader.locator("article")).toHaveCount(1);
@@ -307,9 +322,7 @@ async function capturePublishing(owner, detail, draft, shot) {
     "The owner's timeline",
     "Sahibin zaman akışı",
   );
-  await owner.getByRole("button", { name: "New post" }).click();
   const form = owner.locator("#composer .panel");
-  await form.getByLabel("Title").fill("Notes from the afternoon");
   await form
     .getByLabel("Post text (Markdown)")
     .fill("The light moved across the studio wall while the ink dried.");
@@ -324,6 +337,7 @@ async function capturePublishing(owner, detail, draft, shot) {
   await button(form, "Cancel").click();
   await navigate(owner, "/?post=" + detail.id + "&lang=en");
   await button(owner, "Edit").click();
+  await form.locator("summary").click();
   await expect(form.getByLabel("Title")).toHaveValue(detail.text.en.title);
   await shot(
     owner,

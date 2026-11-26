@@ -91,10 +91,9 @@ for (const [lang, mobile] of [
         .locator("#composer input[type=password]")
         .fill("a-local-browser-password");
       await page.locator("#composer button").click();
-      const newPost = page.getByRole("button", {
-        name: lang === "en" ? "New post" : "Yeni gönderi",
-      });
-      await newPost.click();
+      const newPost = page.getByPlaceholder(lang === "en" ? "What’s on your mind?" : "Aklından ne geçiyor?");
+      await expect(newPost).toBeVisible();
+      await expect(page.locator("#composer input[type=text]").first()).toBeHidden();
       await page.locator("textarea").fill("A garden in İstanbul");
       await page
         .getByRole("button", {
@@ -107,6 +106,7 @@ for (const [lang, mobile] of [
       await expect(page.locator("textarea")).toHaveValue(
         "A garden in İstanbul",
       );
+      await page.locator("#composer summary").click();
       await page
         .getByRole("button", {
           name: lang === "en" ? "Türkçe" : "English",

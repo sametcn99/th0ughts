@@ -2,11 +2,11 @@
 export const handbook = {
   "README.md#publishing": {
     en: [
-      "Sign in at /login and choose New post on the timeline. Pick the original language, write Markdown and add tags or attachments. Save draft keeps it private. Publish makes the original visible to readers.",
+      "Sign in at /login and write directly in the timeline. Use Post options to add media, tags or an article title. Longer posts open in full from their timeline preview. Save draft keeps it private. Publish makes the original visible to readers.",
       "Use the other language tab to add a translation and publish it separately. Share the post's date link for a permanent URL. Readers see the original if their translation is still a draft.",
     ],
     tr: [
-      "/login adresinden giriş yapıp akışta Yeni gönderi’yi seç. Özgün dili belirle, Markdown yaz ve etiket ya da ekleri ekle. Taslağı kaydet gönderiyi gizli tutar. Yayımla özgün gönderiyi okurlara açar.",
+      "/login adresinden giriş yapıp doğrudan akışa yaz. Gönderi seçeneklerinden medya, etiket veya yazı başlığı ekleyebilirsin. Uzun yazıların tamamı akıştaki önizlemeden açılır. Taslağı kaydet gönderiyi gizli tutar. Yayımla özgün gönderiyi okurlara açar.",
       "Diğer dil sekmesinde bir çeviri ekleyip bağımsız olarak yayımla. Kalıcı adresi paylaşmak için gönderinin tarih bağlantısını kullan. Çeviri taslaksa okur özgün gönderiyi görür.",
     ],
   },

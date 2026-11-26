@@ -37,7 +37,12 @@ func bodyHTML(src string) string {
 	return cleaner.Sanitize(buf.String())
 }
 func plain(src string, n int) string {
-	s := strings.Join(strings.Fields(html.UnescapeString(markup.ReplaceAllString(bodyHTML(src), " "))), " ")
+	return excerpt(plainHTML(bodyHTML(src)), n)
+}
+func plainHTML(rendered string) string {
+	return strings.Join(strings.Fields(html.UnescapeString(markup.ReplaceAllString(rendered, " "))), " ")
+}
+func excerpt(s string, n int) string {
 	if utf8.RuneCountInString(s) > n {
 		return string([]rune(s)[:n]) + "…"
 	}
@@ -243,9 +248,9 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 			meta("og:image", cover)
 			meta("twitter:image", cover)
 		}
-		structured := map[string]any{"@context": "https://schema.org", "@type": "Blog", "name": title, "url": canonical, "inLanguage": seoLang, "description": description}
+		structured := map[string]any{"@context": "https://schema.org", "@type": "CollectionPage", "name": title, "url": canonical, "inLanguage": seoLang, "description": description}
 		if id != "" {
-			structured["@type"] = "BlogPosting"
+			structured["@type"] = "SocialMediaPosting"
 			structured["datePublished"] = time.UnixMilli(page.Posts[0].Created).UTC().Format(time.RFC3339)
 			structured["headline"] = title
 			structured["author"] = map[string]string{"@type": "Person", "name": site.Author}
@@ -276,7 +281,7 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 	var posts strings.Builder
 	posts.WriteString("<div class=\"entries\">")
 	for _, p := range page.Posts {
-		posts.WriteString(h.postHTML(r, p, lang, words, site, design, private))
+		posts.WriteString(h.postHTML(r, p, lang, words, site, design, private, id != ""))
 	}
 	if len(page.Posts) == 0 {
 		fmt.Fprintf(&posts, "<div class=\"empty\"><span aria-hidden=\"true\">◌</span><p>%s</p></div>", esc(words["empty"]))

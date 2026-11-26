@@ -1,4 +1,4 @@
 <meta name="theme" content="index" title="Index">
 <style>.reading { max-width: 68rem; } .entry { border-radius: 0; background-color: #fcf5e9; border-color: #704328; } .mast { font-family: monospace; } .entries { display: grid; grid-template-columns: 1fr; gap: 1rem; }</style>
 <template id="feed"><header><slot name="header"></slot></header><main class="reading"><div class="index-layout"><aside><slot name="filters"></slot><slot name="settings"></slot></aside><section><slot name="composer"></slot><slot name="posts"></slot><slot name="pagination"></slot></section></div></main></template>
-<template id="item"><header class="entry-heading"><slot name="title"></slot><slot name="byline"></slot></header><section><slot name="media"></slot><slot name="body"></slot></section><footer><slot name="tags"></slot><slot name="actions"></slot></footer></template>
+<template id="item"><header class="entry-heading"><slot name="byline"></slot><slot name="title"></slot></header><section><slot name="body"></slot><slot name="media"></slot></section><footer><slot name="tags"></slot><slot name="actions"></slot></footer></template>

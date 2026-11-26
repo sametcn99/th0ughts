@@ -253,3 +253,41 @@ func TestDraftTranslationAttachment(t *testing.T) {
 		t.Fatal("withdrawn attachment visible")
 	}
 }
+
+func TestTimelineNotesAndArticlePreviews(t *testing.T) {
+	s := fixture(t, "sqlite")
+	a, _ := owner(t, s)
+	for _, tc := range []struct {
+		title, body string
+		preview     bool
+	}{
+		{"", strings.Repeat("ğ", 280), false},
+		{"", strings.Repeat("ğ", 280) + "Z", true},
+		{"Earlier article", "A short introduction.", true},
+	} {
+		p, err := s.S.Save(context.Background(), a, feed.Post{Original: "en", Text: map[string]feed.Translation{"en": {Title: tc.title, Body: tc.body, Published: true}}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		timeline := get(s, "/?lang=tr", "").Body.String()
+		href := esc(link("", p.ID, "tr"))
+		cta := `class="read-post" href="` + href + `"`
+		if strings.Contains(timeline, cta) != tc.preview {
+			t.Fatal("Unexpected preview behavior", tc.title)
+		}
+		if tc.preview && tc.title == "" && strings.Contains(timeline, tc.body) {
+			t.Fatal("Long body leaked into timeline")
+		}
+		if !tc.preview && !strings.Contains(timeline, tc.body) {
+			t.Fatal("Short post was truncated")
+		}
+		detail := get(s, link("", p.ID, "tr"), "").Body.String()
+		if strings.Contains(detail, cta) || !strings.Contains(detail, tc.body) {
+			t.Fatal("Missing full post on permalink")
+		}
+		md := get(s, "/post/"+p.ID+".md", "").Body.String()
+		if !strings.Contains(md, tc.body) {
+			t.Fatal("Markdown export was truncated")
+		}
+	}
+}
