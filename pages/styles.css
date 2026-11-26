@@ -456,3 +456,71 @@ footer {
     padding-inline: 14px;
   }
 }
+
+.document-list {
+  list-style: none;
+  margin: 24px 0 46px;
+  padding: 0;
+}
+.document-list li {
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+}
+.document-language {
+  font-size: 14px;
+  color: var(--muted);
+}
+.document-contents {
+  margin: 18px 0;
+}
+.markdown {
+  margin: 20px 0 44px;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.markdown h1 {
+  margin-bottom: 24px;
+}
+.markdown h2,
+.markdown h3 {
+  margin: 32px 0 12px;
+  scroll-margin-top: 1rem;
+}
+.markdown code {
+  font: 0.89em var(--mono);
+  background: #eef0e9;
+  padding: 0.1em 0.25em;
+}
+.markdown pre {
+  padding: 14px;
+  background: #eef0e9;
+}
+.markdown pre code {
+  font: inherit;
+  padding: 0;
+}
+.markdown img {
+  max-width: 100%;
+  height: auto;
+}
+.markdown table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+.markdown th,
+.markdown td {
+  padding: 8px 10px;
+  text-align: start;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.markdown th {
+  background: #eef0e9;
+}
+.markdown blockquote {
+  margin-inline: 0;
+  padding-left: 14px;
+  border-left: 3px solid var(--line);
+}

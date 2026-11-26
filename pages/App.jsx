@@ -1,4 +1,5 @@
 import { handbook } from "./handbook.js";
+import { Layout } from "./Layout.jsx";
 import React, { useEffect, useRef, useState } from "react";
 import { drivers, install, repo, text } from "./content.js";
 import shots from "./public/screenshots/manifest.json";
@@ -40,13 +41,6 @@ function Code({ value, label, t }) {
         <code ref={code}>{value}</code>
       </pre>
     </div>
-  );
-}
-function Brand() {
-  return (
-    <span className="brand">
-      th<span>0</span>ughts
-    </span>
   );
 }
 function QuickStart({ prefix, t }) {
@@ -186,10 +180,7 @@ function Installer({ t }) {
               />
             </>
           )}
-          <a
-            className="text-link"
-            href={repo + "/blob/main/docs/deployment.md"}
-          >
+          <a className="text-link" href="docs/deployment/">
             {t.full}
           </a>
         </div>
@@ -309,88 +300,38 @@ function Gallery({ lang, prefix, t }) {
 export function App({ lang }) {
   const t = text[lang];
   const prefix = lang === "en" ? "./" : "../";
-  const links = [
-    ["top", t.quickStart],
-    ["themes", t.themeTitle],
-    ["installation", t.install],
-    ["gallery", t.gallery],
-    ["handbook", t.docs],
-  ];
   return (
-    <>
-      <a className="skip" href="#main">
-        {t.skip}
-      </a>
-      <div className="manual">
-        <header className="sidebar">
-          <a className="home" href="#top" aria-label="th0ughts">
-            <Brand />
-          </a>
-          <nav className="contents" aria-label={t.docs}>
-            {links.map(([id, name]) => (
-              <a key={id} href={"#" + id}>
-                {name}
-              </a>
+    <Layout {...{ lang, prefix }}>
+      <QuickStart {...{ prefix, t }} />
+      <Themes {...{ lang, prefix, t }} />
+      <Installer t={t} />
+      <Gallery {...{ lang, prefix, t }} />
+      <section id="handbook">
+        <h2>{t.docs}</h2>
+        {t.guides.map(([title, body, path]) => (
+          <details
+            key={path}
+            className="reference"
+            id={path === "docs/themes.md" ? "theme-guide" : undefined}
+          >
+            <summary>{title}</summary>
+            <p>{body}</p>
+            {handbook[path][lang].map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
             ))}
-          </nav>
-          <div className="resources">
-            <a href={repo}>
-              GitHub <span aria-hidden="true">↗</span>
-            </a>
-            <nav aria-label={t.language}>
-              <a
-                href={prefix}
-                lang="en"
-                hrefLang="en"
-                aria-current={lang === "en" ? "page" : undefined}
-              >
-                English
-              </a>
-              <span aria-hidden="true"> / </span>
-              <a
-                href={prefix + "tr/"}
-                lang="tr"
-                hrefLang="tr"
-                aria-current={lang === "tr" ? "page" : undefined}
-              >
-                Türkçe
-              </a>
-            </nav>
-          </div>
-        </header>
-        <main id="main">
-          <QuickStart {...{ prefix, t }} />
-          <Themes {...{ lang, prefix, t }} />
-          <Installer t={t} />
-          <Gallery {...{ lang, prefix, t }} />
-          <section id="handbook">
-            <h2>{t.docs}</h2>
-            {t.guides.map(([title, body, path]) => (
-              <details
-                key={path}
-                className="reference"
-                id={path === "docs/themes.md" ? "theme-guide" : undefined}
-              >
-                <summary>{title}</summary>
-                <p>{body}</p>
-                {handbook[path][lang].map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-                {handbook[path].code && (
-                  <pre>
-                    <code>{handbook[path].code}</code>
-                  </pre>
-                )}
-                <a href={repo + "/blob/main/" + path}>{t.fullReference}</a>
-              </details>
-            ))}
-          </section>
-          <footer>
-            <a href={repo}>GitHub ↗</a>
-            <a href="#top">{t.back} ↑</a>
-          </footer>
-        </main>
-      </div>
-    </>
+            {handbook[path].code && (
+              <pre>
+                <code>{handbook[path].code}</code>
+              </pre>
+            )}
+            {path.startsWith("docs/") ? (
+              <a href={path.replace(".md", "/")}>{t.fullReference}</a>
+            ) : (
+              <a href={repo + "/blob/main/" + path}>README · GitHub</a>
+            )}
+          </details>
+        ))}
+      </section>
+    </Layout>
   );
 }

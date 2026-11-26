@@ -12,6 +12,9 @@ export const drivers = {
 };
 export const text = {
   en: {
+    documents: "Documentation",
+    onPage: "On this page",
+    contentLanguage: "",
     skip: "Skip to content",
     quickStart: "Quick start",
     quickNote:
@@ -113,6 +116,9 @@ export const text = {
     ],
   },
   tr: {
+    documents: "Belgeler",
+    onPage: "Bu sayfada",
+    contentLanguage: "Belgeler İngilizce yazılmıştır.",
     skip: "İçeriğe geç",
     quickStart: "Hızlı kurulum",
     quickNote: "Sihirbaz veritabanını, portu ve kurulum dizinini sorar.",

@@ -1,7 +1,7 @@
 // Smoke-test the built site at its GitHub project path, including direct Turkish navigation.
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
-import { readFile, stat } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium, expect } from "@playwright/test";
@@ -124,6 +124,86 @@ try {
     assert.deepEqual(broken, []);
     await ctx.close();
   }
+  const files = (
+    await readdir(new URL("../docs/", import.meta.url), { recursive: true })
+  ).filter((f) => /\.md$/i.test(f));
+  for (const lang of ["en", "tr"]) {
+    const ctx = await browser.newContext({
+      javaScriptEnabled: false,
+      viewport: { width: 390, height: 844 },
+    });
+    const page = await ctx.newPage();
+    const home = origin + "/th0ughts/" + (lang === "tr" ? "tr/" : "");
+    await page.goto(home);
+    await page.locator("#installation a.text-link").click();
+    await expect(page).toHaveURL(home + "docs/deployment/");
+    await page.locator(".contents a").last().click();
+    await expect(page).toHaveURL(home + "docs/");
+    const urls = await page
+      .locator(".document-list a")
+      .evaluateAll((links) => links.map((a) => a.href));
+    assert.deepEqual(
+      urls.sort(),
+      files
+        .map(
+          (f) =>
+            home +
+            "docs/" +
+            f.slice(0, -3).split("/").map(encodeURIComponent).join("/") +
+            "/",
+        )
+        .sort(),
+    );
+    for (const url of urls) {
+      assert((await page.goto(url)).ok());
+      await expect(page.locator("article")).toHaveAttribute("lang", "en");
+      await expect(page.locator("main h1").first()).toBeVisible();
+      assert.equal(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth > innerWidth,
+        ),
+        false,
+      );
+      const links = await page
+        .locator(".document-contents a, article a")
+        .evaluateAll((links) => links.map((a) => a.href));
+      for (const link of links) {
+        if (link.startsWith(url + "#")) {
+          assert(
+            await page.evaluate(
+              (id) => !!document.getElementById(id),
+              decodeURIComponent(new URL(link).hash.slice(1)),
+            ),
+            link,
+          );
+        } else if (link.startsWith(origin)) {
+          assert((await page.request.get(link)).ok(), link);
+        }
+      }
+    }
+    await page.goto(home);
+    const backup = page
+      .locator("#handbook details")
+      .filter({
+        has: page.locator('a[href*="#backup-migration-and-recovery"]'),
+      });
+    await backup.locator("summary").click();
+    await backup.locator("a").click();
+    await expect(page.locator(":target")).toHaveText(
+      "Backup, migration, and recovery",
+    );
+    await page
+      .locator(".resources a[hreflang='" + (lang === "en" ? "tr" : "en") + "']")
+      .click();
+    await expect(page).toHaveURL(
+      origin + "/th0ughts/" + (lang === "en" ? "tr/" : "") + "docs/deployment/",
+    );
+    await expect(page.locator("article table")).toBeVisible();
+    await ctx.close();
+  }
+  console.log(
+    "All Markdown documents, local references and EN/TR routes passed without JavaScript.",
+  );
   console.log("Pages passed English desktop and Turkish mobile checks.");
 } finally {
   await browser.close();
