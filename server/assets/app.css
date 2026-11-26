@@ -406,3 +406,28 @@ article.entry:has(.byline) {
 html.settings-open { overflow: hidden; }
 
 .search :is(input, button), .edit { color: var(--ink); }
+
+.thread-link { display:inline-block; margin:8px 0 0; font-size:.875rem; }
+.comment-thread { width:min(100%,700px); margin:0 auto; padding:20px clamp(12px,3vw,24px); background:var(--surface); color:var(--ink); overflow-wrap:anywhere; }
+.thread-heading,.comment-meta,.comment-actions { display:flex; align-items:center; flex-wrap:wrap; gap:8px 12px; }
+.thread-heading { justify-content:space-between; margin-bottom:14px; }
+.thread-heading h2 { margin:0; font-size:1.2rem; }
+.comment-thread button { cursor:pointer; color:var(--accent); background:var(--surface); border:0; padding:6px 2px; font:inherit; }
+.comment-thread button:hover { text-decoration:underline; }
+.comment-thread .comment-primary { background:var(--accent); color:var(--on-accent); padding:8px 14px; border-radius:8px; font-weight:600; }
+.comment-thread :focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+.thread-node { margin-block:10px; padding:10px 0; border-top:1px solid var(--line); }
+.comment-meta { font-size:.88rem; }
+.comment-meta time,.comment-muted { color:var(--muted); }
+.comment-thread .branch-toggle { border:1px solid var(--line); border-radius:50%; line-height:1; width:24px; height:24px; padding:0; }
+.comment-actions { font-size:.88rem; }
+.thread-indent > .comment-branch { border-inline-start:2px solid var(--line); padding-inline-start:clamp(8px,2vw,20px); margin-inline-start:4px; }
+.comment-plain { white-space:pre-wrap; }
+.comment-images { display:flex; flex-wrap:wrap; gap:8px; }
+.comment-images img { display:block; width:clamp(80px,20vw,140px);height:96px;object-fit:cover;border-radius:8px; }
+.comment-text pre { overflow:auto; }
+.guest-comment { display:grid; gap:12px; border:1px solid var(--line); padding:14px; border-radius:10px; margin-block:12px; }
+.guest-comment label { display:grid;gap:4px;font-size:.9rem; }
+.guest-comment :is(textarea,input,select) { border:1px solid var(--line); background:var(--surface); color:var(--ink); font:inherit; padding:8px; border-radius:5px; min-width:0; max-width:100%; }
+.guest-comment textarea { resize:vertical; }
+.comment-fields { display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px; }

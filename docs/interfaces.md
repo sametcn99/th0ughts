@@ -60,3 +60,11 @@ A new store implements `storage.Store` and its public ordering, cursor, missing-
 ### Theme commands
 
 Use the shared `service.Themes` catalog when embedding the service. `publish_theme` takes `{"settings":{...},"source":"..."}` and commits both changes together. Publishing a file requires both the `settings` and `themes` scopes. `save_settings` validates option overrides against the installed schemas. `get_theme` returns the current HTML in `source`, the last revision in `previous`, and older revisions in `history`. Pass one of these sources to `install_theme` to restore it. `delete_theme` removes an inactive custom theme by ID. These commands are available through the named HTTP endpoints, CLI and agent tools.
+
+### Guest comments
+
+Read the first 20 root comments with `list_comments` and a `post` ID. Pass a `parent` comment ID to read a branch or the returned `next` value as `cursor` to continue. Each item includes `hasReplies`. The `comment_context` command accepts an `id` and returns its visible ancestors and the selected comment. A link to a specific reply uses `/?post=POST_ID#comment-COMMENT_ID`.
+
+A guest first sends `{"post":"POST_ID","email":"reader@example.org","lang":"en"}` to `POST /api/v1/comment-code`. The response contains a challenge ID. Submit a multipart form to `POST /api/v1/comments/POST_ID` with the `X-Comment-Challenge` and `X-Comment-Code` headers. The six-digit code goes to the guest's inbox and expires after ten minutes. Supported form fields are `name`, `body`, `format` (`text` or `markdown`), optional `parent`, and repeated `image` parts. Each successful submission consumes the code. The response status field is `pending` or `approved`.
+
+Owners use `pending_comments` with the `pending` or `published` status filter, `moderate_comment` with an `id` and an `approve` or `delete` action, and `set_thread_lock` with a post `id` and a `closed` boolean. These commands use the same permission checks across HTTP, CLI, and MCP.

@@ -7,17 +7,20 @@ import (
 	"errors"
 	"io"
 	"slices"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/sametcn99/th0ughts/storage"
 	theme "github.com/sametcn99/th0ughts/themes"
 )
 
 type Manifest struct {
-	Version int
-	Site    Settings
-	Posts   []Post
-	Themes  []Version
-	Media   []Media
+	Version  int
+	Site     Settings
+	Posts    []Post
+	Themes   []Version
+	Comments []Comment `json:",omitempty"`
+	Media    []Media
 }
 
 func (l *Library) Export(ctx context.Context, a Actor, w io.Writer) error {
@@ -43,7 +46,7 @@ func (l *Library) Export(ctx context.Context, a Actor, w io.Writer) error {
 		}
 		m.Themes = append(m.Themes, v)
 	}
-	for _, kind := range []string{"post", "media"} {
+	for _, kind := range []string{"post", "comment", "media"} {
 		rows, e := l.Service.DB.List(ctx, storage.Query{Kind: kind})
 		if e != nil {
 			return e
@@ -56,6 +59,13 @@ func (l *Library) Export(ctx context.Context, a Actor, w io.Writer) error {
 					return e
 				}
 				m.Posts = append(m.Posts, p)
+			case "comment":
+				var c Comment
+				if e = json.Unmarshal(r.Data, &c); e != nil {
+					return e
+				}
+				m.Comments = append(m.Comments, c)
+				m.Version = 2
 			case "media":
 				med, f, e := l.Open(ctx, a, r.ID)
 				if e != nil {
@@ -86,8 +96,8 @@ func (l *Library) Export(ctx context.Context, a Actor, w io.Writer) error {
 }
 
 type importLog struct {
-	Posts, Themes, Media []string
-	Site                 *siteRecord
+	Posts, Themes, Media, Comments []string
+	Site                           *siteRecord
 }
 
 func (l *Library) RollbackImport(ctx context.Context) error {
@@ -98,7 +108,7 @@ func (l *Library) RollbackImport(ctx context.Context) error {
 	if e != nil {
 		return e
 	}
-	for kind, ids := range map[string][]string{"post": j.Posts, "theme": j.Themes, "media": j.Media} {
+	for kind, ids := range map[string][]string{"post": j.Posts, "theme": j.Themes, "media": j.Media, "comment": j.Comments} {
 		for _, id := range ids {
 			if kind == "media" {
 				m, e := Read[Media](ctx, l.Service.DB, "media", id)
@@ -127,7 +137,7 @@ func (l *Library) Import(ctx context.Context, a Actor, z *zip.Reader) (err error
 	if !a.Recent() {
 		return Denied
 	}
-	for _, k := range []string{"post", "media"} {
+	for _, k := range []string{"post", "comment", "media"} {
 		r, e := l.Service.DB.List(ctx, storage.Query{Kind: k, Limit: 1})
 		if e != nil {
 			return e
@@ -159,7 +169,7 @@ func (l *Library) Import(ctx context.Context, a Actor, z *zip.Reader) (err error
 	var m Manifest
 	e = json.NewDecoder(r).Decode(&m)
 	r.Close()
-	if e != nil || m.Version != 1 {
+	if e != nil || (m.Version != 1 && m.Version != 2) {
 		return Invalid
 	}
 	old, e := l.Service.Themes.record(ctx)
@@ -205,6 +215,12 @@ func (l *Library) Import(ctx context.Context, a Actor, z *zip.Reader) (err error
 		seen[p.ID] = true
 		j.Posts = append(j.Posts, p.ID)
 	}
+	if e = validateCommentArchive(m); e != nil {
+		return e
+	}
+	for _, c := range m.Comments {
+		j.Comments = append(j.Comments, c.ID)
+	}
 	for _, v := range m.Themes {
 		t, e := theme.Compile(v.Source)
 		if e != nil {
@@ -242,6 +258,10 @@ func (l *Library) Import(ctx context.Context, a Actor, z *zip.Reader) (err error
 			return e
 		}
 		med.Post = v.Post
+		med.Comment = v.Comment
+		if med.Comment != "" && med.Type != "image/jpeg" {
+			return Invalid
+		}
 		if e = Write(ctx, l.Service.DB, "media", med.ID, med, 0, false); e != nil {
 			return e
 		}
@@ -252,6 +272,11 @@ func (l *Library) Import(ctx context.Context, a Actor, z *zip.Reader) (err error
 			rank += 1 << 54
 		}
 		if e = Write(ctx, l.Service.DB, "post", p.ID, p, rank, p.Visible()); e != nil {
+			return e
+		}
+	}
+	for _, c := range m.Comments {
+		if e = Write(ctx, l.Service.DB, "comment", c.ID, c, c.Created, c.Status != "pending"); e != nil {
 			return e
 		}
 	}
@@ -283,5 +308,65 @@ func (l *Library) Import(ctx context.Context, a Actor, z *zip.Reader) (err error
 	l.Service.mu.Lock()
 	l.Service.index = nil
 	l.Service.mu.Unlock()
+	return nil
+}
+
+func validateCommentArchive(m Manifest) error {
+	posts := map[string]bool{}
+	media := map[string]Media{}
+	items := map[string]Comment{}
+	used := map[string]bool{}
+	for _, p := range m.Posts {
+		posts[p.ID] = true
+		for _, mid := range p.AllMedia() {
+			used[mid] = true
+		}
+	}
+	for _, v := range m.Media {
+		media[v.ID] = v
+	}
+	for _, c := range m.Comments {
+		prefix := branchPrefix(c.Post, c.Parent)
+		if !posts[c.Post] || !storage.ValidKey(c.ID) || !strings.HasPrefix(c.ID, prefix) || len(c.ID) != len(prefix)+24 || items[c.ID].ID != "" || c.Created <= 0 || c.Depth < 0 || c.Depth > 12 || utf8.RuneCountInString(c.Name) > 80 || utf8.RuneCountInString(c.Body) > 6000 || len(c.Images) > 4 {
+			return Invalid
+		}
+		switch c.Status {
+		case "pending", "approved":
+			if c.Format != "text" && c.Format != "markdown" || strings.TrimSpace(c.Body) == "" && len(c.Images) == 0 {
+				return Invalid
+			}
+		case "deleted":
+			if c.Body != "" || c.Name != "" || len(c.Images) > 0 {
+				return Invalid
+			}
+		default:
+			return Invalid
+		}
+		for _, mid := range c.Images {
+			v := media[mid]
+			if used[mid] || v.Comment != c.ID || v.Post != c.Post || v.Type != "image/jpeg" {
+				return Invalid
+			}
+			used[mid] = true
+		}
+		items[c.ID] = c
+	}
+	for _, v := range m.Media {
+		if v.Comment != "" && !slices.Contains(items[v.Comment].Images, v.ID) {
+			return Invalid
+		}
+	}
+	for _, c := range items {
+		if c.Parent == "" {
+			if c.Depth != 0 {
+				return Invalid
+			}
+			continue
+		}
+		p := items[c.Parent]
+		if p.Post != c.Post || c.Depth != p.Depth+1 || p.Status == "pending" {
+			return Invalid
+		}
+	}
 	return nil
 }

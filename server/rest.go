@@ -33,7 +33,7 @@ func (s *Server) postResource(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	case "DELETE":
-		e = s.S.Delete(ctx, a, id)
+		e = s.L.DeletePost(ctx, a, id)
 		result = true
 	}
 	if e != nil {

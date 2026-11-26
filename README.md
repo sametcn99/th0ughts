@@ -46,6 +46,7 @@ The language in a shared URL takes precedence over a saved reader preference, fo
 
 ## Customize and deploy
 
+- Enable guest discussions in **Settings → Comments**. Readers can reply with text, Markdown, and images after verifying their email. The owner can review submissions, delete comments, or lock individual threads. [Configure verification mail](docs/deployment.md#guest-comments-and-verification-mail)
 - Upload a single HTML file from **Settings → Appearance**. Preview it, select its options, and save. Browse community themes and leave feedback in Discussions, or start a thread for your own theme. [Community themes](https://github.com/sametcn99/th0ughts/discussions/categories/show-and-tell) · [Share a theme](https://github.com/sametcn99/th0ughts/discussions/new?category=show-and-tell) · [Theme authoring guide](docs/themes.md)
 - Choose SQLite, PostgreSQL, MySQL, MariaDB, MongoDB, single-file JSON, or directory JSON. Each has a standalone Compose file. Platform-specific instructions cover repository builds, TLS routing, volumes, and secrets. [Deployment guide](docs/deployment.md)
 - Automate with scoped bearer tokens, the CLI, WebMCP, or standalone MCP. [API and CLI guide](docs/interfaces.md)
@@ -76,7 +77,7 @@ Run `bun run build:pages` to render the English and Turkish React site into `pag
 
 <!-- gallery:start -->
 <details>
-<summary>Application screenshots (45)</summary>
+<summary>Application screenshots (49)</summary>
 
 Build the Go binary (see Local development), install Chromium with `bun run --bun playwright install chromium`, and run `bun run screenshots` to refresh this gallery. The script creates and removes its own demo instance.
 
@@ -259,6 +260,22 @@ Build the Go binary (see Local development), install Chromium with `bun run --bu
 **Appearance settings on mobile**
 
 ![Appearance settings on mobile](https://sametcn99.github.io/th0ughts/screenshots/mobile-appearance.webp)
+
+**Threaded comments and images**
+
+![Threaded comments and images](https://sametcn99.github.io/th0ughts/screenshots/comment-thread.webp)
+
+**Reading replies on mobile**
+
+![Reading replies on mobile](https://sametcn99.github.io/th0ughts/screenshots/comment-mobile.webp)
+
+**Guest comment form**
+
+![Guest comment form](https://sametcn99.github.io/th0ughts/screenshots/guest-comment.webp)
+
+**Comment settings and moderation queue**
+
+![Comment settings and moderation queue](https://sametcn99.github.io/th0ughts/screenshots/comment-moderation.webp)
 
 </details>
 <!-- gallery:end -->

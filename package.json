@@ -5,7 +5,7 @@
   "packageManager": "bun@1.4.4",
   "type": "module",
   "scripts": {
-    "build": "bun run --bun esbuild web/owner.jsx --bundle --minify --format=esm --outfile=server/assets/owner.js && bun web/build-previews.jsx",
+    "build": "bun run --bun esbuild web/owner.jsx --bundle --minify --format=esm --outfile=server/assets/owner.js && bun run --bun esbuild web/thread.jsx --bundle --minify --format=esm --outfile=server/assets/thread.js && bun web/build-previews.jsx",
     "check:i18n": "bun scripts/check-i18n.mjs",
     "test:browser": "bun run --bun playwright test",
     "build:pages": "bun pages/build.mjs",

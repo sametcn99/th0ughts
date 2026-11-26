@@ -56,6 +56,12 @@ func (s *mongoStore) Delete(ctx context.Context, k, id string) error {
 }
 func (s *mongoStore) List(ctx context.Context, q Query) ([]Record, error) {
 	f := bson.M{"kind": q.Kind}
+	if q.Prefix != "" {
+		f["id"] = bson.M{"$gte": q.Prefix, "$lt": q.Prefix + "~"}
+	}
+	if q.Unpublished {
+		f["published"] = false
+	}
 	if q.Public {
 		f["published"] = true
 	}

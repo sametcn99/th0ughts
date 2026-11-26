@@ -202,7 +202,7 @@ func Compile(src string) (Theme, error) {
 				}
 				if x.Data == "slot" {
 					k := attr(x, "name")
-					if (!slices.Contains(allowed, k) && !(base == "item" && slices.Contains(itemSlots, k))) || seen[k] {
+					if (!slices.Contains(allowed, k) && !(base == "post" && k == "comments") && !(base == "item" && slices.Contains(itemSlots, k))) || seen[k] {
 						return problem(line, "slot", k)
 					}
 					seen[k] = true
@@ -242,6 +242,9 @@ func Compile(src string) (Theme, error) {
 				return problem(line, "slot", "byline")
 			}
 			layoutText := buf.String()
+			if base == "post" && !seen["comments"] {
+				layoutText = strings.Replace(layoutText, "[[posts]]", "[[posts]][[comments]]", 1)
+			}
 			if base == "item" && !seen["readmore"] {
 				layoutText = strings.Replace(layoutText, "[[body]]", "[[body]][[readmore]]", 1)
 			}
@@ -309,6 +312,9 @@ func (t Theme) RenderLocale(view string, parts map[string]string, lang string, f
 	if layout == "" {
 		for _, s := range slots[view] {
 			layout += "[[" + s + "]]"
+			if view == "post" && s == "posts" {
+				layout += "[[comments]]"
+			}
 			if view == "item" && s == "body" {
 				layout += "[[readmore]]"
 			}
@@ -341,6 +347,9 @@ func (t Theme) RenderLocale(view string, parts map[string]string, lang string, f
 		layout = out.String()
 	}
 	pairs := []string{}
+	if view == "post" {
+		pairs = append(pairs, "[[comments]]", parts["comments"])
+	}
 	for _, k := range slots[view] {
 		pairs = append(pairs, "[["+k+"]]", parts[k])
 	}

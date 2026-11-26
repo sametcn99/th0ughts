@@ -32,11 +32,14 @@ try:
     theme = '<meta name="theme" content="compose" title="Compose">'
     site = request("/api/v1/get_settings", {})
     site["theme"] = "compose"
+    site["comments"] = {"mode":"review","images":2,"markdown":True}
     request("/api/v1/publish_theme", {"source": theme, "settings": site})
     docker("down")
     docker("up","-d","--wait","--wait-timeout","180")
     assert request("/api/v1/get_settings", {})["theme"] == "compose"
     assert request("/api/v1/get_theme", {"id": "compose"})["source"] == theme
+    assert request("/api/v1/list_comments", {"post":post["id"]})["items"] == []
+    assert request("/api/v1/pending_comments", {})["items"] == []
     restored=request("/api/v1/posts/"+post["id"])
     assert restored["text"]["en"]["body"]=="Persisted post"
 finally:

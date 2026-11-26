@@ -349,6 +349,42 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	var thread *threadPageResult
+	var readonly bool
+	if view == "post" && len(page.Posts) > 0 && (site.Comments.Enabled() || preview) && page.Posts[0].Visible() {
+		if preview {
+			parts["comments"] = `<section class="comment-thread" inert><h2>` + esc(words["comments"]) + `</h2><article class="thread-node"><strong>` + esc(words["unknown_user"]) + `</strong><p>` + esc(words["sample_comment"]) + `</p></article></section>`
+		} else {
+			thread, e = h.threadPage(ctx, a, feed.CommentQuery{Post: id}, false)
+			if e != nil {
+				fail(w, e)
+				return
+			}
+			relay, e := h.relay(ctx)
+			if e != nil {
+				fail(w, e)
+				return
+			}
+			readonly = page.Posts[0].CommentsClosed || relay.Host == ""
+			var fallback strings.Builder
+			fallback.WriteString(`<section id="comments" class="comment-thread"><h2>` + esc(words["comments"]) + "</h2>")
+			for _, c := range thread.Items {
+				fallback.WriteString(`<article class="thread-node">`)
+				if c.Status == "deleted" {
+					fallback.WriteString(esc(words["deleted_comment"]))
+				} else {
+					fallback.WriteString("<strong>" + esc(first(c.Name, words["unknown_user"])) + "</strong>")
+					if c.Format == "markdown" {
+						fallback.WriteString(c.HTML)
+					} else {
+						fallback.WriteString("<p>" + esc(c.Body) + "</p>")
+					}
+				}
+				fallback.WriteString("</article>")
+			}
+			parts["comments"] = fallback.String() + "</section>"
+		}
+	}
 	out := head.String() + "<div class=\"themed\">" + design.RenderLocale(view, parts, lang, map[string]bool{"owner": private, "detail": id != "", "list": id == "" && !login}) + "</div>"
 	out += `<footer class="site-footer"><a href="https://github.com/sametcn99/th0ughts">` + esc(words["host_your_own"]) + `</a></footer>`
 	tools := []Command{}
@@ -360,16 +396,23 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 	if !preview {
 		_, acctErr := h.A.Account(ctx)
 		data := map[string]any{"site": site, "lang": lang, "owner": private, "setup": setup, "newSite": errors.Is(acctErr, storage.ErrMissing), "messages": words, "tools": tools}
+		if thread != nil {
+			data["thread"] = thread
+			data["threadPost"] = id
+			data["threadReadonly"] = readonly
+		}
 		if private || setup {
 			data["driver"] = h.cfg.Driver
 		}
 		out += "<script id=\"state\" type=\"application/json\">" + jsonText(data) + "</script><script src=\"/assets/reader.js\" defer></script>"
 		if private || setup || login {
 			out += "<script type=\"module\" src=\"/assets/owner.js\"></script>"
+		} else if thread != nil {
+			out += `<script type="module" src="/assets/thread.js"></script>`
 		}
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	for _, name := range []string{"app.css", "reader.js", "owner.js"} {
+	for _, name := range []string{"app.css", "reader.js", "owner.js", "thread.js"} {
 		out = strings.ReplaceAll(out, "/assets/"+name+"\"", assetURL(name)+"\"")
 	}
 	fmt.Fprint(w, out+"</body></html>")

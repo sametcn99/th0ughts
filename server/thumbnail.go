@@ -33,7 +33,7 @@ func (s *Server) thumbnail(w http.ResponseWriter, r *http.Request, m feed.Media,
 		http.ServeContent(w, r, m.ID, time.Time{}, f)
 		return true
 	}
-	if open() {
+	if m.Comment == "" && open() {
 		return nil
 	}
 	select {
@@ -42,7 +42,7 @@ func (s *Server) thumbnail(w http.ResponseWriter, r *http.Request, m feed.Media,
 	case <-r.Context().Done():
 		return context.Canceled
 	}
-	if open() {
+	if m.Comment == "" && open() {
 		return nil
 	}
 	src, _, e := image.Decode(original)
@@ -56,8 +56,10 @@ func (s *Server) thumbnail(w http.ResponseWriter, r *http.Request, m feed.Media,
 	if e = png.Encode(&out, dst); e != nil {
 		return e
 	}
-	if e = storage.Atomic(file, out.Bytes()); e != nil {
-		return e
+	if m.Comment == "" {
+		if e = storage.Atomic(file, out.Bytes()); e != nil {
+			return e
+		}
 	}
 	w.Header().Set("Content-Type", "image/png")
 	http.ServeContent(w, r, m.ID, time.Time{}, bytes.NewReader(out.Bytes()))

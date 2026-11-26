@@ -11,6 +11,8 @@ import {
   SignIn,
   ceremony,
 } from "./shared.jsx";
+import { createRoot } from "react-dom/client";
+import { Thread } from "./comments.jsx";
 import Settings from "./settings.jsx";
 
 function Setup() {
@@ -291,6 +293,16 @@ export function Composer() {
             </button>
           </div>
         ))}
+        {["review", "open"].includes(state.site.comments?.mode) && (
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={!!post.commentsClosed}
+              onChange={(e) => edit("commentsClosed", e.target.checked)}
+            />
+            {t("lock_thread")}
+          </label>
+        )}
         <label className="check">
           <input
             type="checkbox"
@@ -344,6 +356,8 @@ export function Composer() {
   );
 }
 if (typeof document !== "undefined") {
+  const thread = document.getElementById("comments");
+  if (thread && state.thread) createRoot(thread).render(<Thread />);
   if (location.pathname === "/login") mount("login", <SignIn />);
   else if (state.setup) mount("composer", <Setup />);
   else if (state.owner) {

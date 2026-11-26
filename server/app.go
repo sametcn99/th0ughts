@@ -34,6 +34,7 @@ type ticket struct {
 	Binding string
 }
 type Server struct {
+	guest       guestMail
 	imageMu     sync.Mutex
 	image       socialImage
 	instance    *flock.Flock
@@ -137,6 +138,9 @@ func (s *Server) connect(ctx context.Context, c storage.Config) error {
 	if e = s.L.RollbackImport(ctx); e != nil {
 		return e
 	}
+	if e = s.L.RepairCommentMedia(ctx); e != nil {
+		return e
+	}
 	return s.T.Reclaim(ctx)
 }
 func (s *Server) Close() error { return errors.Join(s.S.DB.Close(), s.instance.Unlock()) }
@@ -168,6 +172,8 @@ func (s *Server) routes() {
 	for _, p := range []string{"GET /{$}", "GET /login", "GET /feed.md", "GET /post/{id}", "GET /feed.xml", "GET /sitemap.xml", "GET /robots.txt"} {
 		m.HandleFunc(p, s.cachedPage)
 	}
+	m.HandleFunc("POST /api/v1/comment-code", s.requestCode)
+	m.HandleFunc("POST /api/v1/comments/{post}", s.submitComment)
 	m.HandleFunc("GET /social.png", s.social)
 	m.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
 	m.HandleFunc("GET /assets/{name}", static)
@@ -285,6 +291,14 @@ func errorStatus(e error) (int, string) {
 	code := 500
 	msg := "internal_error"
 	switch {
+	case errors.Is(e, invalidEmail), errors.Is(e, invalidCode):
+		return 400, e.Error()
+	case errors.Is(e, mailUnavailable):
+		return 503, "mail_unavailable"
+	case errors.Is(e, commentRate):
+		return 429, "comment_rate"
+	case errors.Is(e, feed.CommentsClosed):
+		return 403, "comments_closed"
 	case errors.Is(e, feed.Denied):
 		code = 403
 		msg = "forbidden"

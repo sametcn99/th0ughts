@@ -42,6 +42,9 @@ func (t *Themes) record(ctx context.Context) (siteRecord, error) {
 	if rec.Refs == nil {
 		rec.Refs = map[string][]string{}
 	}
+	if rec.Comments.Mode == "" {
+		rec.Comments = CommentPolicy{Mode: "off", Markdown: true, Images: 4}
+	}
 	rec.Settings.refs = rec.Refs
 	return rec, e
 }
@@ -242,6 +245,9 @@ func (t *Themes) Publish(ctx context.Context, a Actor, prefs Settings, src strin
 	rec, e := t.record(ctx)
 	if e != nil {
 		return e
+	}
+	if prefs.Comments.Mode == "" {
+		prefs.Comments = rec.Comments
 	}
 	var design theme.Theme
 	if src != "" {

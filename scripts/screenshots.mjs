@@ -18,6 +18,8 @@ import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 import { chromium, expect } from "@playwright/test";
 
+import {openCommentInbox} from "./fixtures/comment-mail.mjs";
+
 const root = fileURLToPath(new URL("../", import.meta.url));
 const binary = process.env.TEST_BINARY || path.join(root, "bin/th0ughts");
 const destination = path.join(root, "pages/public/screenshots");
@@ -619,13 +621,43 @@ async function captureThemesAndMobile(owner, reader, data, shot) {
   );
 }
 
+async function captureComments(owner,reader,data,mail,shot){
+  await data.api("configure_comment_mail",mail.relay);
+  await data.api("save_settings",{...data.site,comments:{mode:"open",markdown:true,images:3}});
+  const upload=await readFile(photo);
+  async function submit(email,name,body,parent="",image=false){
+    const {challenge}=await data.api("comment-code",{post:data.note.id,email,lang:"en"});
+    const multipart={name,body,format:"markdown",parent};
+    if(image)multipart.image={name:"print.jpg",mimeType:"image/jpeg",buffer:upload};
+    const res=await reader.request.post("/api/v1/comments/"+data.note.id,{headers:{"X-Comment-Challenge":challenge,"X-Comment-Code":mail.codes.get(email)},multipart,failOnStatusCode:true});
+    return res.json();
+  }
+  const root=await submit("reader@example.org","Mira","The thin blue lines really stand out in this **print**.", "",true);
+  await submit("reply@example.org","Deniz","Especially along the edge of the wave.",root.id);
+  await data.api("save_settings",{...data.site,comments:{mode:"review",markdown:true,images:3}});
+  await submit("sarah@example.org","Sarah","Which paper did you use for the second impression?");
+  await reader.setViewportSize({width:1100,height:820});await navigate(reader,"/?lang=en&post="+data.note.id);
+  const thread=reader.locator("#comments");await button(thread,"Show replies").click();
+  await expect(thread.locator(".comment-branch")).toContainText("Deniz");
+  await shot(reader,"comment-thread","reader","Threaded comments and images","Görselli yorumlar ve yanıtlar",{target:thread});
+  await reader.setViewportSize({width:390,height:844});await navigate(reader,"/?post="+data.note.id+"&lang=tr");
+  await button(thread,"Yanıtları göster").click();await expect(thread.locator(".comment-branch")).toContainText("Deniz");
+  await shot(reader,"comment-mobile","reader","Reading replies on mobile","Mobilde yanıtları okuma",{target:thread});
+  await button(thread,"Yorum yaz").click();
+  await shot(reader,"guest-comment","reader","Guest comment form","Ziyaretçi yorum formu",{target:thread.locator("form")});
+  await owner.setViewportSize({width:1120,height:860});await navigate(owner,"/?lang=en");await button(owner,"Settings").click();
+  const panel=owner.locator("#settings .settings-dialog");await button(panel,"Comments").click();await expect(panel.locator(".moderation-entry")).toContainText("Sarah");
+  await panel.locator(".moderation-entry").scrollIntoViewIfNeeded();await shot(owner,"comment-moderation","publishing","Comment settings and moderation queue","Yorum ayarları ve moderasyon kuyruğu",{target:panel});
+}
+
 async function captureAll(staging, dataDir) {
   const master = randomBytes(32).toString("hex");
+  const mail=await openCommentInbox();
   const app = spawn(
     binary,
     ["-listen", "127.0.0.1:0", "-data", dataDir, "serve"],
     {
-      env: { ...process.env, TH0UGHTS_MASTER_KEY: master },
+      env: { ...process.env, SSL_CERT_FILE:mail.cert, TH0UGHTS_MASTER_KEY: master },
       stdio: ["ignore", "ignore", "pipe"],
     },
   );
@@ -654,6 +686,7 @@ async function captureAll(staging, dataDir) {
     await capturePublishing(owner, data.detail, data.draft, shot);
     await captureSettings(owner, shot);
     await captureThemesAndMobile(owner, reader, data, shot);
+    await captureComments(owner,reader,data,mail,shot);
     // Lead with the public feed everywhere the manifest is consumed.
     manifest.unshift(
       manifest.splice(
@@ -669,6 +702,7 @@ async function captureAll(staging, dataDir) {
     app.kill();
     await closed;
     await browser?.close();
+    await mail.close();
   }
 }
 

@@ -382,3 +382,9 @@
   height: auto;
   margin: 0;
 }
+.mail-settings { margin-block:18px; }
+.mail-settings summary { cursor:pointer; color:var(--accent); font-weight:600; }
+.moderation-entry { padding-block:12px; border-bottom:1px solid var(--line); overflow-wrap:anywhere; }
+.moderation-entry .comment-plain { white-space:pre-wrap; }
+.moderation-entry .comment-images { display:flex; flex-wrap:wrap; gap:8px; }
+.moderation-entry img { width:96px;height:80px;object-fit:cover;border-radius:6px; }

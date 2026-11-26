@@ -24,6 +24,7 @@ import (
 const MaxMedia = 32 << 20
 
 type Media struct {
+	Comment  string `json:"comment,omitempty"`
 	Object   string `json:"object,omitempty"`
 	Width    int    `json:"width,omitempty"`
 	Height   int    `json:"height,omitempty"`
@@ -91,6 +92,9 @@ func (l *Library) Upload(ctx context.Context, a Actor, r io.Reader) (Media, erro
 	return l.upload(ctx, a, r, ID(16))
 }
 func (l *Library) upload(ctx context.Context, a Actor, r io.Reader, id string) (Media, error) {
+	return l.uploadBound(ctx, a, r, id, "", "")
+}
+func (l *Library) uploadBound(ctx context.Context, a Actor, r io.Reader, id, post, comment string) (Media, error) {
 	var m Media
 	if !a.Can("media") {
 		return m, Denied
@@ -129,7 +133,7 @@ func (l *Library) upload(ctx context.Context, a Actor, r io.Reader, id string) (
 	} else if e != nil {
 		return m, e
 	}
-	m = Media{ID: id, Object: ID(16), Type: typ, Size: n, Location: loc}
+	m = Media{Comment: comment, Post: post, ID: id, Object: ID(16), Type: typ, Size: n, Location: loc}
 	if strings.HasPrefix(typ, "image/") {
 		cfg, _, e := image.DecodeConfig(f)
 		if e != nil || cfg.Width <= 0 || cfg.Height <= 0 || cfg.Width > 16384 || cfg.Height > 16384 || int64(cfg.Width)*int64(cfg.Height) > 64000000 {
@@ -178,7 +182,15 @@ func (l *Library) Open(ctx context.Context, a Actor, id string) (Media, ReadSeek
 	if e != nil {
 		return m, nil, e
 	}
-	if !a.Can("media") && !a.Can("posts:read") {
+	if m.Comment != "" && !a.Owner {
+		c, e := Read[Comment](ctx, l.Service.DB, "comment", m.Comment)
+		if e != nil || c.Status != "approved" || !slices.Contains(c.Images, id) || c.Post != m.Post {
+			return m, nil, storage.ErrMissing
+		}
+		if _, e = l.Service.CommentPolicy(ctx, c.Post, false); e != nil {
+			return m, nil, storage.ErrMissing
+		}
+	} else if m.Comment == "" && !a.Can("media") && !a.Can("posts:read") {
 		p, e := l.Service.Get(ctx, Actor{}, m.Post, false)
 		if e != nil || !slices.Contains(p.AllMedia(), id) {
 			return m, nil, storage.ErrMissing

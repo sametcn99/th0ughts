@@ -493,5 +493,49 @@
     "file": "mobile-appearance.webp",
     "width": 390,
     "height": 844
+  },
+  {
+    "id": "comment-thread",
+    "group": "reader",
+    "title": {
+      "en": "Threaded comments and images",
+      "tr": "Görselli yorumlar ve yanıtlar"
+    },
+    "file": "comment-thread.webp",
+    "width": 700,
+    "height": 478
+  },
+  {
+    "id": "comment-mobile",
+    "group": "reader",
+    "title": {
+      "en": "Reading replies on mobile",
+      "tr": "Mobilde yanıtları okuma"
+    },
+    "file": "comment-mobile.webp",
+    "width": 390,
+    "height": 478
+  },
+  {
+    "id": "guest-comment",
+    "group": "reader",
+    "title": {
+      "en": "Guest comment form",
+      "tr": "Ziyaretçi yorum formu"
+    },
+    "file": "guest-comment.webp",
+    "width": 366,
+    "height": 466
+  },
+  {
+    "id": "comment-moderation",
+    "group": "publishing",
+    "title": {
+      "en": "Comment settings and moderation queue",
+      "tr": "Yorum ayarları ve moderasyon kuyruğu"
+    },
+    "file": "comment-moderation.webp",
+    "width": 900,
+    "height": 744
   }
 ]

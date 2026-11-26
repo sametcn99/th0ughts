@@ -24,10 +24,12 @@ type Record struct {
 	Data      json.RawMessage
 }
 type Query struct {
-	Kind   string
-	Public bool
-	Before *Cursor
-	Limit  int
+	Prefix      string
+	Unpublished bool
+	Kind        string
+	Public      bool
+	Before      *Cursor
+	Limit       int
 }
 type Cursor struct {
 	Rank int64
@@ -53,7 +55,7 @@ func Open(ctx context.Context, c Config) (Store, error) {
 	return nil, fmt.Errorf("unsupported driver %q", c.Driver)
 }
 func matches(r Record, q Query) bool {
-	return r.Kind == q.Kind && (!q.Public || r.Published) && (q.Before == nil || r.Rank < q.Before.Rank || r.Rank == q.Before.Rank && r.ID < q.Before.ID)
+	return r.Kind == q.Kind && strings.HasPrefix(r.ID, q.Prefix) && (!q.Unpublished || !r.Published) && (!q.Public || r.Published) && (q.Before == nil || r.Rank < q.Before.Rank || r.Rank == q.Before.Rank && r.ID < q.Before.ID)
 }
 func ordered(rows []Record, q Query) []Record {
 	sort.Slice(rows, func(i, j int) bool {

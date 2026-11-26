@@ -111,6 +111,13 @@ func (s *sqlStore) Delete(ctx context.Context, k, id string) error {
 func (s *sqlStore) List(ctx context.Context, q Query) ([]Record, error) {
 	query := "SELECT " + fields + " FROM records WHERE kind=?"
 	args := []any{q.Kind}
+	if q.Prefix != "" {
+		query += " AND id>=? AND id<?"
+		args = append(args, q.Prefix, q.Prefix+"~")
+	}
+	if q.Unpublished {
+		query += " AND published=FALSE"
+	}
 	if q.Public {
 		query += " AND published=TRUE"
 	}

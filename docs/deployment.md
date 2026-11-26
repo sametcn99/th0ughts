@@ -49,3 +49,13 @@ Both platform files expose the container port internally, use `/healthz`, and mo
 - To preserve sessions, passkeys, and encrypted connection details in a full infrastructure backup, retain the database, all volumes, any S3 objects, and the original master key.
 - Stop the serving process before offline maintenance. With the same data directory and master key, run `th0ughts -data /data recover` and supply the replacement password on standard input. Recovery invalidates old sessions and API tokens. Run `th0ughts -data /data theme-reset` to restore the built-in Paper theme.
 - Keep the Compose project name stable when upgrading. Rebuild, deploy, and check `/healthz`. Retain the existing volume and master key.
+
+## Guest comments and verification mail
+
+Comments are off on new and upgraded sites. Open **Settings → Comments → Verification email delivery** and enter the SMTP host, port, sender, and any required credentials. Choose STARTTLS (typically port 587) or implicit TLS (typically 465). The relay must accept mail from your instance and present a certificate trusted by the server. The master key encrypts relay credentials in the database. Restoring a portable backup onto a new instance requires configuring its relay again.
+
+Choose **Review each comment before publishing** or **Publish after email verification**, then save. Set the image limit to zero to disable uploads and use the Markdown switch to control formatting. Switching guest comments off hides all threads and their images from readers. Closing an individual post keeps approved conversations readable.
+
+Guests receive a one-use mailbox code for each submission. Display names are optional. Email addresses and codes are excluded from published comments and portable backups. Each comment accepts up to 6,000 characters and up to four JPEG, PNG, or WebP images of 4 MiB each, subject to the owner's settings. The server decodes images and re-encodes them as JPEG before storing them on disk or S3.
+
+Use the moderation queue to approve or delete submissions. Deleting a published comment removes its content and images while keeping replies in context. The moderation interface does not offer text editing. Backups preserve the tree, attachments, pending submissions, moderation states, and post locks.

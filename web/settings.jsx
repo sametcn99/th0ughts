@@ -10,8 +10,17 @@ import {
   SignIn,
   ceremony,
 } from "./shared.jsx";
-const sections = ["site", "appearance", "security", "tokens", "storage"];
+import CommentSettings from "./comment-settings.jsx";
+const sections = [
+  "site",
+  "appearance",
+  "comments",
+  "security",
+  "tokens",
+  "storage",
+];
 const iconPaths = {
+  comments: "M3 4h18v13H9l-5 4v-4H3z",
   site: "M3 5h18v14H3z M3 9h18 M7 5v4",
   appearance:
     "M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1-3.7c-1.1-.8-.6-2.8.9-2.8H17a4 4 0 0 0 4-4C21 6.4 17 3 12 3z M7 10h.01 M10 7h.01 M15 7h.01 M18 10h.01",
@@ -158,7 +167,7 @@ export default function Settings({ previewSection } = {}) {
   function close() {
     dialog.current.close();
   }
-  const editable = tab === "site" || tab === "appearance";
+  const editable = ["site", "appearance", "comments"].includes(tab);
   const dirty =
     JSON.stringify(prefs) !== JSON.stringify(state.site) ||
     draft?.theme.id === prefs.theme;
@@ -669,6 +678,12 @@ export default function Settings({ previewSection } = {}) {
                   </fieldset>
                 </>
               )}
+              {tab === "comments" && (
+                <CommentSettings
+                  policy={prefs.comments || {}}
+                  change={(v) => set("comments", v)}
+                />
+              )}
               {tab === "security" && (
                 <>
                   <div className="method-row">
@@ -897,7 +912,7 @@ export default function Settings({ previewSection } = {}) {
                   {reauth && <SignIn reauth onDone={() => verify(false)} />}
                 </fieldset>
               )}
-              {["tokens", "storage"].includes(tab) && (
+              {["tokens", "storage", "comments"].includes(tab) && (
                 <button className="verify-link" onClick={() => verify(!reauth)}>
                   {t("reauth")}
                 </button>

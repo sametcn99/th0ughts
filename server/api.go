@@ -55,13 +55,40 @@ type themeInput struct {
 }
 
 var commands = []Command{
+	command("comment_context", "", true, func(c context.Context, s *Server, a feed.Actor, x identify) (any, error) {
+		return s.commentContext(c, x.ID)
+	}),
+	command("set_thread_lock", "owner", false, func(c context.Context, s *Server, a feed.Actor, x struct {
+		ID     string `json:"id"`
+		Closed bool   `json:"closed"`
+	}) (any, error) { return true, s.S.LockThread(c, a, x.ID, x.Closed) }),
+	command("list_comments", "", true, func(c context.Context, s *Server, a feed.Actor, x feed.CommentQuery) (any, error) {
+		return s.threadPage(c, a, x, false)
+	}),
+	command("pending_comments", "owner", true, func(c context.Context, s *Server, a feed.Actor, x feed.CommentQuery) (any, error) {
+		return s.threadPage(c, a, x, true)
+	}),
+	command("moderate_comment", "owner", false, func(c context.Context, s *Server, a feed.Actor, x struct {
+		ID     string `json:"id"`
+		Action string `json:"action"`
+	}) (any, error) {
+		return true, s.L.Moderate(c, a, x.ID, x.Action)
+	}),
+	command("get_comment_mail", "owner", true, func(c context.Context, s *Server, a feed.Actor, _ empty) (any, error) {
+		m, e := s.relay(c)
+		m.Password = ""
+		return m, e
+	}),
+	command("configure_comment_mail", "owner", false, func(c context.Context, s *Server, a feed.Actor, m mailRelay) (any, error) {
+		return true, s.saveRelay(c, a, m)
+	}),
 	command("list_posts", "", true, func(c context.Context, s *Server, a feed.Actor, x feed.Filter) (any, error) { return s.S.List(c, a, x) }),
 	command("get_post", "", true, func(c context.Context, s *Server, a feed.Actor, x identify) (any, error) {
 		return s.S.Get(c, a, x.ID, x.Private)
 	}),
 	command("save_post", "posts:write", false, func(c context.Context, s *Server, a feed.Actor, x feed.Post) (any, error) { return s.S.Save(c, a, x) }),
 	command("delete_post", "posts:write", false, func(c context.Context, s *Server, a feed.Actor, x identify) (any, error) {
-		return true, s.S.Delete(c, a, x.ID)
+		return true, s.L.DeletePost(c, a, x.ID)
 	}),
 	command("get_settings", "", true, func(c context.Context, s *Server, a feed.Actor, _ empty) (any, error) { return s.S.Settings(c) }),
 	command("save_settings", "settings", false, func(c context.Context, s *Server, a feed.Actor, x feed.Settings) (any, error) {

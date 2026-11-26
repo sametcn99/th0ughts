@@ -108,3 +108,9 @@ Run `th0ughts -file ./my-theme.html theme-check` locally, before uploading anyth
 In **Settings → Appearance**, upload an HTML file, choose **Preview**, and select the timeline, a short permalink, an Article card or permalink, sign-in, composer, or settings. The controls shown in previews are inert snapshots rendered from the application components. **Save** commits the new active revision and site settings together. A failed save keeps the last published revision visible.
 
 **Download theme file** exports the selected source. **Version history** lists earlier distinct revisions, newest first. Restoring a revision takes effect immediately and keeps the replaced version in history. To delete a custom theme, activate another theme first, then select the inactive custom theme and choose **Delete theme**. Built-in themes are protected. Site backups include custom themes and their revision histories, and the importer accepts earlier backups containing a single previous revision.
+
+### Comment threads
+
+A post template can place `<slot name="comments"></slot>` anywhere in its layout. Existing themes receive the thread after the posts slot automatically. Both short posts and Articles use the same thread. The preview of a post permalink includes a sample comment.
+
+The thread uses the shared surface, text, accent, border, and focus tokens. Use class selectors such as `.comment-thread`, `.thread-heading`, `.thread-node`, `.comment-branch`, `.comment-meta`, `.comment-images`, and `.guest-comment` to change its layout. The reply tree and guest form render inside the themed document.

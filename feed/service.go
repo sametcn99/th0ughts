@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -55,17 +56,19 @@ type Translation struct {
 	Published   bool              `json:"published"`
 }
 type Post struct {
-	ID       string                 `json:"id,omitempty"`
-	Original string                 `json:"original"`
-	Text     map[string]Translation `json:"text"`
-	Tags     []string               `json:"tags,omitempty"`
-	Media    []string               `json:"media,omitempty"`
-	Pinned   bool                   `json:"pinned,omitempty"`
-	Created  int64                  `json:"created,omitempty"`
-	Updated  int64                  `json:"updated,omitempty"`
-	Revision int                    `json:"revision,omitempty"`
+	CommentsClosed bool                   `json:"commentsClosed,omitempty"`
+	ID             string                 `json:"id,omitempty"`
+	Original       string                 `json:"original"`
+	Text           map[string]Translation `json:"text"`
+	Tags           []string               `json:"tags,omitempty"`
+	Media          []string               `json:"media,omitempty"`
+	Pinned         bool                   `json:"pinned,omitempty"`
+	Created        int64                  `json:"created,omitempty"`
+	Updated        int64                  `json:"updated,omitempty"`
+	Revision       int                    `json:"revision,omitempty"`
 }
 type Settings struct {
+	Comments    CommentPolicy `json:"comments"`
 	refs        map[string][]string
 	Name        string                       `json:"name"`
 	Description string                       `json:"description,omitempty"`
@@ -117,6 +120,9 @@ func (s *Service) SaveSettings(ctx context.Context, a Actor, v Settings) error {
 	return e
 }
 func validateSettings(v *Settings) error {
+	if !v.Comments.valid() {
+		return Invalid
+	}
 	if !Locale(v.Lang) || v.Name == "" || !storage.ValidKey(v.Theme) || len(v.Name) > 150 || len(v.Description) > 1000 {
 		return Invalid
 	}
@@ -210,6 +216,9 @@ func (s *Service) Save(ctx context.Context, a Actor, p Post) (Post, error) {
 	}
 	for _, id := range p.AllMedia() {
 		m, e := Read[Media](ctx, s.DB, "media", id)
+		if m.Comment != "" {
+			return Post{}, Invalid
+		}
 		if e == nil && m.Post != "" && m.Post != p.ID {
 			_, claimErr := s.DB.Get(ctx, "post", m.Post)
 			if !errors.Is(claimErr, storage.ErrMissing) {
@@ -262,15 +271,28 @@ func (s *Service) Save(ctx context.Context, a Actor, p Post) (Post, error) {
 	return p, e
 }
 func (s *Service) Delete(ctx context.Context, a Actor, id string) error {
+	return s.deletePost(ctx, a, id, nil)
+}
+func (s *Service) deletePost(ctx context.Context, a Actor, id string, discard func(context.Context, []string) error) error {
 	if !a.Can("posts:write") {
 		return Denied
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if !storage.ValidKey(id) {
+		return Invalid
+	}
+	if e := Write(ctx, s.DB, "thread_gc", id, true, 0, false); e != nil {
+		return e
+	}
 	e := s.DB.Delete(ctx, "post", id)
 	if e == nil {
 		delete(s.index, id)
 		s.Version.Add(1)
+		if e = s.purgePostComments(ctx, id, discard); e != nil {
+			return e
+		}
+		return s.DB.Delete(ctx, "thread_gc", id)
 	}
 	return e
 }
@@ -291,6 +313,18 @@ type Page struct {
 func cursor(r storage.Record) string {
 	return base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprintf("%d/%s", r.Rank, r.ID)))
 }
+func parseCursor(value string) (*storage.Cursor, error) {
+	b, e := base64.RawURLEncoding.DecodeString(value)
+	if e != nil {
+		return nil, Invalid
+	}
+	r, id, ok := strings.Cut(string(b), "/")
+	rank, e := strconv.ParseInt(r, 10, 64)
+	if !ok || e != nil || !storage.ValidKey(id) {
+		return nil, Invalid
+	}
+	return &storage.Cursor{Rank: rank, ID: id}, nil
+}
 func (s *Service) List(ctx context.Context, a Actor, f Filter) (Page, error) {
 	out := Page{Posts: []Post{}}
 	if f.Private && !a.Can("posts:read") {
@@ -298,16 +332,11 @@ func (s *Service) List(ctx context.Context, a Actor, f Filter) (Page, error) {
 	}
 	q := storage.Query{Kind: "post", Public: !f.Private}
 	if f.Cursor != "" {
-		b, e := base64.RawURLEncoding.DecodeString(f.Cursor)
+		var e error
+		q.Before, e = parseCursor(f.Cursor)
 		if e != nil {
-			return out, Invalid
+			return out, e
 		}
-		r, id, ok := strings.Cut(string(b), "/")
-		var rank int64
-		if _, e = fmt.Sscan(r, &rank); !ok || e != nil || !storage.ValidKey(id) {
-			return out, Invalid
-		}
-		q.Before = &storage.Cursor{Rank: rank, ID: id}
 	}
 	limit := f.Limit
 	if limit <= 0 {

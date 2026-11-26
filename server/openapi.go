@@ -43,6 +43,12 @@ func (s *Server) openapi(w http.ResponseWriter, r *http.Request) {
 	list["parameters"] = params
 	paths["/api/v1/posts"] = spec{"get": list, "post": operation("createPost", "Create a post", schemaFor("save_post"), true)}
 	paths["/api/v1/posts/{id}"] = spec{"parameters": []spec{{"in": "path", "name": "id", "required": true, "schema": spec{"type": "string"}}}, "get": operation("getPost", "Read a post", nil, false), "put": operation("updatePost", "Update a post with its current revision", schemaFor("save_post"), true), "delete": operation("deletePost", "Delete a post", nil, true)}
+	stringField := spec{"type": "string"}
+	paths["/api/v1/comment-code"] = spec{"post": operation("requestCommentCode", "Email a one-use verification code for a published post", spec{"type": "object", "required": []string{"post", "email"}, "properties": spec{"post": stringField, "email": spec{"type": "string", "format": "email"}, "lang": stringField}}, false)}
+	submit := operation("submitGuestComment", "Submit a verified guest comment or reply", nil, false)
+	submit["parameters"] = []spec{{"in": "path", "name": "post", "required": true, "schema": stringField}, {"in": "header", "name": "X-Comment-Challenge", "required": true, "schema": stringField}, {"in": "header", "name": "X-Comment-Code", "required": true, "schema": stringField}}
+	submit["requestBody"] = spec{"required": true, "content": spec{"multipart/form-data": spec{"schema": spec{"type": "object", "properties": spec{"name": stringField, "parent": stringField, "body": stringField, "format": spec{"type": "string", "enum": []string{"text", "markdown"}}, "image": spec{"type": "array", "maxItems": 4, "items": spec{"type": "string", "format": "binary"}}}}}}}
+	paths["/api/v1/comments/{post}"] = spec{"post": submit}
 	for _, name := range []string{"upload", "restore", "backup"} {
 		verb := "post"
 		mime := "application/octet-stream"
