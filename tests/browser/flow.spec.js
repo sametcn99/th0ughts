@@ -356,3 +356,100 @@ for (const [lang, mobile] of [
     }
   });
 }
+
+test("themed timeline appends cursor pages and retains crawlable links", async ({ browser }) => {
+  const dir = await mkdtemp(path.join(tmpdir(), "thoughts-scroll-"));
+  const master = randomBytes(32).toString("hex");
+  const app = spawn(process.env.TEST_BINARY || "bin/th0ughts",
+    ["-listen", "127.0.0.1:0", "-data", dir, "serve"],
+    { env: { ...process.env, TH0UGHTS_MASTER_KEY: master }, stdio: ["ignore", "ignore", "pipe"] });
+  const closed = once(app, "close");
+  const contexts = [];
+  try {
+    const port = await listeningPort(app.stderr);
+    const baseURL = "http://localhost:" + port;
+    const owner = await browser.newContext({ baseURL });
+    const guest = await browser.newContext({ baseURL, viewport: {width:390,height:740} });
+    const crawler = await browser.newContext({ baseURL, javaScriptEnabled: false });
+    contexts.push(owner, guest, crawler);
+    const api = async (path, data) => {
+      const r = await owner.request.post(path, { data, headers: {"X-Th0ughts-Request": "1"} });
+      expect(r.ok(), await r.text()).toBeTruthy();
+      return r.json();
+    };
+    await api("/auth/bootstrap", { master });
+    await api("/auth/setup", { password: "scroll-test-password" });
+    const settings = await api("/api/v1/get_settings", {});
+    await api("/api/v1/save_settings", {...settings, theme: "index"});
+    const published = [];
+    let pinned, draft;
+    for (let i = 0; i < 47; i++) {
+      const p = await api("/api/v1/save_post", {
+        original: "tr", pinned: i === 1, tags: [i === 45 ? "other" : "ink"],
+        text: { tr: { body: i === 46 ? "Unrelated" : "Garden " + i, published: i !== 0 } },
+      });
+      if (i === 0) draft = p;
+      if (i === 1) pinned = p;
+      if (i >= 1 && i < 45) published.push(p.id);
+    }
+    const url = "/?lang=tr&q=Garden&tag=ink";
+    const page = await guest.newPage();
+    await page.goto(url);
+    const posts = page.locator(".entries > [data-post-id]");
+    await expect(posts).toHaveCount(20);
+    await expect(posts.first()).toHaveAttribute("data-post-id", pinned.id);
+    const older = page.locator("[data-feed-next]");
+    const second = await older.getAttribute("href");
+
+    const plain = await crawler.newPage();
+    await plain.goto(url);
+    await plain.locator("[data-feed-next]").click();
+    await expect(plain).toHaveURL(baseURL + "/" + second);
+    await expect(plain.locator(".entries > article")).toHaveCount(20);
+    await expect(plain.locator('link[rel=canonical]')).toHaveAttribute("href", /cursor=/);
+
+    // Move a previously seen pinned post behind the cursor between loads.
+    await api("/api/v1/save_post", {...pinned, pinned:false});
+    const requests = [];
+    await page.route("**/*cursor=*", async route => {
+      if (route.request().headers().accept !== "application/vnd.th0ughts.timeline+json") return route.continue();
+      requests.push(route.request().url());
+      if (requests.length === 1) return route.fulfill({status:503, body:""});
+      return route.continue();
+    });
+    await posts.last().scrollIntoViewIfNeeded();
+    await expect(older).toHaveText(/Tekrar dene/);
+    await expect(posts).toHaveCount(20);
+    await older.focus();
+    await page.keyboard.press("Enter");
+    await expect(posts).toHaveCount(40);
+    expect(requests[0]).toBe(requests[1]);
+    await posts.last().scrollIntoViewIfNeeded();
+    await expect(posts).toHaveCount(44);
+    await expect(older).toHaveCount(0);
+    await expect(page).toHaveURL(baseURL + url);
+    expect(requests).toHaveLength(3);
+    for (const target of requests) {
+      const params = new URL(target).searchParams;
+      expect([params.get("lang"),params.get("tag"),params.get("q")]).toEqual(["tr","ink","Garden"]);
+    }
+    expect((await posts.evaluateAll(nodes => nodes.map(n => n.dataset.postId))).sort()).toEqual(published.sort());
+    await expect(posts.last().locator("time").first()).toHaveAttribute("title", /.+/);
+    await expect(page.locator("[data-edit]")).toHaveCount(0);
+
+    const dashboard = await owner.newPage();
+    await dashboard.goto(url);
+    const entries = dashboard.locator(".entries > article");
+    await entries.last().scrollIntoViewIfNeeded();
+    await expect(entries).toHaveCount(40);
+    await entries.last().scrollIntoViewIfNeeded();
+    await expect(entries).toHaveCount(45);
+    await dashboard.locator('[data-edit="' + draft.id + '"]').click();
+    await expect(dashboard.locator("#composer textarea")).toHaveValue("Garden 0");
+  } finally {
+    for (const ctx of contexts) await ctx.close();
+    app.kill();
+    await closed;
+    await rm(dir, {recursive:true,force:true});
+  }
+});

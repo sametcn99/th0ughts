@@ -92,5 +92,5 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 	if !detail && site.Comments.Enabled() && p.Visible() {
 		parts["actions"] += `<a class="thread-link" href="` + permalink + `#comments">` + esc(words["comments"]) + `</a>`
 	}
-	return "<article class=\"" + class + "\" lang=\"" + esc(l) + "\">" + design.RenderLocale("item", parts, lang, map[string]bool{"article": article, "short": !article, "detail": detail, "list": !detail, "owner": private, "pinned": p.Pinned, "draft": !t.Published, "media": len(p.Attachments(t)) > 0, "tags": len(p.Tags) > 0, "title": t.Title != ""}) + "</article>"
+	return "<article data-post-id=\"" + esc(p.ID) + "\" class=\"" + class + "\" lang=\"" + esc(l) + "\">" + design.RenderLocale("item", parts, lang, map[string]bool{"article": article, "short": !article, "detail": detail, "list": !detail, "owner": private, "pinned": p.Pinned, "draft": !t.Published, "media": len(p.Attachments(t)) > 0, "tags": len(p.Tags) > 0, "title": t.Title != ""}) + "</article>"
 }

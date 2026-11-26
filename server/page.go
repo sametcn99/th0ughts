@@ -176,6 +176,27 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	nextURL := ""
+	if page.Next != "" {
+		params := r.URL.Query()
+		params.Set("cursor", page.Next)
+		nextURL = "?" + params.Encode()
+	}
+	fragment := r.URL.Path == "/" && id == "" && !preview && wantsTimelineFragment(r)
+	var items strings.Builder
+	prioritizePhoto := !fragment
+	for i, p := range page.Posts {
+		if i >= 2 {
+			prioritizePhoto = false
+		}
+		items.WriteString(h.postHTML(r, p, lang, words, site, design, private, id != "", &prioritizePhoto))
+	}
+	themeVersion := fmt.Sprintf("%s/%d", design.ID, design.Revisions)
+	if fragment {
+		w.Header().Set("Content-Type", timelineMediaType)
+		json.NewEncoder(w).Encode(map[string]any{"items": items.String(), "next": nextURL, "owner": private, "theme": themeVersion, "lang": lang})
+		return
+	}
 	title, description, cover := site.Name, site.Description, site.Cover
 	canonical := link(base, id, lang)
 	ogType := "website"
@@ -294,23 +315,16 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 	}
 	banner.WriteString("</nav></details></div>")
 	var posts strings.Builder
-	posts.WriteString("<div class=\"entries\">")
-	prioritizePhoto := true
-	for i, p := range page.Posts {
-		if i >= 2 {
-			prioritizePhoto = false
-		}
-		posts.WriteString(h.postHTML(r, p, lang, words, site, design, private, id != "", &prioritizePhoto))
-	}
+	fmt.Fprintf(&posts, `<div class="entries" data-feed-theme="%s">`, esc(themeVersion))
+	posts.WriteString(items.String())
 	if len(page.Posts) == 0 {
 		fmt.Fprintf(&posts, "<div class=\"empty\"><span aria-hidden=\"true\">◌</span><p>%s</p></div>", esc(words["empty"]))
 	}
 	posts.WriteString("</div>")
 	parts := map[string]string{"header": banner.String(), "posts": posts.String()}
 	parts["filters"] = fmt.Sprintf("<section class=\"intro\"><div><h1>%s</h1><p>%s</p></div><a class=\"rss\" href=\"/feed.xml?lang=%s\">RSS ↗</a></section><form class=\"search\" action=\"/\"><input type=hidden name=lang value=\"%s\"><input name=q type=search aria-label=\"%s\" placeholder=\"%s\" value=\"%s\"><button>%s</button></form>", esc(words["timeline"]), esc(site.Description), lang, lang, esc(words["search"]), esc(words["search_hint"]), esc(f.Search), esc(words["search"]))
-	if page.Next != "" {
-		q.Set("cursor", page.Next)
-		parts["pagination"] = "<a class=\"older\" href=\"?" + esc(q.Encode()) + "\">" + esc(words["older"]) + " →</a>"
+	if nextURL != "" {
+		parts["pagination"] = fmt.Sprintf(`<a class="older" data-feed-next rel="next" href="%s" data-loading="%s" data-retry="%s" data-loaded="%s">%s →</a><span class="feed-status" role="status"></span>`, esc(nextURL), esc(words["loading_posts"]), esc(words["retry_posts"]), esc(words["posts_loaded"]), esc(words["older"]))
 	}
 	view := "feed"
 	if id != "" {

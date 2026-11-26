@@ -151,6 +151,13 @@ func serveCopy(w http.ResponseWriter, r *http.Request, b *response) {
 		w.Write(body)
 	}
 }
+
+const timelineMediaType = "application/vnd.th0ughts.timeline+json"
+
+func wantsTimelineFragment(r *http.Request) bool {
+	return r.Header.Get("Accept") == timelineMediaType
+}
+
 func (s *Server) cachedPage(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/login" || r.URL.Path == "/sitemap.xml" || r.URL.Path == "/robots.txt" || r.Header.Get("Authorization") != "" || cookie(r, "session") != "" || cookie(r, "bootstrap") != "" || r.URL.Query().Has("preview") || len(r.URL.RawQuery) > 2048 {
 		s.page(w, r)
@@ -163,6 +170,8 @@ func (s *Server) cachedPage(w http.ResponseWriter, r *http.Request) {
 	key := r.Host + "\x00" + r.URL.RequestURI() + "\x00" + lang
 	if strings.Contains(r.Header.Get("Accept"), "text/markdown") {
 		key += "\x00md"
+	} else if wantsTimelineFragment(r) {
+		key += "\x00timeline"
 	}
 	if r.TLS != nil {
 		key += "\x00tls"

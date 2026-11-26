@@ -2,7 +2,7 @@
 
 A single-owner microblog with two pages. Readers open the timeline at `/`. The owner opens `/login` directly, signs in, and writes, translates, uploads media, changes themes, and manages the site on the same timeline.
 
-Go serves the initial HTML and the embedded React application. Reading, searching, pagination, per-post links, RSS, and Markdown work without JavaScript. One server process owns the data store. On managed installations, a launcher restarts the server during updates.
+Go serves the initial HTML and the embedded React application. Reading, searching, pagination, per-post links, RSS, and Markdown work without JavaScript. The timeline loads 20 posts at a time and appends the next page as you scroll. One server process owns the data store. On managed installations, a launcher restarts the server during updates.
 
 ## Install on a VPS
 
