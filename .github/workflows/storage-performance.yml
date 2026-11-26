@@ -45,6 +45,7 @@ jobs:
         shell: bash
         run: |
           go test -tags nativekv ./storage -run TestDrivers -v
+          go test -tags nativekv ./feed -run TestPublishingMatrix -v
           go test -tags nativekv ./storage -run '^$' -bench BenchmarkStore -benchtime=100x -count=3 | tee storage.txt
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:

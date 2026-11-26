@@ -2,7 +2,10 @@
 set -euo pipefail
 out=${1:?Supply an output directory}
 mkdir -p "$out"
-for arch in amd64 arm64; do
+# Build the host last so subsequent local Go builds can reuse the archive.
+arches=(arm64 amd64)
+if [[ $(go env GOHOSTARCH) == arm64 ]]; then arches=(amd64 arm64); fi
+for arch in "${arches[@]}"; do
   case "$arch" in
     amd64) prefix=x86_64-linux-gnu; target=x86_64-unknown-linux-gnu ;;
     arm64) prefix=aarch64-linux-gnu; target=aarch64-unknown-linux-gnu ;;

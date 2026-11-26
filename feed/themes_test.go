@@ -24,7 +24,11 @@ func (s *failingPublication) Put(ctx context.Context, r storage.Record) error {
 	return s.Store.Put(ctx, r)
 }
 func TestAtomicThemePublication(t *testing.T) {
-	for _, driver := range []string{"sqlite", "json", "json-dir"} {
+	drivers := []string{"sqlite", "json", "json-dir"}
+	if storage.NativeKVEnabled {
+		drivers = append(drivers, "redb", "lmdb")
+	}
+	for _, driver := range drivers {
 		t.Run(driver, func(t *testing.T) {
 			ctx := context.Background()
 			open := func() *failingPublication {
