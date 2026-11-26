@@ -271,13 +271,13 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 	}
 	head.WriteString("</style></head><body>")
 	var banner strings.Builder
-	fmt.Fprintf(&banner, "<div class=\"mast\"><a class=\"wordmark\" href=\"/?lang=%s\"><span class=\"mark\" aria-hidden=\"true\">◒</span>%s</a><nav aria-label=\"%s\">", lang, esc(site.Name), esc(words["language"]))
+	fmt.Fprintf(&banner, `<div class="mast"><a class="wordmark" href="/?lang=%s"><span class="mark" aria-hidden="true">◒</span>%s</a><details class="language-picker"><summary aria-label="%s · %s">%s</summary><nav aria-label="%s">`, lang, esc(site.Name), esc(words["language"]), esc(words["lang_"+lang]), esc(words["lang_"+lang]), esc(words["language"]))
 	for _, l := range []string{"en", "tr"} {
 		v := r.URL.Query()
 		v.Set("lang", l)
-		fmt.Fprintf(&banner, "<a lang=\"%s\" href=\"?%s\" aria-current=\"%t\">%s</a>", l, esc(v.Encode()), l == lang, esc(words["lang_"+l]))
+		fmt.Fprintf(&banner, `<a lang="%s" href="?%s" aria-current="%t">%s</a>`, l, esc(v.Encode()), l == lang, esc(words["lang_"+l]))
 	}
-	banner.WriteString("</nav></div>")
+	banner.WriteString("</nav></details></div>")
 	var posts strings.Builder
 	posts.WriteString("<div class=\"entries\">")
 	for _, p := range page.Posts {

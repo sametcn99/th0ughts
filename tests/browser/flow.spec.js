@@ -60,6 +60,20 @@ for (const [lang, mobile] of [
       await page.goto("/?lang=" + lang);
       await expectRepositoryFooter(page, lang);
       await expect(page.locator('a[href*="/login"]')).toHaveCount(0);
+      const otherLang = lang === "en" ? "tr" : "en";
+      const picker = page.locator(".language-picker");
+      await page.goto("/?lang=" + lang + "&q=ink&tag=studio");
+      await picker.locator("summary").focus();
+      await page.keyboard.press("Enter");
+      await expect(picker.locator("nav")).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(picker.locator("nav")).toBeHidden();
+      await picker.locator("summary").click();
+      await picker.locator('a[lang="' + otherLang + '"]').click();
+      await expect(page.locator("html")).toHaveAttribute("lang", otherLang);
+      expect(new URL(page.url()).searchParams.get("q")).toBe("ink");
+      expect(new URL(page.url()).searchParams.get("tag")).toBe("studio");
+      await page.goto("/?lang=" + lang);
       const cdp = await ctx.newCDPSession(page);
       const discovered = new Map();
       cdp.on("WebMCP.toolsAdded", ({ tools }) =>
@@ -167,6 +181,13 @@ for (const [lang, mobile] of [
       await reader.goto("/?lang=" + (lang === "en" ? "tr" : "en"));
       await expectRepositoryFooter(reader, lang === "en" ? "tr" : "en");
       await expect(reader.locator(".prose")).toHaveText("A garden in İstanbul");
+      await reader.locator(".byline a").click();
+      const postId = new URL(reader.url()).searchParams.get("post");
+      expect(postId).toBeTruthy();
+      await reader.locator(".language-picker summary").click();
+      await reader.locator('.language-picker a[lang="' + lang + '"]').click();
+      await expect(reader.locator("html")).toHaveAttribute("lang", lang);
+      expect(new URL(reader.url()).searchParams.get("post")).toBe(postId);
       await expect(reader.locator("#settings")).toHaveCount(0);
       await expect(reader.locator('meta[property="og:title"]')).toHaveCount(1);
       expect(await reader.content()).not.toContain("Private translated draft");

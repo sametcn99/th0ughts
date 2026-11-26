@@ -66,6 +66,17 @@
     "height": 860
   },
   {
+    "id": "language",
+    "group": "reader",
+    "title": {
+      "en": "Choosing the interface language",
+      "tr": "Arayüz dilini seçme"
+    },
+    "file": "language.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
     "id": "short-post",
     "group": "reader",
     "title": {

@@ -299,6 +299,11 @@ async function captureReader(reader, { detail, note }, shot) {
     "The public timeline",
     "Herkese açık zaman akışı",
   );
+  const picker = reader.locator(".language-picker");
+  await picker.locator("summary").click();
+  await expect(picker.locator("nav")).toBeVisible();
+  await shot(reader, "language", "reader", "Choosing the interface language", "Arayüz dilini seçme");
+  await picker.locator("summary").click();
   await captureShortPost(reader, note, "en", shot);
   await navigate(reader, "/?lang=en");
   await reader.getByRole("link", { name: "Read article" }).click();
