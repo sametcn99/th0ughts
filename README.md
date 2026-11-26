@@ -46,7 +46,7 @@ The language in a shared URL takes precedence over a saved reader preference, fo
 
 ## Customize and deploy
 
-- Upload a single HTML file from **Settings → Appearance**. Preview it, select its options, and save. Community themes use the same file format. [Theme authoring guide](docs/themes.md)
+- Upload a single HTML file from **Settings → Appearance**. Preview it, select its options, and save. Browse community themes and leave feedback in Discussions, or start a thread for your own theme. [Community themes](https://github.com/sametcn99/th0ughts/discussions/categories/show-and-tell) · [Share a theme](https://github.com/sametcn99/th0ughts/discussions/new?category=show-and-tell) · [Theme authoring guide](docs/themes.md)
 - Choose SQLite, PostgreSQL, MySQL, MariaDB, MongoDB, single-file JSON, or directory JSON. Each has a standalone Compose file. Platform-specific instructions cover repository builds, TLS routing, volumes, and secrets. [Deployment guide](docs/deployment.md)
 - Automate with scoped bearer tokens, the CLI, WebMCP, or standalone MCP. [API and CLI guide](docs/interfaces.md)
 - Review security controls, tests, and load measurements. [Security verification](docs/security.md) · [Performance](docs/performance.md)

@@ -1,0 +1,23 @@
+labels: ["theme"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use your theme's name as the discussion title. To export an installed theme, open **Settings → Appearance → Download theme file**.
+  - type: textarea
+    id: theme
+    attributes:
+      label: Theme file
+      description: Link to the single HTML file on GitHub or a Gist, or paste its source in an HTML code block.
+    validations:
+      required: true
+  - type: textarea
+    id: preview
+    attributes:
+      label: Preview
+      description: Drop a screenshot here or link to a live feed so readers can see the theme.
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Notes and feedback
+      description: What did you change? Are there particular screens, devices, or options you would like others to try?

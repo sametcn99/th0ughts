@@ -9,6 +9,12 @@ The same UTF-8 HTML file can be uploaded at runtime or added to `themes/` in a p
 
 The metadata names the stable theme ID and its display name. The default provides every layout you omit. Selecting a file creates a session-bound preview. Saving installs and activates the file. When replacing a theme with the same ID, its previous source remains available for rollback. Site preferences are stored by theme ID.
 
+## Share your theme
+
+Download your HTML file from **Settings → Appearance → Download theme file**. Start a discussion with the theme name as the title and link the file or paste its source. A screenshot helps readers decide whether to try it. [Share a theme](https://github.com/sametcn99/th0ughts/discussions/new?category=show-and-tell)
+
+To try someone else's theme, download their HTML file and open **Settings → Appearance → Upload a theme → Preview**. Reply in the original thread with feedback or screenshots. Authors can edit the opening post when they release an update. [Browse community themes](https://github.com/sametcn99/th0ughts/discussions/categories/show-and-tell)
+
 ## Change a layout
 
 A named `template` wraps slots in semantic HTML. Keep every slot of the layout exactly once. The engine iterates over the page of posts, renders the `item` layout for each, and bounds rendering to that page.

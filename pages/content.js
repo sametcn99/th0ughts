@@ -23,6 +23,8 @@ export const text = {
     themeIntro:
       "The same feed in three themes. Each theme is one HTML file with its own layout and CSS.",
     themeGuide: "Write a theme",
+    communityThemes: "Community themes",
+    shareTheme: "Share your theme",
     language: "Language",
     fullReference: "Full reference",
     install: "Installation",
@@ -126,6 +128,8 @@ export const text = {
     themeIntro:
       "Aynı akışın üç farklı temadaki görünümü. Her tema, kendi yerleşimini ve CSS kurallarını içeren tek bir HTML dosyasıdır.",
     themeGuide: "Tema yazma rehberi",
+    communityThemes: "Topluluk temaları",
+    shareTheme: "Temanı paylaş",
     language: "Dil",
     fullReference: "Ayrıntılı kaynak (İngilizce)",
     install: "Kurulum",

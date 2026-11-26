@@ -83,14 +83,18 @@ function Themes({ prefix, t, lang }) {
           );
         })}
       </div>
-      <a
-        href="#theme-guide"
-        onClick={() => {
-          document.getElementById("theme-guide").open = true;
-        }}
-      >
-        {t.themeGuide}
-      </a>
+      <div className="theme-links">
+        <a
+          href="#theme-guide"
+          onClick={() => {
+            document.getElementById("theme-guide").open = true;
+          }}
+        >
+          {t.themeGuide}
+        </a>
+        <a href={repo + "/discussions/categories/show-and-tell"}>{t.communityThemes}</a>
+        <a href={repo + "/discussions/new?category=show-and-tell"}>{t.shareTheme}</a>
+      </div>
     </section>
   );
 }
