@@ -240,9 +240,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 func (s *Server) origin(r *http.Request) string {
-	c, e := s.S.Settings(r.Context())
-	if e == nil && c.URL != "" {
-		return c.URL
+	c, _ := s.S.Settings(r.Context())
+	return pageOrigin(r, c.URL)
+}
+func pageOrigin(r *http.Request, url string) string {
+	if url != "" {
+		return url
 	}
 	scheme := "http"
 	host, _, _ := net.SplitHostPort(r.Host)
@@ -377,21 +380,40 @@ func (s *Server) allowedAttempt(r *http.Request) bool {
 	return true
 }
 func (s *Server) media(w http.ResponseWriter, r *http.Request) {
-	m, f, e := s.L.Open(r.Context(), s.actor(r), r.PathValue("id"))
+	m, open, e := s.L.Access(r.Context(), s.actor(r), r.PathValue("id"))
+	if e != nil {
+		fail(w, e)
+		return
+	}
+	width := 0
+	size := r.URL.Query().Get("w")
+	if (size == "480" || size == "960") && !m.Video() {
+		n, _ := strconv.Atoi(size)
+		if n < m.Width || m.Type == "image/jpeg" && m.Size > 64<<10 {
+			width = min(n, m.Width)
+		}
+	}
+	if m.Object != "" {
+		tag := "\"" + m.Object + "-" + strconv.Itoa(width) + "-v1\""
+		w.Header().Set("Cache-Control", "private, no-cache")
+		w.Header().Set("ETag", tag)
+		if r.Header.Get("If-None-Match") == tag {
+			w.WriteHeader(http.StatusNotModified)
+			return
+		}
+	}
+	if width > 0 {
+		if e = s.thumbnail(w, r, m, open, width); e != nil {
+			fail(w, e)
+		}
+		return
+	}
+	f, e := open()
 	if e != nil {
 		fail(w, e)
 		return
 	}
 	defer f.Close()
-	if size := r.URL.Query().Get("w"); (size == "480" || size == "960") && !m.Video() {
-		n, _ := strconv.Atoi(size)
-		if n < m.Width {
-			if e = s.thumbnail(w, r, m, f, n); e != nil {
-				fail(w, e)
-			}
-			return
-		}
-	}
 	w.Header().Set("Content-Type", m.Type)
 	http.ServeContent(w, r, m.ID, time.Time{}, f)
 }

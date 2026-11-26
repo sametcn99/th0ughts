@@ -8,6 +8,7 @@ import (
 	"mime"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -50,10 +51,39 @@ func static(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", mime.TypeByExtension(path.Ext(name)))
 	w.Header().Set("Vary", "Accept-Encoding")
-	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+	if acceptsGzip(r.Header.Get("Accept-Encoding")) {
 		w.Header().Set("Content-Encoding", "gzip")
 		w.Write(a.gz)
 	} else {
 		w.Write(a.raw)
 	}
+}
+
+func acceptsGzip(value string) bool {
+	wildcard := false
+	for _, item := range strings.Split(value, ",") {
+		name, params, _ := strings.Cut(item, ";")
+		name = strings.ToLower(strings.TrimSpace(name))
+		if name != "gzip" && name != "*" {
+			continue
+		}
+		quality := 1.0
+		if params != "" {
+			key, v, ok := strings.Cut(strings.TrimSpace(params), "=")
+			if !ok || !strings.EqualFold(strings.TrimSpace(key), "q") {
+				continue
+			}
+			var err error
+			quality, err = strconv.ParseFloat(strings.TrimSpace(v), 64)
+			if err != nil {
+				quality = 0
+			}
+		}
+		allowed := quality > 0 && quality <= 1
+		if name == "gzip" {
+			return allowed
+		}
+		wildcard = allowed
+	}
+	return wildcard
 }

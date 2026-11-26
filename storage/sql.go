@@ -121,7 +121,11 @@ func (s *sqlStore) List(ctx context.Context, q Query) ([]Record, error) {
 	if q.Public {
 		query += " AND published=TRUE"
 	}
-	if q.Before != nil {
+	if q.Before != nil && (s.driver == "sqlite" || s.driver == "postgres") {
+		// A tuple boundary allows a direct seek into the ordering index.
+		query += " AND (rank_value,id)<(?,?)"
+		args = append(args, q.Before.Rank, q.Before.ID)
+	} else if q.Before != nil {
 		query += " AND (rank_value < ? OR (rank_value=? AND id<?))"
 		args = append(args, q.Before.Rank, q.Before.Rank, q.Before.ID)
 	}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 
 	"github.com/gofrs/flock"
@@ -47,10 +48,11 @@ func syncDir(path string) error {
 }
 
 type files struct {
-	mu   sync.RWMutex
-	rows map[string]Record
-	cfg  Config
-	lock *flock.Flock
+	mu     sync.RWMutex
+	rows   map[string]Record
+	byKind map[string][]Record
+	cfg    Config
+	lock   *flock.Flock
 }
 
 func openFiles(c Config) (Store, error) {
@@ -64,7 +66,7 @@ func openFiles(c Config) (Store, error) {
 	if e := os.MkdirAll(dir, 0700); e != nil {
 		return nil, e
 	}
-	f := &files{cfg: c, rows: map[string]Record{}, lock: flock.New(c.Address + ".lock")}
+	f := &files{cfg: c, byKind: make(map[string][]Record), rows: map[string]Record{}, lock: flock.New(c.Address + ".lock")}
 	ok, e := f.lock.TryLock()
 	if e != nil {
 		return nil, e
@@ -122,16 +124,53 @@ func (f *files) Get(_ context.Context, k, id string) (Record, error) {
 	}
 	return r, nil
 }
-func (f *files) List(_ context.Context, q Query) ([]Record, error) {
+
+// Readers share an immutable ordered snapshot. A write invalidates only its kind.
+func (f *files) snapshot(kind string) []Record {
 	f.mu.RLock()
-	defer f.mu.RUnlock()
-	rows := []Record{}
+	rows, ok := f.byKind[kind]
+	f.mu.RUnlock()
+	if ok {
+		return rows
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if rows, ok = f.byKind[kind]; ok {
+		return rows
+	}
 	for _, r := range f.rows {
-		if matches(r, q) {
+		if r.Kind == kind {
 			rows = append(rows, r)
 		}
 	}
-	return ordered(rows, q), nil
+	if len(rows) > 0 {
+		orderRecords(rows)
+		f.byKind[kind] = rows
+	}
+	return rows
+}
+func (f *files) List(ctx context.Context, q Query) ([]Record, error) {
+	rows := f.snapshot(q.Kind)
+	if cur := q.Before; cur != nil {
+		start := sort.Search(len(rows), func(i int) bool {
+			r := rows[i]
+			return r.Rank < cur.Rank || r.Rank == cur.Rank && r.ID < cur.ID
+		})
+		rows = rows[start:]
+	}
+	result := make([]Record, 0, min(max(q.Limit, 0), len(rows)))
+	for i, r := range rows {
+		if i%256 == 0 && ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+		if matches(r, q) {
+			result = append(result, r)
+			if len(result) == q.Limit {
+				break
+			}
+		}
+	}
+	return result, nil
 }
 func (f *files) change(r Record, remove bool) error {
 	if !ValidKey(r.Kind) || !ValidKey(r.ID) {
@@ -139,6 +178,7 @@ func (f *files) change(r Record, remove bool) error {
 	}
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	delete(f.byKind, r.Kind)
 	key := r.Kind + "/" + r.ID
 	if f.cfg.Driver == "json" {
 		next := make(map[string]Record, len(f.rows))

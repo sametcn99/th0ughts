@@ -15,7 +15,7 @@ import (
 const timelineTextLimit = 280
 const articleExcerptLength = 160
 
-func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[string]string, site feed.Settings, design theme.Theme, private, detail bool) string {
+func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[string]string, site feed.Settings, design theme.Theme, private, detail bool, prioritizePhoto *bool) string {
 	l, t := p.Select(lang)
 	dt := time.UnixMilli(p.Created).UTC()
 	parts := map[string]string{}
@@ -65,7 +65,20 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 		if m.Video() {
 			fmt.Fprintf(&media, "<video controls preload=\"metadata\" aria-label=\"%s\" src=\"/media/%s\"></video>", esc(t.Alt[id]), esc(id))
 		} else {
-			fmt.Fprintf(&media, "<a href=\"/media/%s\"><img class=\"attachment\" loading=\"lazy\" width=\"%d\" height=\"%d\" src=\"/media/%s\" srcset=\"/media/%s?w=480 480w, /media/%s?w=960 960w\" sizes=\"(max-width: 760px) 92vw, 700px\" alt=\"%s\"></a>", esc(id), m.Width, m.Height, esc(id), esc(id), esc(id), esc(t.Alt[id]))
+			loading := `loading="lazy"`
+			if *prioritizePhoto {
+				loading = `loading="eager" fetchpriority="high"`
+				*prioritizePhoto = false
+			}
+			path := "/media/" + esc(id)
+			set := ""
+			if m.Width > 0 {
+				set = fmt.Sprintf("%s?w=480 %dw", path, min(480, m.Width))
+			}
+			if m.Width > 480 {
+				set += fmt.Sprintf(", %s?w=960 %dw", path, min(960, m.Width))
+			}
+			fmt.Fprintf(&media, `<a href="%s"><img class="attachment" %s width="%d" height="%d" src="%s" srcset="%s" sizes="(max-width: 760px) 92vw, 700px" alt="%s"></a>`, path, loading, m.Width, m.Height, path, set, esc(t.Alt[id]))
 		}
 	}
 	parts["media"] = media.String()

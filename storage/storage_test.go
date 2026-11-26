@@ -42,6 +42,22 @@ func TestDrivers(t *testing.T) {
 			if e != nil || len(rows) != 1 || rows[0].ID != "a" {
 				t.Fatalf("next page: %+v %v", rows, e)
 			}
+			// A warm ordering index must see changes to both rank and visibility.
+			updated := storage.Record{Kind: "contract", ID: "b", Rank: 3, Published: true, Data: json.RawMessage(`{"text":"İstanbul"}`)}
+			if e = s.Put(ctx, updated); e != nil {
+				t.Fatal(e)
+			}
+			rows, e = s.List(ctx, storage.Query{Kind: "contract", Public: true, Limit: 1})
+			if e != nil || len(rows) != 1 || rows[0].ID != "b" {
+				t.Fatalf("updated page: %+v %v", rows, e)
+			}
+			if e = s.Delete(ctx, "contract", "c"); e != nil {
+				t.Fatal(e)
+			}
+			rows, e = s.List(ctx, storage.Query{Kind: "contract", Before: &storage.Cursor{Rank: 3, ID: "b"}})
+			if e != nil || len(rows) != 1 || rows[0].ID != "a" {
+				t.Fatalf("page after deletion: %+v %v", rows, e)
+			}
 			if driver == "json" || driver == "json-dir" {
 				if duplicate, e := storage.Open(ctx, cfg); e == nil {
 					duplicate.Close()

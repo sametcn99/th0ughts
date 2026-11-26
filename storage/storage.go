@@ -57,17 +57,13 @@ func Open(ctx context.Context, c Config) (Store, error) {
 func matches(r Record, q Query) bool {
 	return r.Kind == q.Kind && strings.HasPrefix(r.ID, q.Prefix) && (!q.Unpublished || !r.Published) && (!q.Public || r.Published) && (q.Before == nil || r.Rank < q.Before.Rank || r.Rank == q.Before.Rank && r.ID < q.Before.ID)
 }
-func ordered(rows []Record, q Query) []Record {
+func orderRecords(rows []Record) {
 	sort.Slice(rows, func(i, j int) bool {
 		if rows[i].Rank == rows[j].Rank {
 			return rows[i].ID > rows[j].ID
 		}
 		return rows[i].Rank > rows[j].Rank
 	})
-	if q.Limit > 0 && len(rows) > q.Limit {
-		return rows[:q.Limit]
-	}
-	return rows
 }
 func ValidKey(s string) bool {
 	return s != "" && len(s) <= 128 && strings.Trim(s, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-") == ""

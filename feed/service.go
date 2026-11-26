@@ -83,10 +83,11 @@ type Service struct {
 	Themes       *Themes
 	DB           storage.Store
 	Version      atomic.Uint64
-	mu           sync.Mutex
+	mu           sync.RWMutex
 	hookWake     chan struct{}
 	hookDelivery sync.Mutex
-	index        map[string]searchEntry
+	publicMedia  publicMediaCache
+	index        *searchIndex
 }
 
 func New(db storage.Store) *Service {
@@ -294,7 +295,9 @@ func (s *Service) deletePost(ctx context.Context, a Actor, id string, discard fu
 	}
 	e := s.DB.Delete(ctx, "post", id)
 	if e == nil {
-		delete(s.index, id)
+		if s.index != nil {
+			s.index.remove(id)
+		}
 		s.Version.Add(1)
 		if e = s.purgePostComments(ctx, id, discard); e != nil {
 			return e

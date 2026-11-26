@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -177,7 +178,52 @@ type ReadSeekCloser interface {
 	io.Closer
 }
 
+// Public post attachments can reuse their visibility check until a publishing
+// change. Comment moderation and privileged access always use the live records.
+type publicMediaCache struct {
+	mu      sync.RWMutex
+	version uint64
+	items   map[string]Media
+}
+
+func (c *publicMediaCache) get(id string, version uint64) (Media, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	m, ok := c.items[id]
+	return m, ok && c.version == version
+}
+func (c *publicMediaCache) put(m Media, version uint64) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if version < c.version {
+		return
+	}
+	if version != c.version || len(c.items) >= 512 || c.items == nil {
+		c.items = make(map[string]Media)
+		c.version = version
+	}
+	c.items[m.ID] = m
+}
+
 func (l *Library) Open(ctx context.Context, a Actor, id string) (Media, ReadSeekCloser, error) {
+	m, open, e := l.Access(ctx, a, id)
+	if e != nil {
+		return m, nil, e
+	}
+	f, e := open()
+	return m, f, e
+}
+
+// Access checks current visibility and returns an opener for this version of the object.
+// Callers serving a validated derivative need not contact the original store.
+func (l *Library) Access(ctx context.Context, a Actor, id string) (Media, func() (ReadSeekCloser, error), error) {
+	public := !a.Owner && !a.Can("media") && !a.Can("posts:read")
+	version := l.Service.Version.Load()
+	if public {
+		if m, ok := l.Service.publicMedia.get(id, version); ok {
+			return m, func() (ReadSeekCloser, error) { return l.openObject(ctx, m) }, nil
+		}
+	}
 	m, e := Read[Media](ctx, l.Service.DB, "media", id)
 	if e != nil {
 		return m, nil, e
@@ -196,18 +242,24 @@ func (l *Library) Open(ctx context.Context, a Actor, id string) (Media, ReadSeek
 			return m, nil, storage.ErrMissing
 		}
 	}
+	if !storage.ValidKey(id) || !storage.ValidKey(m.objectKey()) {
+		return m, nil, Invalid
+	}
+	if public && m.Comment == "" && m.Object != "" {
+		l.Service.publicMedia.put(m, version)
+	}
+	return m, func() (ReadSeekCloser, error) { return l.openObject(ctx, m) }, nil
+}
+
+func (l *Library) openObject(ctx context.Context, m Media) (ReadSeekCloser, error) {
 	if m.Location == "disk" {
-		if !storage.ValidKey(id) {
-			return m, nil, Invalid
-		}
-		f, e := os.Open(filepath.Join(l.Dir, m.objectKey()))
-		return m, f, e
+		return os.Open(filepath.Join(l.Dir, m.objectKey()))
 	}
 	client, c, e := l.remote(ctx, m.Location)
 	if e != nil {
-		return m, nil, e
+		return nil, e
 	}
-	obj, e := client.GetObject(ctx, c.Bucket, m.objectKey(), minio.GetObjectOptions{})
-	return m, obj, e
+	return client.GetObject(ctx, c.Bucket, m.objectKey(), minio.GetObjectOptions{})
 }
+
 func (m Media) Video() bool { return strings.HasPrefix(m.Type, "video/") }

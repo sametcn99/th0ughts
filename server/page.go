@@ -63,7 +63,7 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 	}
 	words := h.catalog[lang]
 	a := h.actor(r)
-	base := h.origin(r)
+	base := pageOrigin(r, site.URL)
 	if r.URL.Path == "/robots.txt" {
 		w.Header().Set("Content-Type", "text/plain")
 		fmt.Fprintf(w, "User-agent: *\nDisallow: /login\nDisallow: /auth/\nSitemap: %s/sitemap.xml\n", base)
@@ -295,8 +295,12 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 	banner.WriteString("</nav></details></div>")
 	var posts strings.Builder
 	posts.WriteString("<div class=\"entries\">")
-	for _, p := range page.Posts {
-		posts.WriteString(h.postHTML(r, p, lang, words, site, design, private, id != ""))
+	prioritizePhoto := true
+	for i, p := range page.Posts {
+		if i >= 2 {
+			prioritizePhoto = false
+		}
+		posts.WriteString(h.postHTML(r, p, lang, words, site, design, private, id != "", &prioritizePhoto))
 	}
 	if len(page.Posts) == 0 {
 		fmt.Fprintf(&posts, "<div class=\"empty\"><span aria-hidden=\"true\">◌</span><p>%s</p></div>", esc(words["empty"]))
@@ -397,8 +401,18 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !preview {
-		_, acctErr := h.A.Account(ctx)
-		data := map[string]any{"site": site, "lang": lang, "owner": private, "setup": setup, "newSite": errors.Is(acctErr, storage.ErrMissing), "messages": words, "tools": tools}
+		messages := words
+		newSite := false
+		if private || setup || login {
+			_, acctErr := h.A.Account(ctx)
+			newSite = errors.Is(acctErr, storage.ErrMissing)
+		} else if thread == nil {
+			messages = make(map[string]string, len(tools))
+			for _, op := range tools {
+				messages[op.Name] = words[op.Name]
+			}
+		}
+		data := map[string]any{"site": site, "lang": lang, "owner": private, "setup": setup, "newSite": newSite, "messages": messages, "tools": tools}
 		if thread != nil {
 			data["thread"] = thread
 			data["threadPost"] = id

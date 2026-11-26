@@ -20,7 +20,13 @@ func main() {
 	dir := flag.String("data", "", "Empty benchmark directory")
 	driver := flag.String("driver", "sqlite", "Storage driver")
 	addr := flag.String("address", "", "Dedicated benchmark database")
+	posts := flag.Int("posts", 10000, "Number of posts")
+	image := flag.String("image", "", "Image fixture to attach")
+	every := flag.Int("image-every", 50, "Attach an image to every Nth post")
 	flag.Parse()
+	if *posts < 1 || *every < 1 {
+		panic("posts and image-every must be positive")
+	}
 	if *dir == "" {
 		panic("provide a fresh benchmark directory")
 	}
@@ -47,10 +53,14 @@ func main() {
 	must(e)
 	must(storage.Atomic(filepath.Join(*dir, "bench-token"), []byte(token)))
 	sample, _ := base64.StdEncoding.DecodeString("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X2ZkAAAAASUVORK5CYII=")
-	for i := 0; i < 10000; i++ {
+	if *image != "" {
+		sample, e = os.ReadFile(*image)
+		must(e)
+	}
+	for i := 0; i < *posts; i++ {
 		lang := []string{"en", "tr"}[i%2]
 		p := feed.Post{ID: fmt.Sprintf("seed-%05d", i), Original: lang, Created: 1700000000000 + int64(i), Updated: 1700000000000 + int64(i), Revision: 1, Tags: []string{fmt.Sprintf("tag-%d", i%31)}, Text: map[string]feed.Translation{lang: {Body: fmt.Sprintf("Field note %d. İstanbul, İzmir and the morning light. Notes about **gardens** and software. Group %d.", i, i%127), Published: true}}}
-		if i%50 == 0 {
+		if i%*every == 0 {
 			m, e := s.L.Upload(ctx, owner, bytes.NewReader(sample))
 			must(e)
 			m.Post = p.ID

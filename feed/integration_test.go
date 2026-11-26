@@ -174,3 +174,62 @@ func TestS3RoundTrip(t *testing.T) {
 		t.Fatal("S3 content mismatch", e)
 	}
 }
+
+func TestSearchCursorAfterPublicationChanges(t *testing.T) {
+	ctx := context.Background()
+	db, err := storage.Open(ctx, storage.Config{Driver: "json-dir", Address: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	s := feed.New(db)
+	actor := feed.Actor{Owner: true}
+	for _, id := range []string{"a", "b", "c", "d"} {
+		p := feed.Post{ID: id, Revision: 1, Created: 1, Original: "en", Text: map[string]feed.Translation{"en": {Body: "Search me", Published: true}}}
+		if err := feed.Write(ctx, db, "post", id, p, 1, true); err != nil {
+			t.Fatal(err)
+		}
+	}
+	filter := feed.Filter{Search: "search", Limit: 2}
+	check := func(f feed.Filter, ids string) feed.Page {
+		t.Helper()
+		page, e := s.List(ctx, feed.Actor{}, f)
+		if e != nil {
+			t.Fatal(e)
+		}
+		var got string
+		for _, p := range page.Posts {
+			got += p.ID
+		}
+		if got != ids {
+			t.Fatalf("got %s, want %s", got, ids)
+		}
+		return page
+	}
+	page := check(filter, "dc")
+	next := filter
+	next.Cursor = page.Next
+	if check(next, "ba").Next != "" {
+		t.Fatal("unexpected next cursor")
+	}
+	p, e := s.Get(ctx, actor, "a", true)
+	if e != nil {
+		t.Fatal(e)
+	}
+	p.Pinned = true
+	p, e = s.Save(ctx, actor, p)
+	if e != nil {
+		t.Fatal(e)
+	}
+	check(filter, "ad")
+	p.Text["en"] = feed.Translation{Body: "hidden"}
+	if _, e = s.Save(ctx, actor, p); e != nil {
+		t.Fatal(e)
+	}
+	if e = s.Delete(ctx, actor, "c"); e != nil {
+		t.Fatal(e)
+	}
+	if check(filter, "db").Next != "" {
+		t.Fatal("stale search index")
+	}
+}
