@@ -1,0 +1,67 @@
+{
+  "browser": "159.0.8154.6",
+  "profile": "390x844, 4x CPU slowdown, 150ms RTT, 1.6 Mbps down / 750 Kbps up, eight fresh contexts",
+  "runs": [
+    {
+      "LCP": 388,
+      "CLS": 0,
+      "INP": 24,
+      "interactions": 7,
+      "js": 719
+    },
+    {
+      "LCP": 416,
+      "CLS": 0,
+      "INP": 32,
+      "interactions": 7,
+      "js": 719
+    },
+    {
+      "LCP": 400,
+      "CLS": 0,
+      "INP": 16,
+      "interactions": 7,
+      "js": 719
+    },
+    {
+      "LCP": 416,
+      "CLS": 0,
+      "INP": 32,
+      "interactions": 7,
+      "js": 719
+    },
+    {
+      "LCP": 400,
+      "CLS": 0,
+      "INP": 32,
+      "interactions": 7,
+      "js": 719
+    },
+    {
+      "LCP": 424,
+      "CLS": 0,
+      "INP": 32,
+      "interactions": 7,
+      "js": 719
+    },
+    {
+      "LCP": 400,
+      "CLS": 0,
+      "INP": 16,
+      "interactions": 7,
+      "js": 719
+    },
+    {
+      "LCP": 384,
+      "CLS": 0,
+      "INP": 32,
+      "interactions": 7,
+      "js": 719
+    }
+  ],
+  "p75": {
+    "LCP": 416,
+    "CLS": 0,
+    "INP": 32
+  }
+}

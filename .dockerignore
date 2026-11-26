@@ -1,0 +1,11 @@
+.git
+.env*
+node_modules
+bin
+data
+test-results
+playwright-report
+docs/measurements
+*.key
+*.token
+*.session

@@ -1,0 +1,56 @@
+services:
+  app:
+    build: ..
+    environment:
+      TH0UGHTS_MASTER_KEY: ${TH0UGHTS_MASTER_KEY:?Set a persistent random master key}
+    command: ["-data", "/data", "-driver", "mysql", "serve"]
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - app-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      db:
+        condition: service_healthy
+  setup:
+    build: ..
+    environment:
+      TH0UGHTS_MASTER_KEY: ${TH0UGHTS_MASTER_KEY:?Set a persistent random master key}
+    command: ["-data", "/data", "-driver", "mysql", "-file", "/run/db-init", "setup-storage"]
+    volumes:
+      - app-data:/data
+      - db-init:/run/db-init
+    restart: "no"
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    environment:
+      MYSQL_USER: th0ughts
+      MYSQL_DATABASE: th0ughts
+      MYSQL_PASSWORD_FILE: /run/db-init/db-password
+      MYSQL_ROOT_PASSWORD_FILE: /run/db-init/admin-password
+    volumes:
+      - db-data:/var/lib/mysql
+      - db-init:/run/db-init:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+volumes:
+  app-data:
+  db-data:
+  db-init:

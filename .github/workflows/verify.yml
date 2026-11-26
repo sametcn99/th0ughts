@@ -1,0 +1,29 @@
+name: Verify
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff
+        with:
+          go-version-file: go.mod
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+      - run: bun install --frozen-lockfile && bun run check:i18n && bun run build && git diff --exit-code -- server/assets/owner.js
+      - run: go build -o bin/th0ughts ./cmd/th0ughts && go vet ./...
+      - run: TEST_BINARY="$PWD/bin/th0ughts" go test -race ./...
+      - run: go test ./themes -run '^$' -fuzz FuzzCompile -fuzztime=10s && go test ./server -run '^$' -fuzz FuzzArchive -fuzztime=10s
+      - run: bun audit --audit-level=high && go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+      - run: bun run --bun playwright install --with-deps chromium && bun run test:browser
+      - run: python3 scripts/check-compose.py
+  persistence:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        driver: [sqlite, json, json-dir, postgres, mysql, mariadb, mongodb]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - run: python3 scripts/smoke-compose.py "${{ matrix.driver }}"

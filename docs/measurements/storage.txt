@@ -1,0 +1,20 @@
+goos: linux
+goarch: amd64
+pkg: github.com/sametcn99/th0ughts/storage
+cpu: Intel(R) Core(TM) Ultra 9 285H
+BenchmarkStore/sqlite/page20-16  	     100	     38746 ns/op
+BenchmarkStore/sqlite/update-16  	     100	     18033 ns/op
+BenchmarkStore/postgres/page20-16         	     100	    140762 ns/op
+BenchmarkStore/postgres/update-16         	     100	    165417 ns/op
+BenchmarkStore/mysql/page20-16            	     100	    487906 ns/op
+BenchmarkStore/mysql/update-16            	     100	     94023 ns/op
+BenchmarkStore/mariadb/page20-16          	     100	    159216 ns/op
+BenchmarkStore/mariadb/update-16          	     100	    194666 ns/op
+BenchmarkStore/mongodb/page20-16          	     100	    251143 ns/op
+BenchmarkStore/mongodb/update-16          	     100	     95577 ns/op
+BenchmarkStore/json/page20-16             	     100	    208914 ns/op
+BenchmarkStore/json/update-16             	     100	    504139 ns/op
+BenchmarkStore/json-dir/page20-16         	     100	    119901 ns/op
+BenchmarkStore/json-dir/update-16         	     100	     15451 ns/op
+PASS
+ok  	github.com/sametcn99/th0ughts/storage	2.102s

@@ -1,0 +1,34 @@
+{
+  "sqlite": {
+    "sample_interval_seconds": 1,
+    "samples": 1021,
+    "peak_sample_bytes": 53055488,
+    "memory_limit_bytes": 2147483648,
+    "cpu_max": "200000 100000",
+    "memory_events": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0,
+      "oom_group_kill": 0,
+      "sock_throttled": 0
+    }
+  },
+  "pg": {
+    "sample_interval_seconds": 1,
+    "samples": 1021,
+    "peak_sample_bytes": 206344192,
+    "memory_limit_bytes": 2147483648,
+    "cpu_max": "200000 100000",
+    "memory_events": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0,
+      "oom_group_kill": 0,
+      "sock_throttled": 0
+    }
+  }
+}

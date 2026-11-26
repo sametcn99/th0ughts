@@ -1,0 +1,56 @@
+services:
+  app:
+    build: ..
+    environment:
+      TH0UGHTS_MASTER_KEY: ${TH0UGHTS_MASTER_KEY:?Set a persistent random master key}
+    command: ["-data", "/data", "-driver", "mariadb", "serve"]
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - app-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      db:
+        condition: service_healthy
+  setup:
+    build: ..
+    environment:
+      TH0UGHTS_MASTER_KEY: ${TH0UGHTS_MASTER_KEY:?Set a persistent random master key}
+    command: ["-data", "/data", "-driver", "mariadb", "-file", "/run/db-init", "setup-storage"]
+    volumes:
+      - app-data:/data
+      - db-init:/run/db-init
+    restart: "no"
+  db:
+    image: mariadb:11.8
+    restart: unless-stopped
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    environment:
+      MARIADB_USER: th0ughts
+      MARIADB_DATABASE: th0ughts
+      MARIADB_PASSWORD_FILE: /run/db-init/db-password
+      MARIADB_ROOT_PASSWORD_FILE: /run/db-init/admin-password
+    volumes:
+      - db-data:/var/lib/mysql
+      - db-init:/run/db-init:ro
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh --connect --innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+volumes:
+  app-data:
+  db-data:
+  db-init:

@@ -1,0 +1,22 @@
+{
+  "name": "th0ughts-web",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "bun@1.4.4",
+  "type": "module",
+  "scripts": {
+    "build": "bun run --bun esbuild web/owner.jsx --bundle --minify --format=esm --outfile=server/assets/owner.js",
+    "check:i18n": "bun scripts/check-i18n.mjs",
+    "test:browser": "bun run --bun playwright test"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@babel/parser": "^8.1.3",
+    "@playwright/test": "^1.60.0",
+    "esbuild": "^0.28.2",
+    "web-vitals": "^6.2.3"
+  }
+}

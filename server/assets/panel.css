@@ -1,0 +1,139 @@
+:host {
+  display: block;
+  color: #222a25;
+  font:
+    15px/1.45 system-ui,
+    sans-serif;
+  direction: inherit;
+}
+* {
+  box-sizing: border-box;
+}
+form,
+.panel {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #d9ddd4;
+  border-radius: 13px;
+  margin: 14px 0;
+  color: #222a25;
+}
+h1,
+h2,
+h3 {
+  font-family: Georgia, serif;
+  line-height: 1.2;
+  font-weight: 500;
+  margin: 0 0 14px;
+}
+label {
+  display: grid;
+  gap: 4px;
+  color: #36453b;
+  margin: 10px 0;
+  font-size: 14px;
+}
+input,
+textarea,
+select {
+  font: inherit;
+  border: 1px solid #b9c6b9;
+  border-radius: 7px;
+  padding: 9px;
+  color: #232a26;
+  background: white;
+  max-width: 100%;
+  min-width: 0;
+}
+textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 120px;
+}
+input[type="checkbox"] {
+  margin: 0 8px 0 0;
+}
+.check {
+  display: block;
+}
+button,
+.button {
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  background: var(--accent, #30533f);
+  color: #fff;
+  border: 1px solid transparent;
+  padding: 9px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.secondary {
+  color: #2d503b;
+  background: white;
+  border-color: #bec8bc;
+}
+button:disabled {
+  opacity: 0.6;
+}
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid #9b6c22;
+  outline-offset: 2px;
+}
+.row,
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.toolbar {
+  padding: 10px 0;
+}
+.notice {
+  color: #385b46;
+  overflow-wrap: anywhere;
+}
+.notice:empty {
+  display: none;
+}
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+.tabs button[aria-pressed="false"] {
+  background: #f2f5ef;
+  color: #344d3e;
+}
+code,
+output {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #f2f5ef;
+  padding: 10px;
+}
+iframe {
+  width: 100%;
+  min-height: 300px;
+  border: 1px solid #bbc8bc;
+}
+small {
+  color: #5c685e;
+}
+fieldset {
+  border: 1px solid #d9ddd4;
+  border-radius: 8px;
+  margin: 10px 0;
+  padding: 12px;
+}
+p {
+  margin: 8px 0;
+}

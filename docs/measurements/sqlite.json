@@ -1,0 +1,67 @@
+{
+  "elapsed_seconds": 899.98,
+  "cache": {
+    "HIT": 25920,
+    "BYPASS": 180,
+    "MISS": 19080
+  },
+  "rows": 10000,
+  "read_rps": 50,
+  "seconds": 900,
+  "warmup": 120,
+  "cold": {
+    "feed": {
+      "ms": 12.53,
+      "ok": true
+    },
+    "post": {
+      "ms": 0.81,
+      "ok": true
+    },
+    "search": {
+      "ms": 164.67,
+      "ok": true
+    },
+    "rss": {
+      "ms": 0.71,
+      "ok": true
+    },
+    "markdown": {
+      "ms": 0.37,
+      "ok": true
+    }
+  },
+  "errors": {},
+  "latency": {
+    "feed": {
+      "count": 22500,
+      "p95_ms": 0.95,
+      "p99_ms": 1.91
+    },
+    "write": {
+      "count": 180,
+      "p95_ms": 4.85,
+      "p99_ms": 6.06
+    },
+    "post": {
+      "count": 13500,
+      "p95_ms": 2.14,
+      "p99_ms": 2.98
+    },
+    "search": {
+      "count": 4500,
+      "p95_ms": 10.86,
+      "p99_ms": 14.34
+    },
+    "rss": {
+      "count": 2250,
+      "p95_ms": 1.21,
+      "p99_ms": 2.06
+    },
+    "markdown": {
+      "count": 2250,
+      "p95_ms": 0.92,
+      "p99_ms": 1.28
+    }
+  }
+}

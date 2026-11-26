@@ -1,0 +1,267 @@
+* {
+  box-sizing: border-box;
+}
+html {
+  color-scheme: light;
+  --accent: #35634e;
+  --ink: #232a26;
+  --muted: #59655c;
+  --line: #d9ddd4;
+  background: #f6f7f0;
+  color: var(--ink);
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.site-footer {
+  margin-top: auto;
+  padding: 20px 16px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  font-size: 0.875rem;
+}
+.site-footer a {
+  color: var(--muted);
+  text-underline-offset: 0.2em;
+}
+a {
+  color: var(--accent);
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #8b6120;
+  outline-offset: 3px;
+}
+.mast {
+  min-height: 74px;
+  padding: 0 max(5vw, calc((100vw - 1080px) / 2));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  background: #fbfcf6;
+  gap: 18px;
+}
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.065em;
+  text-decoration: none;
+  color: var(--ink);
+}
+.mark,
+.avatar {
+  color: var(--accent);
+}
+.mark {
+  font-size: 38px;
+  line-height: 1;
+}
+.mast nav {
+  display: flex;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 3px;
+}
+.mast nav a {
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  padding: 5px 10px;
+  text-decoration: none;
+  color: var(--muted);
+  border-radius: 100px;
+}
+.mast nav a[aria-current="true"] {
+  background: var(--ink);
+  color: #fff;
+}
+.reading,
+.themed > main,
+.themed > .secure-slot {
+  max-width: 760px;
+  margin: auto;
+  padding: 32px 24px;
+}
+.themed > .intro,
+.themed > .entries,
+.themed > .search,
+.themed > .older {
+  max-width: 710px;
+  margin: 24px auto;
+}
+.intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 0 12px;
+  gap: 20px;
+}
+.intro h1,
+.entry h2 {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.055em;
+}
+.intro h1 {
+  font-size: clamp(46px, 7vw, 76px);
+  margin: 0;
+}
+.intro p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 8px 0;
+}
+.rss,
+.older,
+.tag {
+  text-decoration: none;
+}
+.rss {
+  font-size: 13px;
+  font-weight: 650;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 7px 12px;
+}
+.search {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 0 22px;
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  padding: 12px 14px;
+  font: inherit;
+}
+.search button,
+.edit {
+  font: inherit;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+.entries {
+  margin: 18px 0;
+}
+.entry {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: clamp(16px, 4vw, 29px);
+  margin-bottom: 14px;
+  overflow-wrap: anywhere;
+}
+.byline {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted);
+}
+.byline a {
+  color: inherit;
+}
+.avatar {
+  font-size: 26px;
+}
+.byline strong {
+  color: var(--ink);
+}
+.entry h2 {
+  margin: 16px 0 8px;
+  font-size: 32px;
+}
+.prose {
+  line-height: 1.7;
+}
+.prose pre {
+  overflow: auto;
+}
+.tag {
+  display: inline-block;
+  font-size: 13px;
+  margin: 4px 7px 4px 0;
+}
+.attachment,
+.entry video,
+.prose img {
+  max-width: 100%;
+  max-height: 65vh;
+  border-radius: 8px;
+}
+.edit {
+  display: block;
+  font-size: 13px;
+  margin-top: 12px;
+}
+.empty {
+  text-align: center;
+  padding: 44px 20px;
+  color: var(--muted);
+  border: 1px dashed #becabb;
+  border-radius: 14px;
+}
+.empty span {
+  font-size: 36px;
+  color: var(--accent);
+}
+.empty p {
+  margin: 8px;
+}
+.older {
+  display: inline-block;
+  padding: 12px;
+}
+.index-layout {
+  display: grid;
+  grid-template-columns: minmax(175px, 1fr) 2fr;
+  gap: 20px;
+}
+#login {
+  max-width: 440px;
+  margin: 9vh auto;
+  padding: 18px;
+}
+@media (max-width: 650px) {
+  .index-layout {
+    display: block;
+  }
+  .reading {
+    padding: 15px;
+  }
+  .mast {
+    padding: 0 16px;
+  }
+  .themed > .entries,
+  .themed > .search,
+  .themed > .intro {
+    margin: 15px;
+  }
+}
+
+.attachment {
+  height: auto;
+  object-fit: contain;
+}
+.entry video {
+  width: 100%;
+  aspect-ratio: 16/9;
+}
