@@ -42,7 +42,12 @@ export function mount(id, node) {
   createRoot(box).render(node);
 }
 export function useAction() {
-  const [message, set] = useState("");
+  const [message, updateMessage] = useState("");
+  const [failed, setFailed] = useState(false);
+  function set(text) {
+    setFailed(false);
+    updateMessage(text);
+  }
   const [busy, lock] = useState(false);
   async function run(fn, success = t("saved")) {
     if (busy) return;
@@ -52,12 +57,13 @@ export function useAction() {
       await fn();
       set(success);
     } catch (e) {
-      set(e.message);
+      setFailed(true);
+      updateMessage(e.message);
     } finally {
       lock(false);
     }
   }
-  return { run, busy, message, set };
+  return { run, busy, message, failed, set };
 }
 export function Field({ label, value, onChange, type = "text", ...props }) {
   return (
@@ -74,7 +80,7 @@ export function Field({ label, value, onChange, type = "text", ...props }) {
 }
 export function Notice({ action }) {
   return (
-    <p className="notice" role="status">
+    <p className="notice" role={action.failed ? "alert" : "status"}>
       {action.busy ? t("working") : action.message}
     </p>
   );
@@ -114,7 +120,7 @@ export function SignIn({
         });
       }}
     >
-      <h1>{t(reauth ? "reauth" : "login")}</h1>
+      {reauth ? <h3>{t("reauth")}</h3> : <h1>{t("login")}</h1>}
       <Field
         label={init ? "master" : "password"}
         type="password"

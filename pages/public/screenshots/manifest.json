@@ -52,7 +52,7 @@
     },
     "file": "setup-database.webp",
     "width": 698,
-    "height": 389
+    "height": 380
   },
   {
     "id": "login",
@@ -162,7 +162,7 @@
     },
     "file": "compose.webp",
     "width": 666,
-    "height": 176
+    "height": 180
   },
   {
     "id": "edit-media",
@@ -173,7 +173,7 @@
     },
     "file": "edit-media.webp",
     "width": 698,
-    "height": 938
+    "height": 942
   },
   {
     "id": "translation",
@@ -184,7 +184,7 @@
     },
     "file": "translation.webp",
     "width": 698,
-    "height": 938
+    "height": 942
   },
   {
     "id": "draft",
@@ -621,7 +621,7 @@
     },
     "file": "comment-webhook.webp",
     "width": 629,
-    "height": 497
+    "height": 499
   },
   {
     "id": "comment-moderation",
@@ -633,5 +633,27 @@
     "file": "comment-moderation.webp",
     "width": 900,
     "height": 744
+  },
+  {
+    "id": "mermaid-post",
+    "group": "reader",
+    "title": {
+      "en": "A Mermaid diagram in a post",
+      "tr": "Gönderide Mermaid diyagramı"
+    },
+    "file": "mermaid-post.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "mobile-media-viewer",
+    "group": "reader",
+    "title": {
+      "en": "Inspecting a diagram on mobile",
+      "tr": "Mobilde diyagram inceleme"
+    },
+    "file": "mobile-media-viewer.webp",
+    "width": 390,
+    "height": 844
   }
 ]

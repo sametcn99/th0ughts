@@ -173,3 +173,9 @@ p {
 .compose-panel .notice:empty {
   display: none;
 }
+
+summary { min-block-size: 24px; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (pointer: coarse) {
+  summary { min-block-size: 44px; align-content: center; }
+}

@@ -180,6 +180,7 @@ func (s *Server) routes() {
 	m.HandleFunc("POST /api/v1/comments/{post}", s.submitComment)
 	m.HandleFunc("GET /social.png", s.social)
 	m.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
+	m.HandleFunc("GET /assets/diagram-library.js", serveDiagramLibrary)
 	m.HandleFunc("GET /assets/{name}", static)
 	for _, route := range []string{"GET /api/v1/posts", "POST /api/v1/posts", "GET /api/v1/posts/{id}", "PUT /api/v1/posts/{id}", "DELETE /api/v1/posts/{id}"} {
 		m.HandleFunc(route, s.postResource)
@@ -389,7 +390,7 @@ func (s *Server) media(w http.ResponseWriter, r *http.Request) {
 	size := r.URL.Query().Get("w")
 	if (size == "480" || size == "960") && !m.Video() {
 		n, _ := strconv.Atoi(size)
-		if n < m.Width || m.Type == "image/jpeg" && m.Size > 64<<10 {
+		if n < m.Width || m.Type == "image/gif" || m.Type == "image/jpeg" && m.Size > 64<<10 {
 			width = min(n, m.Width)
 		}
 	}

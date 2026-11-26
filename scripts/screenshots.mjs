@@ -698,6 +698,22 @@ async function captureAll(staging, dataDir) {
     await captureSettings(owner, shot);
     await captureThemesAndMobile(owner, reader, data, shot);
     await captureComments(owner,reader,data,shot);
+    const processNote = await publish(data.api, [
+      "Each edition starts with a proof on scrap paper.",
+      "", "```mermaid", "flowchart TD", "accTitle: From proof to edition",
+      "A[Ink the plate] --> B[Pull a proof]",
+      "B --> C{Even coverage?}", "C -->|Yes| D[Print the edition]",
+      "C -->|No| A", "```",
+    ].join("\n"));
+    await reader.setViewportSize({width:1120,height:860});
+    await navigate(reader, "/?lang=en&post="+processNote.id);
+    const figure = reader.locator(".mermaid-figure");
+    await expect(figure).toBeVisible();
+    await shot(reader,"mermaid-post","reader","A Mermaid diagram in a post","Gönderide Mermaid diyagramı");
+    await reader.setViewportSize({width:390,height:844});
+    await figure.getByRole("button").click();
+    await expect(reader.getByRole("dialog").locator("img")).toHaveJSProperty("complete",true);
+    await shot(reader,"mobile-media-viewer","reader","Inspecting a diagram on mobile","Mobilde diyagram inceleme");
     // Lead with the public feed everywhere the manifest is consumed.
     manifest.unshift(
       manifest.splice(

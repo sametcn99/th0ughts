@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   state,
   t,
@@ -30,7 +30,7 @@ function Setup() {
         });
       }}
     >
-      <h1>{t("setup")}</h1>
+      <h2>{t("setup")}</h2>
       <p>{t("setup_hint")}</p>
       <Field
         label="password"
@@ -96,6 +96,7 @@ function savedDraft() {
   }
 }
 export function Composer() {
+  const editor = useRef(null);
   const [post, set] = useState(() => savedDraft() || blank()),
     [lang, langSet] = useState(post?.original || state.lang);
   const a = useAction();
@@ -119,7 +120,7 @@ export function Composer() {
           const p = await api("get_post", { id, private: true });
           set(p);
           langSet(p.original);
-          document.querySelector("#composer").scrollIntoView();
+          editor.current?.focus();
         });
     };
     document.addEventListener("click", click);
@@ -165,6 +166,7 @@ export function Composer() {
       <label className="compose-body">
         <span className="visually-hidden">{t("body")}</span>
         <textarea
+          ref={editor}
           placeholder={t("compose_hint")}
           rows={2}
           value={tr.body}
@@ -330,6 +332,7 @@ export function Composer() {
             onClick={() => {
               set(blank());
               langSet(state.lang);
+              editor.current?.focus();
             }}
           >
             {t("cancel")}

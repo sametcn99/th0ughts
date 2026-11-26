@@ -7,6 +7,12 @@ import path from "node:path";
 import { once } from "node:events";
 import { createInterface } from "node:readline";
 
+test.use({
+  launchOptions: {
+    args: ["--enable-experimental-web-platform-features", "--enable-features=WebMCP"],
+  },
+});
+
 async function listeningPort(stderr) {
   const lines = createInterface({ input: stderr });
   for await (const line of lines) {
@@ -287,7 +293,7 @@ for (const [lang, mobile] of [
         await siteURL.fill("invalid");
         await settings.getByRole("button",{name:"Appearance",exact:true}).click();
         await settings.getByRole("button",{name:"Save",exact:true}).click();
-        await expect(settings.locator(".notice")).toHaveText("Check the information you entered.");
+        await expect(settings.getByRole("alert")).toHaveText("Check the information you entered.");
         await publicPage.reload();
         await expect(publicPage.locator(".folio-first")).toBeVisible();
         await expect(publicPage.locator(".site-footer")).toHaveCSS("background-color","rgb(222, 238, 221)");

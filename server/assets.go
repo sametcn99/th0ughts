@@ -39,6 +39,9 @@ var content = sync.OnceValue(func() map[string]asset {
 func assetURL(name string) string { return "/assets/" + name + "?v=" + content()[name].digest }
 func static(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
+	if name == "diagram.html" {
+		w.Header().Set("Content-Security-Policy", "sandbox allow-scripts; default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'")
+	}
 	a, ok := content()[name]
 	if !ok {
 		http.NotFound(w, r)

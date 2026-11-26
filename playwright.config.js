@@ -5,11 +5,5 @@ export default defineConfig({
   timeout: 60000,
   use: {
     headless: true,
-    launchOptions: {
-      args: [
-        "--enable-experimental-web-platform-features",
-        "--enable-features=WebMCP",
-      ],
-    },
   },
 });

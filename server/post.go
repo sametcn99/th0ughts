@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -11,6 +12,8 @@ import (
 	"github.com/sametcn99/th0ughts/feed"
 	theme "github.com/sametcn99/th0ughts/themes"
 )
+
+var diagramBlock = regexp.MustCompile(`(?s)<pre><code class="language-mermaid">.*?</code></pre>`)
 
 const timelineTextLimit = 280
 const articleExcerptLength = 160
@@ -23,7 +26,11 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 	initial, _ := utf8.DecodeRuneInString(strings.TrimSpace(author))
 	parts["avatar"] = fmt.Sprintf(`<span class="avatar" aria-hidden="true">%s</span>`, esc(strings.ToUpper(string(initial))))
 	parts["author"] = "<strong>" + esc(author) + "</strong>"
-	parts["date"] = fmt.Sprintf(`<a href="%s"><time datetime="%s">%s</time></a>`, esc(link("", p.ID, l)), dt.Format(time.RFC3339), esc(dateLabel(dt, words)))
+	rendered := bodyHTML(t.Body)
+	visible := plainHTML(rendered)
+	subject := first(t.Title, first(excerpt(visible, 72), site.Name))
+	context := `<span class="visually-hidden"> · ` + esc(subject) + `</span>`
+	parts["date"] = fmt.Sprintf(`<a href="%s"><time datetime="%s">%s</time>%s</a>`, esc(link("", p.ID, l)), dt.Format(time.RFC3339), esc(dateLabel(dt, words)), context)
 	if p.Pinned {
 		parts["status"] += "<span>" + esc(words["pinned"]) + "</span>"
 	}
@@ -31,12 +38,14 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 		parts["status"] += "<span>" + esc(words["draft"]) + "</span>"
 	}
 	parts["byline"] = `<div class="byline">` + parts["avatar"] + parts["author"] + parts["date"] + parts["status"] + "</div>"
-	rendered := bodyHTML(t.Body)
 	class := "entry"
 	attachments := p.Attachments(t)
 	permalink := esc(link("", p.ID, lang))
 	if detail {
 		class += " entry-detail"
+	}
+	if detail && t.Title == "" {
+		parts["title"] = `<h1 class="visually-hidden">` + esc(subject) + `</h1>`
 	}
 	if t.Title != "" {
 		if detail {
@@ -46,12 +55,16 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 		}
 	}
 	parts["body"] = `<div class="prose">` + rendered + "</div>"
-	visible := plainHTML(rendered)
 	article := t.Title != "" || utf8.RuneCountInString(visible) > timelineTextLimit
 	if article && !detail {
 		class += " article-preview"
-		parts["body"] = `<div class="prose"><p>` + esc(excerpt(visible, articleExcerptLength)) + `</p></div>`
-		parts["readmore"] = `<a class="read-post" href="` + permalink + `">` + esc(words["read_article"]) + ` <span aria-hidden="true">→</span></a>`
+		previewBody := visible
+		diagram := diagramBlock.FindString(rendered)
+		if diagram != "" {
+			previewBody = plainHTML(diagramBlock.ReplaceAllString(rendered, " "))
+		}
+		parts["body"] = `<div class="prose"><p>` + esc(excerpt(previewBody, articleExcerptLength)) + `</p>` + diagram + `</div>`
+		parts["readmore"] = `<a class="read-post" href="` + permalink + `">` + esc(words["read_article"]) + context + ` <span aria-hidden="true">→</span></a>`
 		if len(attachments) > 1 {
 			attachments = attachments[:1]
 		}
@@ -63,7 +76,7 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 			continue
 		}
 		if m.Video() {
-			fmt.Fprintf(&media, "<video controls preload=\"metadata\" aria-label=\"%s\" src=\"/media/%s\"></video>", esc(t.Alt[id]), esc(id))
+			fmt.Fprintf(&media, "<video controls preload=\"metadata\" aria-label=\"%s\" src=\"/media/%s\"></video>", esc(first(t.Alt[id], words["post_video"])), esc(id))
 		} else {
 			loading := `loading="lazy"`
 			if *prioritizePhoto {
@@ -71,6 +84,8 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 				*prioritizePhoto = false
 			}
 			path := "/media/" + esc(id)
+			label := first(t.Alt[id], words["viewer_image"])
+
 			set := ""
 			if m.Width > 0 {
 				set = fmt.Sprintf("%s?w=480 %dw", path, min(480, m.Width))
@@ -78,7 +93,11 @@ func (s *Server) postHTML(r *http.Request, p feed.Post, lang string, words map[s
 			if m.Width > 480 {
 				set += fmt.Sprintf(", %s?w=960 %dw", path, min(960, m.Width))
 			}
-			fmt.Fprintf(&media, `<a href="%s"><img class="attachment" %s width="%d" height="%d" src="%s" srcset="%s" sizes="(max-width: 760px) 92vw, 700px" alt="%s"></a>`, path, loading, m.Width, m.Height, path, set, esc(t.Alt[id]))
+			still := ""
+			if m.Type == "image/gif" {
+				still = ` data-still="` + path + `?w=960"`
+			}
+			fmt.Fprintf(&media, `<a href="%s"%s><img class="attachment" %s width="%d" height="%d" src="%s" srcset="%s" sizes="(max-width: 760px) 92vw, 700px" alt="%s"></a>`, path, still, loading, m.Width, m.Height, path, set, esc(label))
 		}
 	}
 	parts["media"] = media.String()

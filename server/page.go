@@ -27,7 +27,11 @@ import (
 )
 
 var esc = html.EscapeString
-var cleaner = bluemonday.UGCPolicy()
+var cleaner = func() *bluemonday.Policy {
+	p := bluemonday.UGCPolicy()
+	p.AllowAttrs("class").Matching(regexp.MustCompile("^language-mermaid$")).OnElements("code")
+	return p
+}()
 var markdown = goldmark.New()
 var markup = regexp.MustCompile("<[^>]*>")
 
@@ -209,7 +213,7 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 		seoLang = l
 		title = t.Title
 		if title == "" {
-			title = plain(t.Body, 72)
+			title = first(plain(t.Body, 72), site.Name)
 		}
 		description = t.Description
 		if description == "" {
@@ -237,6 +241,9 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 	}
 	if id == "" && !login {
 		canonical = listingURL(base, lang, f)
+	}
+	if login {
+		title = words["login"] + " · " + site.Name
 	}
 	var head strings.Builder
 	fmt.Fprintf(&head, "<!doctype html><html lang=\"%s\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"color-scheme\" content=\"light dark\"><title>%s</title>", lang, esc(title))
@@ -315,14 +322,14 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 	}
 	banner.WriteString("</nav></details></div>")
 	var posts strings.Builder
-	fmt.Fprintf(&posts, `<div class="entries" data-feed-theme="%s">`, esc(themeVersion))
+	fmt.Fprintf(&posts, `<div id="feed-content" tabindex="-1" class="entries" data-feed-theme="%s">`, esc(themeVersion))
 	posts.WriteString(items.String())
 	if len(page.Posts) == 0 {
 		fmt.Fprintf(&posts, "<div class=\"empty\"><span aria-hidden=\"true\">◌</span><p>%s</p></div>", esc(words["empty"]))
 	}
 	posts.WriteString("</div>")
 	parts := map[string]string{"header": banner.String(), "posts": posts.String()}
-	parts["filters"] = fmt.Sprintf("<section class=\"intro\"><div><h1>%s</h1><p>%s</p></div><a class=\"rss\" href=\"/feed.xml?lang=%s\">RSS ↗</a></section><form class=\"search\" action=\"/\"><input type=hidden name=lang value=\"%s\"><input name=q type=search aria-label=\"%s\" placeholder=\"%s\" value=\"%s\"><button>%s</button></form>", esc(words["timeline"]), esc(site.Description), lang, lang, esc(words["search"]), esc(words["search_hint"]), esc(f.Search), esc(words["search"]))
+	parts["filters"] = fmt.Sprintf("<section class=\"intro\"><div><h1>%s</h1><p>%s</p></div><a class=\"rss\" href=\"/feed.xml?lang=%s\">RSS ↗</a></section><form class=\"search\" role=\"search\" action=\"/\"><input type=hidden name=lang value=\"%s\"><input name=q type=search aria-label=\"%s\" placeholder=\"%s\" value=\"%s\"><button>%s</button></form>", esc(words["timeline"]), esc(site.Description), lang, lang, esc(words["search"]), esc(words["search_hint"]), esc(f.Search), esc(words["search"]))
 	if nextURL != "" {
 		parts["pagination"] = fmt.Sprintf(`<a class="older" data-feed-next rel="next" href="%s" data-loading="%s" data-retry="%s" data-loaded="%s">%s →</a><span class="feed-status" role="status"></span>`, esc(nextURL), esc(words["loading_posts"]), esc(words["retry_posts"]), esc(words["posts_loaded"]), esc(words["older"]))
 	}
@@ -332,11 +339,11 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 	}
 	if login {
 		view = "login"
-		parts["login"] = "<section id=\"login\" class=\"secure-slot\"></section>"
+		parts["login"] = "<section id=\"login\" tabindex=\"-1\" class=\"secure-slot\"></section>"
 	}
 	_, setup := h.ticket(cookie(r, "bootstrap"), "setup", false)
 	if private || setup {
-		parts["composer"] = "<section id=\"composer\" class=\"secure-slot\"></section>"
+		parts["composer"] = "<section id=\"composer\" tabindex=\"-1\" class=\"secure-slot\"></section>"
 		parts["settings"] = "<section id=\"settings\" class=\"secure-slot\"></section>"
 	}
 	if preview {
@@ -406,7 +413,20 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 			parts["comments"] = fallback.String() + "</section>"
 		}
 	}
-	out := head.String() + "<div class=\"themed\">" + design.RenderLocale(view, parts, lang, map[string]bool{"owner": private, "detail": id != "", "list": id == "" && !login}) + "</div>"
+	skipTarget := "feed-content"
+	if login {
+		skipTarget = "login"
+	}
+	if !login && id == "" && (private || setup) {
+		skipTarget = "composer"
+	}
+	skip := `<a class="skip-content" href="#` + skipTarget + `">` + esc(words["skip_content"]) + `</a>`
+	layout := design.RenderLocale(view, parts, lang, map[string]bool{"owner": private, "detail": id != "", "list": id == "" && !login})
+	landmark := ""
+	if !strings.Contains(layout, "<main>") && !strings.Contains(layout, "<main ") {
+		landmark = ` role="main"`
+	}
+	out := head.String() + skip + `<div class="themed"` + landmark + `>` + layout + "</div>"
 	out += `<footer class="site-footer"><a href="https://github.com/sametcn99/th0ughts">` + esc(words["host_your_own"]) + `</a></footer>`
 	tools := []Command{}
 	for _, op := range commands {
@@ -422,11 +442,16 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 			newSite = errors.Is(acctErr, storage.ErrMissing)
 		} else if thread == nil {
 			messages = make(map[string]string, len(tools))
+			for key, value := range words {
+				if key == "close" || strings.HasPrefix(key, "viewer_") || strings.HasPrefix(key, "diagram_") {
+					messages[key] = value
+				}
+			}
 			for _, op := range tools {
 				messages[op.Name] = words[op.Name]
 			}
 		}
-		data := map[string]any{"site": site, "lang": lang, "owner": private, "setup": setup, "newSite": newSite, "messages": messages, "tools": tools}
+		data := map[string]any{"site": site, "lang": lang, "owner": private, "setup": setup, "newSite": newSite, "messages": messages, "tools": tools, "viewerModule": assetURL("viewer.js")}
 		if thread != nil {
 			data["thread"] = thread
 			data["threadPost"] = id
@@ -436,6 +461,7 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 			data["driver"] = h.cfg.Driver
 		}
 		out += "<script id=\"state\" type=\"application/json\">" + jsonText(data) + "</script><script src=\"/assets/reader.js\" defer></script>"
+		out += `<script type="module" src="` + assetURL("media.js") + `"></script>`
 		if private || setup || login {
 			out += "<script type=\"module\" src=\"/assets/owner.js\"></script>"
 		} else if thread != nil {

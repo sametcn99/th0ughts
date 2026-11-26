@@ -128,3 +128,7 @@ In **Settings → Appearance**, upload an HTML file, choose **Preview**, and sel
 A post template can place `<slot name="comments"></slot>` anywhere in its layout. Existing themes receive the thread after the posts slot automatically. Both short posts and Articles use the same thread. The preview of a post permalink includes a sample comment.
 
 The thread uses the shared surface, text, accent, border, and focus tokens. Use class selectors such as `.comment-thread`, `.thread-heading`, `.thread-node`, `.comment-branch`, `.comment-meta`, `.comment-images`, and `.guest-comment` to change its layout. The reply tree and guest form render inside the themed document.
+
+### Diagrams and the media viewer
+
+Post bodies expose rendered diagrams through `.mermaid-figure`, with a focusable image button and a native source disclosure. The media dialog uses the shared palette (including `--surface`, `--ink`, `--line`, and `--focus`). Include the body slot in both timeline and detail views. Keep linked images reachable by keyboard and give date, tag, and action links enough space for touch. Test your palette with the keyboard focus ring visible and at a viewport width of 320 CSS pixels.

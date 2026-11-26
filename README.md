@@ -33,6 +33,19 @@ The application requires one environment variable, `TH0UGHTS_MASTER_KEY`. The in
 
 Write directly in the timeline and select **Publish** or **Save draft**. Short posts appear in full. A title or more than 280 visible characters gives the post an article preview in the same timeline. Its permanent link opens the complete text and attachments. Use **Post options** to add a title, tags, media or a translation. English and Turkish tabs edit the same post. **Original language** controls the fallback when a translation has not been published. The original must be published for the post to appear publicly. **Edit** opens its current revision. Concurrent edits return a conflict so another client's changes survive.
 
+Use a fenced `mermaid` block to publish a diagram. Give it an accessible title and description so readers can follow it by ear or in text.
+
+````markdown
+```mermaid
+flowchart LR
+    accTitle: Print workflow
+    accDescr: A draft becomes a proof before the final edition is printed.
+    Draft --> Proof --> Edition
+```
+````
+
+Select a diagram, Markdown image, or photo attachment to open the media viewer. Pinch or use the zoom buttons, drag or use the directional buttons, and choose **Lock view** to hold the current position. With a keyboard, use **+** and **−** to zoom, the arrow keys to pan, **0** to fit, and **Escape** to return to the image. GIF attachments open on a still frame when the reader prefers reduced motion. **Animate GIF** toggles playback. **Diagram source** reveals the original text. The source also remains readable with JavaScript disabled and through the Markdown API.
+
 The language in a shared URL takes precedence over a saved reader preference, followed by the owner's default. A post keeps one ID across languages, theme changes, and backup restores. Public HTML contains canonical and alternate links, Open Graph, social cards, and JSON-LD. The default social image is generated locally.
 
 | Resource | Address |
@@ -67,7 +80,7 @@ go test ./...
 bin/th0ughts -listen localhost:8080 -data ./data serve
 ```
 
-Set the master key before starting the server. Rebuild the binary after updating frontend assets. Run `bun run --bun playwright install chromium` and `bun run test:browser` for the mobile and desktop browser flows. Source code, comments, documentation, and test names are in English. Product text belongs in both language catalogs. [Contribution guide](CONTRIBUTING.md)
+Set the master key before starting the server. Rebuild the binary after updating frontend assets. Run `bun run --bun playwright install chromium` and `bun run test:browser` for the mobile and desktop browser flows. The browser suite includes keyboard and touch interactions and axe checks for the bundled themes and owner settings. Run the tagged media tests with `bun run test:browser --browser=webkit --grep @media` or `--browser=firefox` after installing the matching Playwright browsers. Source code, comments, documentation, and test names are in English. Product text belongs in both language catalogs. [Contribution guide](CONTRIBUTING.md)
 
 ## Documentation site and screenshots
 
@@ -79,7 +92,7 @@ Run `bun run build:pages` to render the English and Turkish React site into `pag
 
 <!-- gallery:start -->
 <details>
-<summary>Application screenshots (57)</summary>
+<summary>Application screenshots (59)</summary>
 
 Build the Go binary (see Local development), install Chromium with `bun run --bun playwright install chromium`, and run `bun run screenshots` to refresh this gallery. The script creates and removes its own demo instance.
 
@@ -310,6 +323,14 @@ Build the Go binary (see Local development), install Chromium with `bun run --bu
 **Comment settings and moderation queue**
 
 ![Comment settings and moderation queue](https://sametcn99.github.io/th0ughts/screenshots/comment-moderation.webp)
+
+**A Mermaid diagram in a post**
+
+![A Mermaid diagram in a post](https://sametcn99.github.io/th0ughts/screenshots/mermaid-post.webp)
+
+**Inspecting a diagram on mobile**
+
+![Inspecting a diagram on mobile](https://sametcn99.github.io/th0ughts/screenshots/mobile-media-viewer.webp)
 
 </details>
 <!-- gallery:end -->

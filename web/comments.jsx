@@ -100,7 +100,7 @@ function GuestForm({ parent = "", cancel, submitted }) {
           maxLength={6000}
           required={!files.length}
           rows={3}
-          autoFocus={!!parent}
+          autoFocus
         />
       </label>
       {policy.markdown && (
@@ -288,6 +288,7 @@ function Branch({ parent = "", initial, depth = 0 }) {
 }
 
 function ThreadNode({ item, depth }) {
+  const replyButton = useRef(null);
   const [open, show] = useState(false),
     [reply, compose] = useState(false),
     [removed, remove] = useState(false),
@@ -335,7 +336,11 @@ function ThreadNode({ item, depth }) {
               </button>
             )}
             {!deleted && !state.threadReadonly && item.depth < 12 && (
-              <button aria-expanded={reply} onClick={() => compose(!reply)}>
+              <button
+                ref={replyButton}
+                aria-expanded={reply}
+                onClick={() => compose(!reply)}
+              >
                 {t("reply")}
               </button>
             )}
@@ -362,9 +367,13 @@ function ThreadNode({ item, depth }) {
           {reply && (
             <GuestForm
               parent={item.id}
-              cancel={() => compose(false)}
+              cancel={() => {
+                compose(false);
+                replyButton.current?.focus();
+              }}
               submitted={(c) => {
                 compose(false);
+                replyButton.current?.focus();
                 notify(
                   t(
                     c.status === "pending"
@@ -387,6 +396,7 @@ function ThreadNode({ item, depth }) {
   );
 }
 export function Thread() {
+  const addButton = useRef(null);
   const [compose, show] = useState(false),
     [revision, refresh] = useState(0),
     [message, notify] = useState("");
@@ -426,6 +436,7 @@ export function Thread() {
         <h2>{t("comments")}</h2>
         {!state.threadReadonly && (
           <button
+            ref={addButton}
             className="comment-primary"
             aria-expanded={compose}
             onClick={() => show(!compose)}
@@ -439,9 +450,13 @@ export function Thread() {
       )}
       {compose && (
         <GuestForm
-          cancel={() => show(false)}
+          cancel={() => {
+            show(false);
+            addButton.current?.focus();
+          }}
           submitted={(c) => {
             show(false);
+            addButton.current?.focus();
             notify(
               t(
                 c.status === "pending" ? "comment_queued" : "comment_published",
