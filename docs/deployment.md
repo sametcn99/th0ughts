@@ -18,9 +18,23 @@ The database variants create their private credentials in a one-shot setup servi
 
 All seven drivers passed a native-process check through the compiled CLI and HTTP server. Each run initialized an owner, published a translated post, exported a backup, restarted the server, reused its owner session, and verified the public page excluded the private translation. The separate container smoke workflow builds each database recipe and exercises a restart through HTTP.
 
+## Interactive VPS installation
+
+Open a terminal on the Linux host and run:
+
+```bash
+curl -fsSL https://sametcn99.github.io/th0ughts/install.sh | bash
+```
+
+The published script fetches the Git revision used to build the documentation. To inspect it first, download it with `curl -fsSLo install.sh https://sametcn99.github.io/th0ughts/install.sh`, read the file, then run `bash install.sh`. From a reviewed local checkout, `bash deploy/install.sh --source "$PWD"` installs its latest committed revision.
+
+Choose a language, database, host port, bind address, new directory and unique Compose project name. Loopback is the default for an SSH tunnel or an HTTPS proxy. Binding to 0.0.0.0 publishes plain HTTP to the network. Use HTTPS for remote owner access. The wizard uses a new directory and checks for existing Compose resources before provisioning. It can install missing prerequisites on Ubuntu or Debian after confirmation. Other Linux distributions need Bash, Git, curl, OpenSSL, Docker Engine and its Compose plugin.
+
+After the health check, follow the displayed SSH tunnel instructions or visit your HTTPS domain at `/login`. The master key is in the installation's mode-0600 `.env`. Keep this file and the Docker volumes when making a full backup. From the installation directory, run `./manage ps` for status, `./manage logs --tail=100 app` for diagnostics, or `./manage up -d --build --wait` to resume an interrupted build. `./manage down` stops the project while retaining volumes. For upgrades, fetch and check out a reviewed revision in `source/`, then rebuild using the same launcher.
+
 ## Coolify
 
-Use a Git-backed **Application** with the **Docker Compose** build strategy. For this private repository, select a Git App or deploy key that can read the source. Set **Base Directory** to `/deploy` and **Docker Compose Location** to `/compose.coolify.yaml`. Coolify resolves the file's `build: ..` from that base directory, reaching the root Dockerfile and frontend sources. Set `TH0UGHTS_MASTER_KEY` in the resource environment. Assign the HTTPS domain to service `app`, internal port **8080**. For the domain field that accepts a port suffix, enter `https://feed.example.com:8080`. In the application's site settings use the browser-facing URL `https://feed.example.com`. [Coolify Compose build and routing](https://coolify.io/docs/applications/builds/docker-compose)
+Use a Git-backed **Application** with the **Docker Compose** build strategy. Select the public Git repository as the source. Set **Base Directory** to `/deploy` and **Docker Compose Location** to `/compose.coolify.yaml`. Coolify resolves the file's `build: ..` from that base directory, reaching the root Dockerfile and frontend sources. Set `TH0UGHTS_MASTER_KEY` in the resource environment. Assign the HTTPS domain to service `app`, internal port **8080**. For the domain field that accepts a port suffix, enter `https://feed.example.com:8080`. In the application's site settings use the browser-facing URL `https://feed.example.com`. [Coolify Compose build and routing](https://coolify.io/docs/applications/builds/docker-compose)
 
 ## Dokploy
 

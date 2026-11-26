@@ -5,7 +5,7 @@ services:
       TH0UGHTS_MASTER_KEY: ${TH0UGHTS_MASTER_KEY:?Set a persistent random master key}
     command: ["-data", "/data", "-driver", "json-dir", "serve"]
     ports:
-      - "127.0.0.1:8080:8080"
+      - "${TH0UGHTS_LISTEN:-127.0.0.1:8080}:8080"
     volumes:
       - app-data:/data
     read_only: true

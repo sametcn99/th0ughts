@@ -9,3 +9,4 @@ bin/
 *.key
 *.token
 *.session
+pages/dist/

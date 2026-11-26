@@ -1,0 +1,376 @@
+[
+  {
+    "id": "timeline",
+    "group": "reader",
+    "title": {
+      "en": "The public timeline",
+      "tr": "Herkese açık zaman akışı"
+    },
+    "file": "timeline.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "empty",
+    "group": "reader",
+    "title": {
+      "en": "Starting an empty timeline",
+      "tr": "Boş zaman akışı"
+    },
+    "file": "empty.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "bootstrap",
+    "group": "access",
+    "title": {
+      "en": "First sign-in with the master key",
+      "tr": "Ana anahtarla ilk giriş"
+    },
+    "file": "bootstrap.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "setup",
+    "group": "access",
+    "title": {
+      "en": "Owner and database setup",
+      "tr": "Sahip ve veritabanı kurulumu"
+    },
+    "file": "setup.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "setup-database",
+    "group": "access",
+    "title": {
+      "en": "Connecting an external database",
+      "tr": "Harici veritabanına bağlantı"
+    },
+    "file": "setup-database.webp",
+    "width": 712,
+    "height": 389
+  },
+  {
+    "id": "login",
+    "group": "access",
+    "title": {
+      "en": "Password, authenticator and passkey login",
+      "tr": "Parola, doğrulayıcı ve geçiş anahtarıyla giriş"
+    },
+    "file": "login.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "post",
+    "group": "reader",
+    "title": {
+      "en": "A pinned post with an image",
+      "tr": "Görselli sabitlenmiş gönderi"
+    },
+    "file": "post.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "search",
+    "group": "reader",
+    "title": {
+      "en": "Search results",
+      "tr": "Arama sonuçları"
+    },
+    "file": "search.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "search-empty",
+    "group": "reader",
+    "title": {
+      "en": "Search without matches",
+      "tr": "Sonuçsuz arama"
+    },
+    "file": "search-empty.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "tag",
+    "group": "reader",
+    "title": {
+      "en": "Posts with the studio tag",
+      "tr": "Studio etiketli gönderiler"
+    },
+    "file": "tag.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "archive",
+    "group": "reader",
+    "title": {
+      "en": "Older posts",
+      "tr": "Önceki gönderiler"
+    },
+    "file": "archive.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "owner",
+    "group": "publishing",
+    "title": {
+      "en": "The owner's timeline",
+      "tr": "Sahibin zaman akışı"
+    },
+    "file": "owner.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "compose",
+    "group": "publishing",
+    "title": {
+      "en": "Writing a post",
+      "tr": "Gönderi yazma"
+    },
+    "file": "compose.webp",
+    "width": 712,
+    "height": 739
+  },
+  {
+    "id": "edit-media",
+    "group": "publishing",
+    "title": {
+      "en": "Editing attachments and sharing metadata",
+      "tr": "Ekleri ve paylaşım bilgilerini düzenleme"
+    },
+    "file": "edit-media.webp",
+    "width": 712,
+    "height": 1009
+  },
+  {
+    "id": "translation",
+    "group": "publishing",
+    "title": {
+      "en": "Editing a Turkish translation",
+      "tr": "Türkçe çeviri düzenleme"
+    },
+    "file": "translation.webp",
+    "width": 712,
+    "height": 1009
+  },
+  {
+    "id": "draft",
+    "group": "publishing",
+    "title": {
+      "en": "A private draft",
+      "tr": "Özel taslak"
+    },
+    "file": "draft.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "settings",
+    "group": "publishing",
+    "title": {
+      "en": "Site profile and language settings",
+      "tr": "Site profili ve dil ayarları"
+    },
+    "file": "settings.webp",
+    "width": 712,
+    "height": 706
+  },
+  {
+    "id": "appearance",
+    "group": "appearance",
+    "title": {
+      "en": "Theme, typography and spacing",
+      "tr": "Tema, yazı tipi ve boşluklar"
+    },
+    "file": "appearance.webp",
+    "width": 712,
+    "height": 620
+  },
+  {
+    "id": "preview",
+    "group": "appearance",
+    "title": {
+      "en": "Theme preview with published posts",
+      "tr": "Yayınlanan gönderilerle tema önizlemesi"
+    },
+    "file": "preview.webp",
+    "width": 712,
+    "height": 997
+  },
+  {
+    "id": "preview-owner",
+    "group": "appearance",
+    "title": {
+      "en": "Sample content in owner preview",
+      "tr": "Sahip önizlemesinde örnek içerik"
+    },
+    "file": "preview-owner.webp",
+    "width": 712,
+    "height": 997
+  },
+  {
+    "id": "tokens",
+    "group": "access",
+    "title": {
+      "en": "Scoped access token settings",
+      "tr": "Yetki kapsamlı erişim anahtarı ayarları"
+    },
+    "file": "tokens.webp",
+    "width": 712,
+    "height": 558
+  },
+  {
+    "id": "token-issued",
+    "group": "access",
+    "title": {
+      "en": "Issued token and revocation",
+      "tr": "Oluşturulan erişim anahtarı ve iptali"
+    },
+    "file": "token-issued.webp",
+    "width": 712,
+    "height": 686
+  },
+  {
+    "id": "storage",
+    "group": "storage",
+    "title": {
+      "en": "Local storage, backup and restore",
+      "tr": "Yerel depolama, yedekleme ve geri yükleme"
+    },
+    "file": "storage.webp",
+    "width": 712,
+    "height": 441
+  },
+  {
+    "id": "storage-s3",
+    "group": "storage",
+    "title": {
+      "en": "S3-compatible storage",
+      "tr": "S3 uyumlu depolama"
+    },
+    "file": "storage-s3.webp",
+    "width": 712,
+    "height": 739
+  },
+  {
+    "id": "security",
+    "group": "access",
+    "title": {
+      "en": "Passkey and authenticator settings",
+      "tr": "Geçiş anahtarı ve doğrulayıcı ayarları"
+    },
+    "file": "security.webp",
+    "width": 712,
+    "height": 258
+  },
+  {
+    "id": "reauth",
+    "group": "access",
+    "title": {
+      "en": "Verify identity for sensitive actions",
+      "tr": "Hassas işlemler için kimlik doğrulama"
+    },
+    "file": "reauth.webp",
+    "width": 712,
+    "height": 567
+  },
+  {
+    "id": "authenticator",
+    "group": "access",
+    "title": {
+      "en": "Authenticator enrollment",
+      "tr": "Doğrulayıcı kurulumu"
+    },
+    "file": "authenticator.webp",
+    "width": 712,
+    "height": 462
+  },
+  {
+    "id": "recovery-codes",
+    "group": "access",
+    "title": {
+      "en": "Single-use recovery codes",
+      "tr": "Tek kullanımlık kurtarma kodları"
+    },
+    "file": "recovery-codes.webp",
+    "width": 712,
+    "height": 489
+  },
+  {
+    "id": "theme-index",
+    "group": "appearance",
+    "title": {
+      "en": "Index theme",
+      "tr": "Index teması"
+    },
+    "file": "theme-index.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "theme-starter",
+    "group": "appearance",
+    "title": {
+      "en": "Starter theme",
+      "tr": "Starter teması"
+    },
+    "file": "theme-starter.webp",
+    "width": 1120,
+    "height": 860
+  },
+  {
+    "id": "mobile",
+    "group": "reader",
+    "title": {
+      "en": "Mobile timeline in Turkish",
+      "tr": "Türkçe mobil zaman akışı"
+    },
+    "file": "mobile.webp",
+    "width": 390,
+    "height": 844
+  },
+  {
+    "id": "mobile-post",
+    "group": "reader",
+    "title": {
+      "en": "Translated post on mobile",
+      "tr": "Mobilde çevrilmiş gönderi"
+    },
+    "file": "mobile-post.webp",
+    "width": 390,
+    "height": 844
+  },
+  {
+    "id": "mobile-login",
+    "group": "access",
+    "title": {
+      "en": "Mobile sign-in in Turkish",
+      "tr": "Türkçe mobil giriş"
+    },
+    "file": "mobile-login.webp",
+    "width": 390,
+    "height": 844
+  },
+  {
+    "id": "mobile-appearance",
+    "group": "appearance",
+    "title": {
+      "en": "Appearance settings on mobile",
+      "tr": "Mobilde görünüm ayarları"
+    },
+    "file": "mobile-appearance.webp",
+    "width": 342,
+    "height": 715
+  }
+]
