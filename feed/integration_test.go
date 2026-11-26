@@ -18,11 +18,15 @@ import (
 )
 
 func TestPublishingMatrix(t *testing.T) {
-	for _, driver := range []string{"sqlite", "postgres", "mysql", "mariadb", "mongodb", "json", "json-dir"} {
+	drivers := []string{"sqlite", "postgres", "mysql", "mariadb", "mongodb", "json", "json-dir"}
+	if storage.NativeKVEnabled {
+		drivers = append(drivers, "redb", "lmdb")
+	}
+	for _, driver := range drivers {
 		t.Run(driver, func(t *testing.T) {
 			addr := os.Getenv("TEST_" + driver)
-			if driver == "sqlite" || driver == "json" || driver == "json-dir" {
-				addr = filepath.Join(t.TempDir(), "data")
+			if local := storage.LocalAddress(t.TempDir(), driver); local != "" {
+				addr = local
 			} else if addr == "" {
 				t.Skip("provide a disposable database")
 			}

@@ -58,7 +58,11 @@ func TestCodeOnlyWorksOnceForItsPost(t *testing.T) {
 	}
 }
 func TestThreadLifecycleAcrossBackup(t *testing.T) {
-	for _, driver := range []string{"sqlite", "json", "json-dir"} {
+	drivers := []string{"sqlite", "json", "json-dir"}
+	if storage.NativeKVEnabled {
+		drivers = append(drivers, "redb", "lmdb")
+	}
+	for _, driver := range drivers {
 		t.Run(driver, func(t *testing.T) {
 			s := fixture(t, driver)
 			a, _ := owner(t, s)

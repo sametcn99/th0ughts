@@ -44,5 +44,8 @@ try:
     assert request("/api/v1/pending_comments", {})["items"] == []
     restored=request("/api/v1/posts/"+post["id"])
     assert restored["text"]["en"]["body"]=="Persisted post"
+except Exception:
+    docker("logs","--no-color","app")
+    raise
 finally:
     docker("down","-v")
