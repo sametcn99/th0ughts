@@ -433,6 +433,9 @@ async function captureSettings(owner, shot) {
     "Site profile and language settings",
     "Site profili ve dil ayarları",
   );
+  await tab("Updates");
+  await expect(panel.getByText("Running version", {exact:false})).toBeVisible();
+  await panelShot("updates", "publishing", "Application updates", "Uygulama güncellemeleri");
   await tab("Appearance");
   await panel.getByLabel("Reading font").waitFor();
   await panelShot(
@@ -660,7 +663,7 @@ async function captureAll(staging, dataDir) {
   const master = randomBytes(32).toString("hex");
   const app = spawn(
     binary,
-    ["-listen", "127.0.0.1:0", "-data", dataDir, "serve"],
+    [...(process.platform === "linux" && ["x64","arm64"].includes(process.arch) ? ["-managed-updates"] : []), "-listen", "127.0.0.1:0", "-data", dataDir, "serve"],
     {
       env: { ...process.env, TH0UGHTS_MASTER_KEY: master },
       stdio: ["ignore", "ignore", "pipe"],

@@ -28,6 +28,8 @@ try:
     docker("up","-d","--build","--wait","--wait-timeout","240")
     request("/auth/bootstrap",{"master":key})
     request("/auth/setup",{"password":secrets.token_urlsafe(24)})
+    status = request("/api/v1/update_status", {})
+    assert status["managed"] and status["current"] == (root/"updates/VERSION").read_text().strip()
     post = request("/api/v1/posts",{"original":"en","text":{"en":{"body":"Persisted post","published":True}}})
     theme = '<meta name="theme" content="compose" title="Compose">'
     site = request("/api/v1/get_settings", {})

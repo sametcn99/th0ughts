@@ -2,7 +2,7 @@
 
 A single-owner microblog with two pages. Readers open the timeline at `/`. The owner opens `/login` directly, signs in, and writes, translates, uploads media, changes themes, and manages the site on the same timeline.
 
-Go serves the initial HTML and the embedded React application. Reading, searching, pagination, per-post links, RSS, and Markdown work without JavaScript. A deployed instance runs one application process.
+Go serves the initial HTML and the embedded React application. Reading, searching, pagination, per-post links, RSS, and Markdown work without JavaScript. One server process owns the data store. On managed installations, a launcher restarts the server during updates.
 
 ## Install on a VPS
 
@@ -46,6 +46,7 @@ The language in a shared URL takes precedence over a saved reader preference, fo
 
 ## Customize and deploy
 
+- Check **Settings → Updates** for stable GitHub releases. The Linux launcher can install a verified update and restart the server from this panel. [Updating an installation](docs/deployment.md#application-updates) · [GitHub Releases](https://github.com/sametcn99/th0ughts/releases)
 - Send [signed comment webhooks](docs/interfaces.md#signed-comment-webhooks) to your own HTTPS receiver when guests comment or the owner approves or deletes a comment.
 - Enable guest discussions in **Settings → Comments**. Readers can reply with text, Markdown, and images with a required, DNS-checked email address. Inbox codes are optional. The owner can review submissions, delete comments, or lock individual threads. [Comment verification settings](docs/deployment.md#guest-comments-and-verification-mail)
 - Upload a single HTML file from **Settings → Appearance**. Preview it, select its options, and save. Browse community themes and leave feedback in Discussions, or start a thread for your own theme. [Community themes](https://github.com/sametcn99/th0ughts/discussions/categories/show-and-tell) · [Share a theme](https://github.com/sametcn99/th0ughts/discussions/new?category=show-and-tell) · [Theme authoring guide](docs/themes.md)
@@ -78,7 +79,7 @@ Run `bun run build:pages` to render the English and Turkish React site into `pag
 
 <!-- gallery:start -->
 <details>
-<summary>Application screenshots (51)</summary>
+<summary>Application screenshots (52)</summary>
 
 Build the Go binary (see Local development), install Chromium with `bun run --bun playwright install chromium`, and run `bun run screenshots` to refresh this gallery. The script creates and removes its own demo instance.
 
@@ -157,6 +158,10 @@ Build the Go binary (see Local development), install Chromium with `bun run --bu
 **Site profile and language settings**
 
 ![Site profile and language settings](https://sametcn99.github.io/th0ughts/screenshots/settings.webp)
+
+**Application updates**
+
+![Application updates](https://sametcn99.github.io/th0ughts/screenshots/updates.webp)
 
 **Theme, typography and spacing**
 

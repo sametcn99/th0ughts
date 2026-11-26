@@ -11,6 +11,7 @@ import {
   ceremony,
 } from "./shared.jsx";
 import CommentSettings from "./comment-settings.jsx";
+import Updates from "./updates.jsx";
 const sections = [
   "site",
   "appearance",
@@ -18,8 +19,10 @@ const sections = [
   "security",
   "tokens",
   "storage",
+  "updates",
 ];
 const iconPaths = {
+  updates: "M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4",
   comments: "M3 4h18v13H9l-5 4v-4H3z",
   site: "M3 5h18v14H3z M3 9h18 M7 5v4",
   appearance:
@@ -678,6 +681,7 @@ export default function Settings({ previewSection } = {}) {
                   </fieldset>
                 </>
               )}
+              {tab === "updates" && <Updates />}
               {tab === "comments" && (
                 <CommentSettings
                   policy={prefs.comments || {}}
@@ -912,7 +916,7 @@ export default function Settings({ previewSection } = {}) {
                   {reauth && <SignIn reauth onDone={() => verify(false)} />}
                 </fieldset>
               )}
-              {["tokens", "storage", "comments"].includes(tab) && (
+              {["tokens", "storage", "comments", "updates"].includes(tab) && (
                 <button className="verify-link" onClick={() => verify(!reauth)}>
                   {t("reauth")}
                 </button>

@@ -26,15 +26,19 @@ import (
 	"github.com/sametcn99/th0ughts/server"
 	"github.com/sametcn99/th0ughts/storage"
 	theme "github.com/sametcn99/th0ughts/themes"
+	"github.com/sametcn99/th0ughts/updates"
 )
 
 type options struct {
 	dir, listen, base, driver, address, auth, lang, file string
-	json                                                 bool
+	json, managed                                        bool
 }
 
 func main() {
 	if e := run(); e != nil {
+		if errors.Is(e, restartRequested) {
+			os.Exit(restartExit)
+		}
 		fmt.Fprintln(os.Stderr, e)
 		os.Exit(1)
 	}
@@ -49,11 +53,12 @@ func run() error {
 	flag.StringVar(&o.auth, "credentials", "", "File containing a scoped token or saved owner session")
 	flag.StringVar(&o.lang, "lang", "en", "Output language")
 	flag.StringVar(&o.file, "file", "", "File to upload, restore or download")
+	flag.BoolVar(&o.managed, "managed-updates", false, "Run the Linux release update launcher")
 	flag.BoolVar(&o.json, "json", false, "Machine-readable output")
 	flag.Usage = func() {
 		fmt.Fprintln(flag.CommandLine.Output(), server.Labels(o.lang)["cli_help"])
 		labels := server.Labels(o.lang)
-		for _, name := range append([]string{"serve", "setup", "setup-storage", "recover", "theme-reset", "theme-check", "login", "mcp", "upload", "backup", "restore"}, server.CommandNames()...) {
+		for _, name := range append([]string{"version", "serve", "setup", "setup-storage", "recover", "theme-reset", "theme-check", "login", "mcp", "upload", "backup", "restore"}, server.CommandNames()...) {
 			description := labels["cli_"+name]
 			if description == "" {
 				description = labels[name]
@@ -72,6 +77,18 @@ func run() error {
 	}
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
+	if cmd == "version" {
+		if o.json {
+			return json.NewEncoder(os.Stdout).Encode(map[string]string{"version": updates.Version()})
+		}
+		fmt.Println(updates.Version())
+		return nil
+	}
+	if cmd == "serve" && o.managed {
+		args := append([]string(nil), os.Args[1:len(os.Args)-flag.NArg()]...)
+		return supervise(ctx, o.dir, append(args, "serve-worker"))
+	}
+	worker := cmd == "serve-worker" && o.managed
 	if cmd == "theme-check" {
 		f, e := os.Open(o.file)
 		if e != nil {
@@ -95,7 +112,7 @@ func run() error {
 	if cmd == "setup-storage" {
 		return prepare(o)
 	}
-	if cmd == "serve" || cmd == "recover" || cmd == "theme-reset" {
+	if worker || cmd == "serve" || cmd == "recover" || cmd == "theme-reset" {
 		c := storage.Config{Driver: o.driver, Address: o.address}
 		if c.Address == "" {
 			switch c.Driver {
@@ -132,11 +149,35 @@ func run() error {
 		if e != nil {
 			return e
 		}
+		defer listener.Close()
+		if worker {
+			ready := os.NewFile(3, "launcher-ready")
+			if ready == nil {
+				return errors.New("missing launcher pipe")
+			}
+			_, err := fmt.Fprintln(ready, updates.Version())
+			ready.Close()
+			if err != nil {
+				return err
+			}
+			s.EnableManagedUpdates()
+		}
+		shutdownDone := make(chan struct{})
+		serveCtx, stopServe := context.WithCancel(ctx)
+		defer stopServe()
+		restarting := false
 		go func() {
-			<-ctx.Done()
+			defer close(shutdownDone)
+			select {
+			case <-serveCtx.Done():
+			case <-s.UpdateRequested():
+				restarting = true
+			}
 			c, done := context.WithTimeout(context.Background(), 10*time.Second)
 			defer done()
-			httpd.Shutdown(c)
+			if httpd.Shutdown(c) != nil {
+				httpd.Close()
+			}
 		}()
 		workerCtx, stopWorker := context.WithCancel(ctx)
 		workerDone := make(chan struct{})
@@ -144,6 +185,11 @@ func run() error {
 		defer func() { stopWorker(); <-workerDone }()
 		fmt.Fprintln(os.Stderr, "Listening on", listener.Addr())
 		e = httpd.Serve(listener)
+		stopServe()
+		<-shutdownDone
+		if restarting {
+			return restartRequested
+		}
 		if errors.Is(e, http.ErrServerClosed) {
 			return nil
 		}

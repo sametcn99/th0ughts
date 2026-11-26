@@ -27,6 +27,10 @@ th0ughts -url https://feed.example.com -credentials ./writer.token -file ./photo
 
 Create a token in **Settings → Access tokens** and keep the returned value in a permissions-restricted file. Choose individual scopes and an expiry. For owner-only maintenance, pipe a JSON object containing `password` and optional `code` into `th0ughts -url <site> -credentials <session-file> login`. Keep secrets in protected files or standard input. A fresh owner session can download and restore backups with `-file <archive> backup` or `restore`. For an empty site, the `setup` command accepts `master`, `password`, and optional `driver` and `address` on standard input.
 
+### Application releases
+
+Run `th0ughts version` for the local executable version. With owner credentials, `update_status` reads the running server version and launcher status, and `check_update` checks the latest stable GitHub release. Its `available` and `installable` fields distinguish a newer release from one that can be applied to this server. Send `install_update` with the exact `version` shown in `latest` and a recently authenticated owner session. A successful response means the release was staged. Poll `update_status` after the restart until `current` matches the requested version or `failed` identifies the unsuccessful candidate.
+
 ## MCP
 
 - **Browser WebMCP** registers tools with `document.modelContext` when provided by the browser. The page registers names, localized descriptions, and input schemas for the active session. Browsers can read the public feed through HTML, Markdown, or REST independently of that capability.

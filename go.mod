@@ -16,6 +16,7 @@ require (
 	go.mongodb.org/mongo-driver/v2 v2.10.1
 	golang.org/x/crypto v0.59.0
 	golang.org/x/image v0.48.0
+	golang.org/x/mod v0.42.0
 	golang.org/x/net v0.63.0
 	golang.org/x/text v0.44.0
 	modernc.org/sqlite v1.63.0

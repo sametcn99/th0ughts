@@ -21,5 +21,5 @@ COPY --from=build /out/th0ughts /usr/local/bin/th0ughts
 USER app
 WORKDIR /data
 EXPOSE 8080
-ENTRYPOINT ["th0ughts"]
+ENTRYPOINT ["th0ughts","-managed-updates"]
 CMD ["-data","/data","serve"]

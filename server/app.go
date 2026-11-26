@@ -23,6 +23,7 @@ import (
 	"github.com/sametcn99/th0ughts/feed"
 	"github.com/sametcn99/th0ughts/storage"
 	theme "github.com/sametcn99/th0ughts/themes"
+	"github.com/sametcn99/th0ughts/updates"
 )
 
 //go:embed assets/* locales/*.json preview/*.html
@@ -34,24 +35,27 @@ type ticket struct {
 	Binding string
 }
 type Server struct {
-	guest       guestMail
-	imageMu     sync.Mutex
-	image       socialImage
-	instance    *flock.Flock
-	cache       *pageCache
-	mu          sync.RWMutex
-	lock        sync.Mutex
-	tickets     map[string]ticket
-	attempts    map[string]time.Time
-	dir, master string
-	v           feed.Vault
-	cfg         storage.Config
-	S           *feed.Service
-	A           *feed.Auth
-	L           *feed.Library
-	T           *feed.Themes
-	catalog     map[string]map[string]string
-	mux         *http.ServeMux
+	releases        *updates.Manager
+	managedUpdates  bool
+	updateRequested chan struct{}
+	guest           guestMail
+	imageMu         sync.Mutex
+	image           socialImage
+	instance        *flock.Flock
+	cache           *pageCache
+	mu              sync.RWMutex
+	lock            sync.Mutex
+	tickets         map[string]ticket
+	attempts        map[string]time.Time
+	dir, master     string
+	v               feed.Vault
+	cfg             storage.Config
+	S               *feed.Service
+	A               *feed.Auth
+	L               *feed.Library
+	T               *feed.Themes
+	catalog         map[string]map[string]string
+	mux             *http.ServeMux
 }
 
 func Open(ctx context.Context, dir, key string, initial storage.Config) (*Server, error) {
@@ -62,7 +66,7 @@ func Open(ctx context.Context, dir, key string, initial storage.Config) (*Server
 	if e = os.MkdirAll(dir, 0700); e != nil {
 		return nil, e
 	}
-	s := &Server{dir: dir, master: feed.Digest(key), v: v, tickets: map[string]ticket{}, attempts: map[string]time.Time{}, catalog: map[string]map[string]string{}}
+	s := &Server{releases: updates.New(dir, v), updateRequested: make(chan struct{}, 1), dir: dir, master: feed.Digest(key), v: v, tickets: map[string]ticket{}, attempts: map[string]time.Time{}, catalog: map[string]map[string]string{}}
 	p := filepath.Join(dir, "connection.enc")
 	b, e := os.ReadFile(p)
 	if e == nil {
@@ -193,7 +197,7 @@ func (s *Server) routes() {
 }
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	budget := 30 * time.Second
-	if r.URL.Path == "/api/v1/restore" || r.URL.Path == "/api/v1/backup" || r.URL.Path == "/api/v1/upload" || strings.HasPrefix(r.URL.Path, "/media/") {
+	if r.URL.Path == "/api/v1/install_update" || r.URL.Path == "/api/v1/restore" || r.URL.Path == "/api/v1/backup" || r.URL.Path == "/api/v1/upload" || strings.HasPrefix(r.URL.Path, "/media/") {
 		budget = 3 * time.Minute
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), budget)
@@ -291,6 +295,10 @@ func errorStatus(e error) (int, string) {
 	code := 500
 	msg := "internal_error"
 	switch {
+	case errors.Is(e, updates.ErrCheck), errors.Is(e, updates.ErrInstall):
+		return 502, e.Error()
+	case errors.Is(e, updates.ErrChanged), errors.Is(e, updates.ErrUnsupported):
+		return 409, e.Error()
 	case errors.Is(e, dnsUnavailable):
 		return 503, e.Error()
 	case errors.Is(e, feed.EmailCodeRequired):

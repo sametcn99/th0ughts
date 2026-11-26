@@ -1,0 +1,78 @@
+name: Build release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff
+        with:
+          go-version-file: go.mod
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+      - name: Check release version
+        run: |
+          version=$(cat updates/VERSION)
+          [[ "$version" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+          test "$version" = "v$(jq -r .version package.json)"
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then test "$version" = "$GITHUB_REF_NAME"; fi
+      - name: Build and verify the embedded application
+        run: |
+          bun install --frozen-lockfile
+          bun run check:i18n
+          bun run build
+          git diff --exit-code -- server/assets server/preview
+          go build -o bin/th0ughts ./cmd/th0ughts
+          TEST_BINARY="$PWD/bin/th0ughts" go test -race ./...
+      - name: Package Linux executables
+        run: bash scripts/build-release.sh bin/release
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: linux-release
+          path: bin/release/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: build
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: linux-release
+          path: bin/release
+      - name: Publish complete GitHub Release
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          (cd bin/release && sha256sum -c SHA256SUMS)
+          tag="$GITHUB_REF_NAME"
+          if state=$(gh release view "$tag" --json isDraft --jq .isDraft); then
+            test "$state" = true || { echo "Release already published"; exit 1; }
+          else
+            gh release create "$tag" --verify-tag --draft --title "$tag" --generate-notes
+          fi
+          gh release upload "$tag" bin/release/{th0ughts-linux-amd64,th0ughts-linux-arm64,SHA256SUMS} --clobber
+          cd bin/release
+          for file in th0ughts-linux-* SHA256SUMS; do
+            digest=$(sha256sum "$file" | cut -d' ' -f1)
+            remote=$(gh release view "$tag" --json assets --jq ".assets[] | select(.name == \"$file\") | .digest")
+            test "$remote" = "sha256:$digest"
+          done
+          gh release edit "$tag" --draft=false

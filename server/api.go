@@ -55,6 +55,15 @@ type themeInput struct {
 }
 
 var commands = []Command{
+	command("update_status", "owner", true, func(_ context.Context, s *Server, _ feed.Actor, _ empty) (any, error) {
+		return s.releases.Status(s.managedUpdates), nil
+	}),
+	command("check_update", "owner", true, func(ctx context.Context, s *Server, _ feed.Actor, _ empty) (any, error) {
+		return s.releases.Check(ctx, s.managedUpdates)
+	}),
+	command("install_update", "owner", false, func(ctx context.Context, s *Server, a feed.Actor, x struct {
+		Version string `json:"version"`
+	}) (any, error) { return true, s.installUpdate(ctx, a, x.Version) }),
 	command("comment_context", "", true, func(c context.Context, s *Server, a feed.Actor, x identify) (any, error) {
 		return s.commentContext(c, x.ID)
 	}),

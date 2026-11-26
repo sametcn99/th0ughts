@@ -209,6 +209,17 @@
     "height": 744
   },
   {
+    "id": "updates",
+    "group": "publishing",
+    "title": {
+      "en": "Application updates",
+      "tr": "Uygulama güncellemeleri"
+    },
+    "file": "updates.webp",
+    "width": 900,
+    "height": 744
+  },
+  {
     "id": "appearance",
     "group": "appearance",
     "title": {
