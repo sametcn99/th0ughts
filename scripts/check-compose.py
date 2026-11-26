@@ -7,7 +7,7 @@ import subprocess
 root = pathlib.Path(__file__).resolve().parents[1]
 env = {**os.environ, "TH0UGHTS_MASTER_KEY":"compose-schema-validation-only"}
 paths = sorted((root/"deploy").glob("compose.*.yaml"))
-assert len(paths) == 9
+assert len(paths) == 11
 for path in paths:
     cmd = ["docker","compose","-f",str(path),"config","--format","json"]
     model = json.loads(subprocess.check_output(cmd,env=env))

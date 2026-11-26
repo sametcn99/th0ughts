@@ -1,0 +1,52 @@
+name: Measure storage performance
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: benchmark
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 30
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: benchmark
+          MYSQL_ROOT_PASSWORD: benchmark
+          MYSQL_ROOT_HOST: '%'
+        ports: ['3306:3306']
+        options: --health-cmd "mysqladmin ping" --health-interval 5s --health-retries 30
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MARIADB_DATABASE: benchmark
+          MARIADB_ROOT_PASSWORD: benchmark
+        ports: ['3307:3306']
+        options: --health-cmd "healthcheck.sh --connect --innodb_initialized" --health-interval 5s --health-retries 30
+      mongo:
+        image: mongo:8
+        ports: ['27017:27017']
+    env:
+      TEST_postgres: postgres://postgres:benchmark@127.0.0.1:5432/postgres?sslmode=disable
+      TEST_mysql: root:benchmark@tcp(127.0.0.1:3306)/benchmark
+      TEST_mariadb: root:benchmark@tcp(127.0.0.1:3307)/benchmark
+      TEST_mongodb: mongodb://127.0.0.1:27017/benchmark
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff
+        with:
+          go-version-file: go.mod
+      - run: bash scripts/build-native.sh
+      - name: Verify driver contracts and measure durable reads and writes
+        shell: bash
+        run: |
+          go test -tags nativekv ./storage -run TestDrivers -v
+          go test -tags nativekv ./storage -run '^$' -bench BenchmarkStore -benchtime=100x -count=3 | tee storage.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: storage-measurements
+          path: storage.txt

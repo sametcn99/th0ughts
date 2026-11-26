@@ -10,3 +10,5 @@ bin/
 *.token
 *.session
 pages/dist/
+native/target/
+native/lib/

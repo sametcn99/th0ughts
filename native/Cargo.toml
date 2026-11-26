@@ -1,0 +1,15 @@
+[package]
+name = "th0ughts-kv"
+version = "0.1.1"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+heed = { version = "0.23.1", default-features = false }
+redb = "5.0.0"
+
+[profile.release]
+strip = "debuginfo"

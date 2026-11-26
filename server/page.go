@@ -459,6 +459,7 @@ func (h *Server) page(w http.ResponseWriter, r *http.Request) {
 		}
 		if private || setup {
 			data["driver"] = h.cfg.Driver
+			data["nativeKV"] = storage.NativeKVEnabled
 		}
 		out += "<script id=\"state\" type=\"application/json\">" + jsonText(data) + "</script><script src=\"/assets/reader.js\" defer></script>"
 		out += `<script type="module" src="` + assetURL("media.js") + `"></script>`

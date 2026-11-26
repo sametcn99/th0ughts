@@ -9,7 +9,7 @@ import urllib.request
 from pathlib import Path
 
 driver = sys.argv[1]
-if driver not in {"sqlite","json","json-dir","postgres","mysql","mariadb","mongodb"}:
+if driver not in {"sqlite","json","json-dir","redb","lmdb","postgres","mysql","mariadb","mongodb"}:
     raise SystemExit("Unknown database profile")
 key = secrets.token_hex(32)
 project = "thoughts-smoke-"+secrets.token_hex(5)

@@ -33,8 +33,8 @@ func main() {
 	if _, e := os.Stat(filepath.Join(*dir, "connection.enc")); !os.IsNotExist(e) {
 		panic("benchmark instance must be new")
 	}
-	if *driver == "sqlite" {
-		*addr = filepath.Join(*dir, "feed.db")
+	if *addr == "" {
+		*addr = storage.LocalAddress(*dir, *driver)
 	}
 	ctx := context.Background()
 	s, e := server.Open(ctx, *dir, os.Getenv("TH0UGHTS_MASTER_KEY"), storage.Config{Driver: *driver, Address: *addr})

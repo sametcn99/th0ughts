@@ -63,18 +63,20 @@ The language in a shared URL takes precedence over a saved reader preference, fo
 - Send [signed comment webhooks](docs/interfaces.md#signed-comment-webhooks) to your own HTTPS receiver when guests comment or the owner approves or deletes a comment.
 - Enable guest discussions in **Settings → Comments**. Readers can reply with text, Markdown, and images with a required, DNS-checked email address. Inbox codes are optional. The owner can review submissions, delete comments, or lock individual threads. [Comment verification settings](docs/deployment.md#guest-comments-and-verification-mail)
 - Upload a single HTML file from **Settings → Appearance**. Preview it, select its options, and save. Browse community themes and leave feedback in Discussions, or start a thread for your own theme. [Community themes](https://github.com/sametcn99/th0ughts/discussions/categories/show-and-tell) · [Share a theme](https://github.com/sametcn99/th0ughts/discussions/new?category=show-and-tell) · [Theme authoring guide](docs/themes.md)
-- Choose SQLite, PostgreSQL, MySQL, MariaDB, MongoDB, single-file JSON, or directory JSON. Each has a standalone Compose file. Platform-specific instructions cover repository builds, TLS routing, volumes, and secrets. [Deployment guide](docs/deployment.md)
+- Choose SQLite, redb, LMDB, PostgreSQL, MySQL, MariaDB, MongoDB, single-file JSON, or directory JSON. Each has a standalone Compose file. Platform-specific instructions cover repository builds, TLS routing, volumes, and secrets. [Deployment guide](docs/deployment.md)
 - Automate with scoped bearer tokens, the CLI, WebMCP, or standalone MCP. [API and CLI guide](docs/interfaces.md)
 - Review security controls, tests, and load measurements. [Security verification](docs/security.md) · [Performance](docs/performance.md)
 
 ## Local development
 
-Use the Go toolchain specified in `go.mod` and Bun 1.4.4. The compiled React bundle is included so a Go build can run directly from a checkout.
+For all nine drivers, install Rust 1.100 or later, a C compiler and GNU binutils on Linux. The release executables include both native engines. A Go-only source build supports the original seven drivers. Use the Go toolchain specified in `go.mod` and Bun 1.4.4. The compiled React bundle is included so a Go build can run directly from a checkout.
 
 ```sh
 bun install --frozen-lockfile
 bun run check:i18n
 bun run build
+bash scripts/build-native.sh
+export GOFLAGS="-tags=nativekv"
 go build -o bin/th0ughts ./cmd/th0ughts
 go test ./...
 bin/th0ughts -listen localhost:8080 -data ./data serve

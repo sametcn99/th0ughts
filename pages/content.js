@@ -3,6 +3,8 @@ export const site = "https://sametcn99.github.io/th0ughts/";
 export const install = "curl -fsSL " + site + "install.sh | bash";
 export const drivers = {
   sqlite: "SQLite",
+  redb: "redb",
+  lmdb: "LMDB",
   postgres: "PostgreSQL",
   mysql: "MySQL",
   mariadb: "MariaDB",
@@ -61,7 +63,7 @@ export const text = {
     wizardIntro:
       "Connect to your server over SSH and run the command in an interactive terminal. Choose English or Turkish to get started.",
     steps: [
-      "Choose a database. SQLite stores the feed in one local database. The wizard can also provision PostgreSQL, MySQL, MariaDB, MongoDB and two JSON layouts.",
+      "Choose a database. SQLite stores the feed in one local database. The wizard can also provision redb, LMDB, PostgreSQL, MySQL, MariaDB, MongoDB and two JSON layouts.",
       "Pick a host port, binding address, a new installation directory and a unique Compose project name. Loopback is the default for an HTTPS proxy or SSH tunnel.",
       "Review and confirm. On Ubuntu and Debian the wizard can install missing tools with your permission. On other distributions, install Git, curl, OpenSSL and Docker with the Compose plugin first.",
       "After the health check, open /login through HTTPS or the displayed SSH tunnel. Read the generated master key from .env, choose an owner password and set the public URL on the timeline.",
@@ -166,7 +168,7 @@ export const text = {
     wizardIntro:
       "SSH ile sunucuna bağlan ve komutu etkileşimli bir terminalde çalıştır. Başlamak için İngilizce veya Türkçeyi seç.",
     steps: [
-      "Veritabanını seç. SQLite akışı tek bir yerel veritabanında tutar. Sihirbaz ayrıca PostgreSQL, MySQL, MariaDB, MongoDB ve iki JSON düzenini kurabilir.",
+      "Veritabanını seç. SQLite akışı tek bir yerel veritabanında tutar. Sihirbaz ayrıca redb, LMDB, PostgreSQL, MySQL, MariaDB, MongoDB ve iki JSON düzenini kurabilir.",
       "Portu, dinleme adresini, yeni kurulum dizinini ve benzersiz bir Compose proje adını belirle. Varsayılan yerel bağlantı HTTPS ters proxy veya SSH tüneli içindir.",
       "Seçimlerini inceleyip onayla. Ubuntu ve Debian’da sihirbaz izninle eksik araçları kurabilir. Diğer dağıtımlarda önce Git, curl, OpenSSL, Docker ve Compose eklentisini kur.",
       "Sağlık kontrolünden sonra HTTPS veya verilen SSH tüneliyle /login adresini aç. .env dosyasındaki anahtarla kurulumu başlat, parolanı seç ve akış ayarlarına sitenin açık adresini gir.",

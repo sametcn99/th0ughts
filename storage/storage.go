@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -45,6 +46,8 @@ type Store interface {
 
 func Open(ctx context.Context, c Config) (Store, error) {
 	switch c.Driver {
+	case "redb", "lmdb":
+		return openNative(c)
 	case "json", "json-dir":
 		return openFiles(c)
 	case "sqlite", "postgres", "mysql", "mariadb":
@@ -67,4 +70,13 @@ func orderRecords(rows []Record) {
 }
 func ValidKey(s string) bool {
 	return s != "" && len(s) <= 128 && strings.Trim(s, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-") == ""
+}
+
+// LocalAddress resolves file-backed drivers inside the instance's data directory.
+func LocalAddress(dir, driver string) string {
+	name := map[string]string{"sqlite": "feed.db", "json": "feed.json", "json-dir": "records", "redb": "feed.redb", "lmdb": "lmdb"}[driver]
+	if name == "" {
+		return ""
+	}
+	return filepath.Join(dir, name)
 }

@@ -5,6 +5,8 @@ Each Compose file is standalone. Run one application process per site and keep i
 | Installation | Compose file | Persistent content |
 | --- | --- | --- |
 | SQLite | `deploy/compose.sqlite.yaml` | Application volume, SQLite database in WAL mode |
+| redb | `deploy/compose.redb.yaml` | Embedded redb database at `/data/feed.redb` |
+| LMDB | `deploy/compose.lmdb.yaml` | LMDB environment and lock files under `/data/lmdb/` |
 | Single JSON | `deploy/compose.json.yaml` | Application volume and one JSON data file |
 | Directory JSON | `deploy/compose.json-dir.yaml` | Application volume and one file per record |
 | PostgreSQL | `deploy/compose.postgres.yaml` | Application, database, and credential volumes |
@@ -16,7 +18,9 @@ Each Compose file is standalone. Run one application process per site and keep i
 
 The database variants create their private credentials in a one-shot setup service. Database ports stay inside the Compose network. The ordinary host variants bind the web port to loopback. Set the public URL in site settings after configuring your HTTPS proxy. For an existing external database, select the driver on first setup and enter the connection there. PostgreSQL accepts a connection URI, MySQL and MariaDB a Go MySQL DSN, and MongoDB a URI with a database path.
 
-All seven drivers passed a native-process check through the compiled CLI and HTTP server. Each run initialized an owner, published a translated post, exported a backup, restarted the server, reused its owner session, and verified the public page excluded the private translation. The separate container smoke workflow builds each database recipe and exercises a restart through HTTP.
+The original seven drivers passed a native-process check through the compiled CLI and HTTP server. Each run initialized an owner, published a translated post, exported a backup, restarted the server, reused its owner session, and verified the public page excluded the private translation. The separate container smoke workflow builds each database recipe and exercises a restart through HTTP.
+
+redb and LMDB use their native transactional B-trees and commit each mutation durably. Both keep the rank and ID cursor index in the same transaction as its record. They need only the application volume. LMDB reserves a 1 TiB virtual address range on 64-bit hosts and grows its disk file as records are added. Use local storage with working file locks for both engines. Use the application export for a portable backup or stop the server before copying raw files.
 
 ## Interactive VPS installation
 

@@ -15,7 +15,7 @@ import threading
 import urllib.request
 
 root = pathlib.Path(__file__).resolve().parents[1]
-choices = {"sqlite": "1", "postgres": "2"}
+choices = {"sqlite": "1", "postgres": "2", "redb": "8", "lmdb": "9"}
 driver = sys.argv[1]
 project = "thoughts-wizard-" + secrets.token_hex(4)
 with tempfile.TemporaryDirectory() as temporary:

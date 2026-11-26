@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"path/filepath"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -103,9 +102,8 @@ func (s *Server) auth(w http.ResponseWriter, r *http.Request) {
 		}
 		if in.Driver != "" && in.Driver != s.cfg.Driver || in.Address != "" && in.Address != s.cfg.Address {
 			addr := in.Address
-			switch in.Driver {
-			case "sqlite", "json", "json-dir":
-				addr = filepath.Join(s.dir, map[string]string{"sqlite": "feed.db", "json": "feed.json", "json-dir": "records"}[in.Driver])
+			if local := storage.LocalAddress(s.dir, in.Driver); local != "" {
+				addr = local
 			}
 			if e := s.connect(ctx, storage.Config{Driver: in.Driver, Address: addr}); e != nil {
 				fail(w, feed.Invalid)

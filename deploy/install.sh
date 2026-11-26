@@ -66,8 +66,9 @@ main() {
   say "Choose a database. Database servers run in their own private containers." "Veritabanını seçin. Veritabanı sunucuları kendi özel konteynerlerinde çalışır."
   say "1 SQLite (single local database)   2 PostgreSQL   3 MySQL   4 MariaDB   5 MongoDB" "1 SQLite (tek yerel veritabanı)   2 PostgreSQL   3 MySQL   4 MariaDB   5 MongoDB"
   say "6 Single JSON file   7 JSON directory (one file per record)" "6 Tek JSON dosyası   7 JSON dizini (kayıt başına bir dosya)"
-  local drivers=(sqlite postgres mysql mariadb mongodb json json-dir)
-  while :; do ask "Database (1–7)" "Veritabanı (1–7)" 1; [[ $reply =~ ^[1-7]$ ]] && break; done
+  say "8 redb (single local file)   9 LMDB (local directory)" "8 redb (tek yerel dosya)   9 LMDB (yerel dizin)"
+  local drivers=(sqlite postgres mysql mariadb mongodb json json-dir redb lmdb)
+  while :; do ask "Database (1–9)" "Veritabanı (1–9)" 1; [[ $reply =~ ^[1-9]$ ]] && break; done
   driver=${drivers[reply-1]}
   while :; do ask "Web port (1–65535)" "Web portu (1–65535)" 8080; [[ $reply =~ ^[1-9][0-9]{0,4}$ ]] && ((reply <= 65535)) && break; done
   port=$reply

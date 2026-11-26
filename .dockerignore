@@ -10,3 +10,5 @@ docs/measurements
 *.token
 *.session
 pages/
+native/target/
+native/lib/

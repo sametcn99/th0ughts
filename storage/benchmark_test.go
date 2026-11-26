@@ -14,10 +14,13 @@ import (
 // Measure an indexed first page and a durable update with the same fixture size.
 // For external drivers TEST_* must name a disposable database.
 func BenchmarkStore(b *testing.B) {
-	for _, d := range []string{"sqlite", "postgres", "mysql", "mariadb", "mongodb", "json", "json-dir"} {
+	for _, d := range []string{"redb", "lmdb", "sqlite", "postgres", "mysql", "mariadb", "mongodb", "json", "json-dir"} {
 		b.Run(d, func(b *testing.B) {
+			if (d == "redb" || d == "lmdb") && !storage.NativeKVEnabled {
+				b.Skip("nativekv build required")
+			}
 			addr := os.Getenv("TEST_" + d)
-			if d == "sqlite" || d == "json" || d == "json-dir" {
+			if storage.LocalAddress(".", d) != "" {
 				addr = filepath.Join(b.TempDir(), "bench")
 			} else if addr == "" {
 				b.Skip("no disposable database")

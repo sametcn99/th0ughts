@@ -1,0 +1,23 @@
+services:
+  app:
+    build: ..
+    environment:
+      TH0UGHTS_MASTER_KEY: ${TH0UGHTS_MASTER_KEY:?Set a persistent random master key}
+    command: ["-data", "/data", "-driver", "redb", "serve"]
+    ports:
+      - "${TH0UGHTS_LISTEN:-127.0.0.1:8080}:8080"
+    volumes:
+      - app-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+volumes:
+  app-data:

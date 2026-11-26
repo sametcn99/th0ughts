@@ -115,14 +115,7 @@ func run() error {
 	if worker || cmd == "serve" || cmd == "recover" || cmd == "theme-reset" {
 		c := storage.Config{Driver: o.driver, Address: o.address}
 		if c.Address == "" {
-			switch c.Driver {
-			case "json":
-				c.Address = filepath.Join(o.dir, "feed.json")
-			case "json-dir":
-				c.Address = filepath.Join(o.dir, "records")
-			case "sqlite":
-				c.Address = filepath.Join(o.dir, "feed.db")
-			}
+			c.Address = storage.LocalAddress(o.dir, c.Driver)
 		}
 		s, e := server.Open(ctx, o.dir, os.Getenv("TH0UGHTS_MASTER_KEY"), c)
 		if e != nil {

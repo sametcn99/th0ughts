@@ -12,11 +12,14 @@ import (
 )
 
 func TestDrivers(t *testing.T) {
-	for _, driver := range []string{"sqlite", "json", "json-dir", "postgres", "mysql", "mariadb", "mongodb"} {
+	for _, driver := range []string{"redb", "lmdb", "sqlite", "json", "json-dir", "postgres", "mysql", "mariadb", "mongodb"} {
 		t.Run(driver, func(t *testing.T) {
+			if (driver == "redb" || driver == "lmdb") && !storage.NativeKVEnabled {
+				t.Skip("nativekv build required")
+			}
 			addr := os.Getenv("TEST_" + driver)
 			switch driver {
-			case "sqlite", "json", "json-dir":
+			case "sqlite", "json", "json-dir", "redb", "lmdb":
 				addr = filepath.Join(t.TempDir(), "database")
 			default:
 				if addr == "" {
@@ -58,7 +61,7 @@ func TestDrivers(t *testing.T) {
 			if e != nil || len(rows) != 1 || rows[0].ID != "a" {
 				t.Fatalf("page after deletion: %+v %v", rows, e)
 			}
-			if driver == "json" || driver == "json-dir" {
+			if driver == "json" || driver == "json-dir" || driver == "lmdb" || driver == "redb" {
 				if duplicate, e := storage.Open(ctx, cfg); e == nil {
 					duplicate.Close()
 					t.Fatal("second writer acquired store")

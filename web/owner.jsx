@@ -46,6 +46,7 @@ function Setup() {
         <select value={driver} onChange={(e) => d(e.target.value)}>
           {[
             "sqlite",
+            ...(state.nativeKV ? ["redb", "lmdb"] : []),
             "postgres",
             "mysql",
             "mariadb",
@@ -57,7 +58,7 @@ function Setup() {
           ))}
         </select>
       </label>
-      {!["sqlite", "json", "json-dir"].includes(driver) && (
+      {!["sqlite", "json", "json-dir", "redb", "lmdb"].includes(driver) && (
         <Field
           label="address"
           value={address}
