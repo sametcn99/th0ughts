@@ -1,0 +1,60 @@
+goos: linux
+goarch: amd64
+pkg: github.com/sametcn99/th0ughts/storage
+cpu: AMD EPYC 9V45 96-Core Processor
+BenchmarkStore/redb/page20-4  	     100	     17454 ns/op
+BenchmarkStore/redb/page20-4  	     100	     14046 ns/op
+BenchmarkStore/redb/page20-4  	     100	     14107 ns/op
+BenchmarkStore/redb/update-4  	     100	    317229 ns/op
+BenchmarkStore/redb/update-4  	     100	    125067 ns/op
+BenchmarkStore/redb/update-4  	     100	    129967 ns/op
+BenchmarkStore/lmdb/page20-4  	     100	     24546 ns/op
+BenchmarkStore/lmdb/page20-4  	     100	     17278 ns/op
+BenchmarkStore/lmdb/page20-4  	     100	     14775 ns/op
+BenchmarkStore/lmdb/update-4  	     100	    293603 ns/op
+BenchmarkStore/lmdb/update-4  	     100	    160721 ns/op
+BenchmarkStore/lmdb/update-4  	     100	    159536 ns/op
+BenchmarkStore/sqlite/page20-4         	     100	     33562 ns/op
+BenchmarkStore/sqlite/page20-4         	     100	     29249 ns/op
+BenchmarkStore/sqlite/page20-4         	     100	     28165 ns/op
+BenchmarkStore/sqlite/update-4         	     100	    117128 ns/op
+BenchmarkStore/sqlite/update-4         	     100	    111296 ns/op
+BenchmarkStore/sqlite/update-4         	     100	    110767 ns/op
+BenchmarkStore/postgres/page20-4       	     100	     98169 ns/op
+BenchmarkStore/postgres/page20-4       	     100	     88997 ns/op
+BenchmarkStore/postgres/page20-4       	     100	     87159 ns/op
+BenchmarkStore/postgres/update-4       	     100	    181174 ns/op
+BenchmarkStore/postgres/update-4       	     100	    175454 ns/op
+BenchmarkStore/postgres/update-4       	     100	    167469 ns/op
+BenchmarkStore/mysql/page20-4          	     100	    208054 ns/op
+BenchmarkStore/mysql/page20-4          	     100	    200958 ns/op
+BenchmarkStore/mysql/page20-4          	     100	    194976 ns/op
+BenchmarkStore/mysql/update-4          	     100	    142440 ns/op
+BenchmarkStore/mysql/update-4          	     100	    143038 ns/op
+BenchmarkStore/mysql/update-4          	     100	    141395 ns/op
+BenchmarkStore/mariadb/page20-4        	     100	    198647 ns/op
+BenchmarkStore/mariadb/page20-4        	     100	    192162 ns/op
+BenchmarkStore/mariadb/page20-4        	     100	    199448 ns/op
+BenchmarkStore/mariadb/update-4        	     100	    140464 ns/op
+BenchmarkStore/mariadb/update-4        	     100	    141271 ns/op
+BenchmarkStore/mariadb/update-4        	     100	    138856 ns/op
+BenchmarkStore/mongodb/page20-4        	     100	    212934 ns/op
+BenchmarkStore/mongodb/page20-4        	     100	    207849 ns/op
+BenchmarkStore/mongodb/page20-4        	     100	    199191 ns/op
+BenchmarkStore/mongodb/update-4        	     100	    135136 ns/op
+BenchmarkStore/mongodb/update-4        	     100	    130583 ns/op
+BenchmarkStore/mongodb/update-4        	     100	    136761 ns/op
+BenchmarkStore/json/page20-4           	     100	       812.5 ns/op
+BenchmarkStore/json/page20-4           	     100	       289.1 ns/op
+BenchmarkStore/json/page20-4           	     100	       246.7 ns/op
+BenchmarkStore/json/update-4           	     100	    766721 ns/op
+BenchmarkStore/json/update-4           	     100	   1009608 ns/op
+BenchmarkStore/json/update-4           	     100	    754610 ns/op
+BenchmarkStore/json-dir/page20-4       	     100	      1110 ns/op
+BenchmarkStore/json-dir/page20-4       	     100	       383.8 ns/op
+BenchmarkStore/json-dir/page20-4       	     100	       333.1 ns/op
+BenchmarkStore/json-dir/update-4       	     100	    489447 ns/op
+BenchmarkStore/json-dir/update-4       	     100	    478983 ns/op
+BenchmarkStore/json-dir/update-4       	     100	    759894 ns/op
+PASS
+ok  	github.com/sametcn99/th0ughts/storage	3.940s

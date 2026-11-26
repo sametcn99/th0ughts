@@ -114,7 +114,7 @@ export const text = {
       ],
       [
         "Performance",
-        "Inspect the workload, latency and memory measurements for SQLite and PostgreSQL, including the reproducible mobile reader test.",
+        "Compare nine storage drivers and inspect the 10,000-reader, sustained load and mobile results for SQLite, PostgreSQL, redb and LMDB.",
         "docs/performance.md",
       ],
     ],
@@ -219,7 +219,7 @@ export const text = {
       ],
       [
         "Performans",
-        "SQLite ve PostgreSQL için yük, gecikme ve bellek ölçümlerini ve tekrarlanabilir mobil okuma testini incele.",
+        "Dokuz depolama sürücüsünü karşılaştır. SQLite, PostgreSQL, redb ve LMDB için 10.000 okuyucu, sürekli yük ve mobil tarayıcı ölçümlerini incele.",
         "docs/performance.md",
       ],
     ],

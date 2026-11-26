@@ -1,6 +1,88 @@
 # Performance verification
 
-## Image-heavy feed and concurrent readers
+## v0.1.1 verification
+
+On November 26, 2026, we repeated the HTTP and mobile workloads on SQLite, PostgreSQL 16.16, redb 5.0.0 and LMDB. The full storage benchmark covered all nine drivers. Each of the four HTTP deployments had its own database and media files. The measured Linux/amd64 application used Go 1.27.4, Rust 1.100.0 and the runtime sources at `071d5ea`. The raw report includes executable hashes, every burst and browser sample, per-route percentiles and cgroup counters. [Raw HTTP and mobile results](measurements/v0.1.1.json) · [Storage output](measurements/storage-v0.1.1.txt)
+
+### 10,000 posts and 5,000 photographs
+
+Each 20-post page contains ten separately addressed photographs. We rotated the four engines across three runs each, restarted the server and emptied its thumbnail directory before every run. The following values are median run-level p95 latencies in milliseconds, measured through the last response byte. All requests succeeded. The warm timeline burst serves one cached HTML page per reader. Each two-photo visit requests the page and two 480 px JPEGs in sequence.
+
+| Scenario (p95 ms) | SQLite | PostgreSQL | redb | LMDB |
+| --- | ---: | ---: | ---: | ---: |
+| Cold timeline, 128 simultaneous readers | 29.70 | 28.28 | 29.63 | 29.10 |
+| First 10 concurrent thumbnails | 59.43 | 71.05 | 57.27 | 60.33 |
+| Mixed routes, 4,096 requests / 64 workers | 5.86 | 10.26 | 9.95 | 9.04 |
+| Common-word search, 512 requests / 32 workers | 10.58 | 10.21 | 4.79 | 4.27 |
+| Deep cursor, 512 requests / 32 workers | 7.71 | 7.99 | 3.71 | 3.89 |
+| Warm timeline, 10,000 simultaneous readers | 322.28 | 227.32 | 524.32 | 485.94 |
+| 10,000 visits with two photos each | 1,506.10 | 1,457.18 | 1,475.32 | 1,473.87 |
+
+| Per burst, median | SQLite | PostgreSQL | redb | LMDB |
+| --- | ---: | ---: | ---: | ---: |
+| Two-photo visit p99 (s) | 1.53 | 1.48 | 1.49 | 1.49 |
+| Wall time for all 30,000 requests (s) | 1.56 | 1.51 | 1.52 | 1.51 |
+| Encoded bodies transferred (GB) | 1.13 | 1.13 | 1.13 | 1.13 |
+| Server peak RSS across all seven scenarios (MiB) | 560 | 524 | 515 | 490 |
+
+These runs used HTTP/1.1 over loopback on an Intel Core Ultra 9 285H. The server and PostgreSQL shared logical CPUs 2 and 4. The client used CPUs 6–11, matching the earlier image-heavy test. The OS filesystem cache was retained. RSS covers the Go process and its in-process database and excludes the separate PostgreSQL process. The raw file also includes three runs per engine on low-power CPUs 14 and 15. Those samples were collected during other local measurements and are reported separately. An internet-facing VPS serving 1.13 GB across a 100 Mbit/s uplink needs about 90 seconds for the bodies alone.
+
+Compared with the previous measurements on the same CPU assignments, warm timeline p95 increased from 187 to 322 ms on SQLite and from 166 to 227 ms on PostgreSQL. Two-photo visit p95 was 1.51 s on SQLite in both sets and rose from 1.37 to 1.46 s on PostgreSQL. The warm timeline serves cached HTML. Its timing includes connection setup, socket transfer and client scheduling, so this scenario cannot isolate database latency.
+
+### Fifteen minutes of reads and publication changes
+
+After a two-minute warm-up, each server handled 50 reads per second and one publication change every five seconds on a 10,000-post fixture with 200 small images. Across all four engines, 180,000 measured reads and 720 writes completed with zero errors. All four met the existing p95 limits. Each cell below shows p95 / p99 in milliseconds.
+
+| Operation | SQLite | PostgreSQL | redb | LMDB |
+| --- | ---: | ---: | ---: | ---: |
+| Timeline | 0.52 / 1.32 | 1.06 / 2.26 | 0.65 / 1.29 | 0.56 / 1.26 |
+| Focused post | 2.14 / 2.64 | 2.59 / 3.39 | 1.70 / 2.29 | 1.82 / 2.02 |
+| Search | 5.66 / 6.88 | 7.41 / 9.52 | 4.40 / 5.27 | 4.15 / 4.92 |
+| RSS | 0.98 / 1.29 | 1.20 / 2.40 | 0.84 / 1.22 | 0.83 / 1.22 |
+| Markdown | 0.65 / 0.92 | 1.13 / 1.94 | 0.64 / 0.90 | 0.56 / 0.89 |
+| Write | 4.87 / 5.64 | 4.82 / 5.53 | 3.80 / 4.63 | 2.92 / 3.43 |
+
+| Server or deployment | SQLite | PostgreSQL | redb | LMDB |
+| --- | ---: | ---: | ---: | ---: |
+| Cold search (ms) | 67.36 | 196.59 | 70.08 | 76.81 |
+| Peak sampled cgroup memory (MiB) | 41.3 | 83.3 | 43.6 | 34.4 |
+| OOM kills | 0 | 0 | 0 | 0 |
+
+Each deployment ran in its own 2 GiB cgroup with two logical CPUs and a 200% CPU quota. PostgreSQL shared its application’s cgroup. Memory was sampled once per second and includes charged file cache. The four deployments ran concurrently on distinct CPU pairs with different base capabilities. Use this table to assess the workload budgets. The burst table above uses the same cores for every engine and is better suited to direct comparisons.
+
+### Mobile reader
+
+Each cell shows p75 for eight fresh Chromium contexts, alternating English and Turkish with the Paper theme. The emulated viewport was 390 × 844 at 2× pixel density, with 4× CPU slowdown, 150 ms latency and 1.6 Mbit/s downstream. Interactions tapped the search field and typed a query. JS figures count encoded script response bodies observed by the harness.
+
+| Fixture and metric | SQLite | PostgreSQL | redb | LMDB |
+| --- | ---: | ---: | ---: | ---: |
+| Image-heavy LCP (ms) | 1728 | 1724 | 1728 | 1724 |
+| Image-heavy INP (ms) | 32 | 32 | 32 | 32 |
+| Image-heavy CLS | 0 | 0 | 0 | 0 |
+| Text-heavy LCP (ms) | 456 | 460 | 460 | 460 |
+| Text-heavy INP (ms) | 32 | 32 | 32 | 32 |
+| Text-heavy CLS | 0 | 0 | 0 | 0 |
+| Maximum reader JS (bytes) | 4142 | 4142 | 4142 | 4142 |
+
+### Nine storage engines
+
+The Go benchmark populated 500 records and ran 100 iterations per operation, repeated three times. Values are the median of the three mean times, in microseconds per operation. Five file-backed stores ran in temporary directories. PostgreSQL 18, MySQL 8.4, MariaDB 11.8 and MongoDB 8 ran as separate services on the same GitHub-hosted Linux runner. The workflow also exercised the storage and publishing contracts. [GitHub Actions run](https://github.com/sametcn99/th0ughts/actions/runs/45851673928)
+
+| Driver | Read 20 rows (µs) | Update one row (µs) |
+| --- | ---: | ---: |
+| SQLite | 29.25 | 111.30 |
+| PostgreSQL | 89.00 | 175.45 |
+| redb | 14.11 | 129.97 |
+| LMDB | 17.28 | 160.72 |
+| MySQL | 200.96 | 142.44 |
+| MariaDB | 198.65 | 140.46 |
+| MongoDB | 207.85 | 135.14 |
+| Single JSON | 0.29 | 766.72 |
+| Directory JSON | 0.38 | 489.45 |
+
+The JSON engines serve repeated page reads from ordered in-memory snapshots. Single-file JSON rewrites its database on each mutation. Different filesystems, durability settings and network distances change the cost of a write. The reproduction commands below cover the image-heavy, sustained, mobile and storage workloads.
+
+## Earlier image-heavy feed and concurrent readers
 
 We compared v0.1.0 (commit `c0cd7ba`) with the optimized server on Linux/amd64 and Go 1.27.4. The SQLite fixture has 10,000 published posts alternating between English and Turkish and 5,000 independently stored, independently addressed copies of the same 600 × 403 JPEG (166,452 bytes each). Each timeline page contains 20 posts and ten photographs. The server ran on two logical CPUs with `GOMAXPROCS=2`. The HTTP/1.1 client ran on six separate logical CPUs on the same Intel Core Ultra 9 285H. Each build ran three times, alternating versions. Each run started a fresh process with an empty thumbnail directory and retained the OS filesystem cache. [Raw runs, mobile samples and executable hashes](measurements/image-feed.json)
 
@@ -55,7 +137,8 @@ Build the server as described in the README. Start from a dedicated empty direct
 umask 077
 export TH0UGHTS_MASTER_KEY="$(openssl rand -hex 32)"
 work="$(mktemp -d)"
-go run ./scripts/benchseed -data "$work/data" -posts 10000 \
+export GOFLAGS=-tags=nativekv
+go run ./scripts/benchseed -data "$work/data" -driver redb -posts 10000 \
   -image scripts/fixtures/great-wave.jpg -image-every 2
 GOMAXPROCS=2 bin/th0ughts -data "$work/data" -listen 127.0.0.1:18081 serve
 ```
@@ -67,7 +150,7 @@ go run ./scripts/scalebench -port 18081 -burst 10000 > scale.json
 bun scripts/mobile-vitals.mjs http://127.0.0.1:18081 mobile.json
 ```
 
-For cross-version comparisons, use the same fixture and client binary, stop the disposable server between runs and move its generated `thumbnails` directory aside before restarting. The raw report records the CPU affinity and hashes for the measured binaries. The mobile script creates eight fresh Chromium contexts per build. For the PostgreSQL scenario, also pass `-driver postgres -address <disposable-postgres-URI>` to the seed command and give the server and database the same CPU affinity.
+For cross-version comparisons, use the same fixture and client binary, stop the disposable server between runs and move its generated `thumbnails` directory aside before restarting. The raw report records the CPU affinity and hashes for the measured binaries. The mobile script creates eight fresh Chromium contexts per build. Use a new data directory for each driver and select it with the seed command’s `-driver` flag. For the PostgreSQL scenario, also pass `-driver postgres -address <disposable-postgres-URI>` to the seed command and give the server and database the same CPU affinity.
 
 ## Earlier sustained SQLite and PostgreSQL comparison
 
@@ -123,17 +206,18 @@ Build the frontend and Go executable as described in the README. Use a dedicated
 umask 077
 export TH0UGHTS_MASTER_KEY="$(openssl rand -hex 32)"
 work="$(mktemp -d)"
-go run ./scripts/benchseed -data "$work/data" -driver sqlite
+export GOFLAGS=-tags=nativekv
+go run ./scripts/benchseed -data "$work/data" -driver lmdb
 bin/th0ughts -data "$work/data" -listen 127.0.0.1:8080 serve
 ```
 
 Run the client in a second shell, using the temporary directory created above.
 
 ```sh
-python3 scripts/benchmark.py http://127.0.0.1:8080 "$work/data/bench-token" --output sqlite.json
+python3 scripts/benchmark.py http://127.0.0.1:8080 "$work/data/bench-token" --output lmdb.json
 bun scripts/mobile-vitals.mjs http://127.0.0.1:8080 mobile.json
 ```
 
 For PostgreSQL, use a fresh directory and pass `-driver postgres -address <disposable-postgres-URI>` to the seed command. The server reopens the encrypted locator in that directory. On Linux with cgroup v2 and systemd, set `CPUQuota=200%` and `MemoryMax=2G` on a dedicated slice. Start the server and its database in that slice, and start the workload client outside the slice. Read `cpu.max`, `memory.max`, `memory.current`, and `memory.events` from the slice during the run.
 
-To reproduce the storage measurements, set the external database addresses with `TEST_postgres`, `TEST_mysql`, `TEST_mariadb`, and `TEST_mongodb` in the test environment, then run `go test ./storage -run '^$' -bench BenchmarkStore -benchtime=100x`. SQLite and both JSON drivers use temporary directories.
+To reproduce the storage measurements, set the external database addresses with `TEST_postgres`, `TEST_mysql`, `TEST_mariadb`, and `TEST_mongodb` in the test environment, build the native archive with `bash scripts/build-native.sh`, then run `go test -tags nativekv ./storage -run '^$' -bench BenchmarkStore -benchtime=100x -count=3`. The five file-backed engines use temporary directories. The GitHub Actions workflow `storage-performance.yml` provisions all four external database services and saves the output of the same benchmark.

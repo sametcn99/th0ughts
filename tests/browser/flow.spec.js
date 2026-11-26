@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { once } from "node:events";
@@ -107,12 +107,21 @@ for (const [lang, mobile] of [
       await expect(
         page.locator("#composer input[type=password]"),
       ).toBeVisible();
+      const nativeDriver = lang === "en" ? "redb" : "lmdb";
+      if (process.env.GOFLAGS?.includes("nativekv")) {
+        await page.locator("#composer select").selectOption(nativeDriver);
+        await expect(page.locator("#composer input[type=password]")).toHaveCount(1);
+      }
       await page
         .locator("#composer input[type=password]")
         .fill("a-local-browser-password");
       await page.locator("#composer button").click();
       const newPost = page.getByPlaceholder(lang === "en" ? "What’s on your mind?" : "Aklından ne geçiyor?");
       await expect(newPost).toBeVisible();
+      if (process.env.GOFLAGS?.includes("nativekv")) {
+        const database = nativeDriver === "redb" ? "feed.redb" : "lmdb/data.mdb";
+        expect((await stat(path.join(dir, database))).size).toBeGreaterThan(0);
+      }
       await expect(page.locator("#composer input[type=text]").first()).toBeHidden();
       await page.locator("textarea").fill("A garden in İstanbul");
       await page
@@ -139,7 +148,8 @@ for (const [lang, mobile] of [
           name: lang === "en" ? "Save draft" : "Taslak kaydet",
         })
         .click();
-      await expect(newPost).toBeVisible();
+      // Saving reloads the document. Wait for the fresh composer before opening settings.
+      await expect(newPost).toHaveValue("");
       await page
         .getByRole("button", {
           name: lang === "en" ? "Settings" : "Ayarlar",
@@ -150,6 +160,7 @@ for (const [lang, mobile] of [
       await expect(settings).toBeVisible();
       await expect(settings.getByRole("button", {name: lang === "en" ? "Save" : "Kaydet", exact: true})).toBeDisabled();
       await page.keyboard.press("Escape");
+      await expect(page.locator("dialog.settings-dialog")).toHaveCount(0);
       const settingsTrigger = page.getByRole("button", {name: lang === "en" ? "Settings" : "Ayarlar", exact: true});
       await expect(settingsTrigger).toBeFocused();
       await settingsTrigger.click();

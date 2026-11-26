@@ -1,0 +1,2825 @@
+{
+  "date": "2026-11-26",
+  "runtime_source": "071d5ea0dee34555e7bacd078cfae731e85352c5",
+  "system": {
+    "host": "Intel Core Ultra 9 285H",
+    "platform": "linux/amd64",
+    "go": "1.27.4",
+    "rust": "1.100.0",
+    "redb": "5.0.0",
+    "lmdb_binding": "heed 0.23.1",
+    "postgres": "16.16",
+    "network": "IPv4 loopback, HTTP/1.1",
+    "os_file_cache": "retained"
+  },
+  "sha256": {
+    "server": "51ad05032e34e3829403fde8503e610538f8415b44567df4d146b5ef4017f5b1",
+    "scale": "463334f7520952803efda3a2c34143e6b1c912319457c33ef51fb749e7804e6b",
+    "seed": "2e790b74c7dcb79f0ea727c7f50c998e5a2d7d78afb9a68be47a872efee078fd"
+  },
+  "image_heavy_fixture": {
+    "posts": 10000,
+    "independent_images": 5000,
+    "jpeg_bytes": 166452,
+    "jpeg_sha256": "b76ccf0710b8e4b32e778a45e5398a0cf4777994523116f994a0430f4ee6a841",
+    "timeline_posts": 20,
+    "photos_per_timeline": 10,
+    "empty_thumbnail_dir_each_run": true
+  },
+  "image_heavy": {
+    "server_cpus": [
+      2,
+      4
+    ],
+    "client_cpus": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "gomaxprocs_server": 2,
+    "gomaxprocs_client": 6,
+    "runs": {
+      "sqlite": [
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.059499929,
+              "P50ms": 34.971,
+              "P95ms": 59.434,
+              "P99ms": 59.434
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 474752,
+              "Seconds": 0.030183523,
+              "P50ms": 27.925,
+              "P95ms": 29.701,
+              "P99ms": 29.868
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.051348988,
+              "P50ms": 2.164,
+              "P95ms": 7.532,
+              "P99ms": 11.814
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 680,
+              "BodyBytes": 120937876,
+              "Seconds": 0.345471732,
+              "P50ms": 0.734,
+              "P95ms": 5.857,
+              "P99ms": 18.436
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130100000,
+              "Seconds": 1.565588651,
+              "P50ms": 1425.965,
+              "P95ms": 1530.36,
+              "P99ms": 1536.398
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.116557589,
+              "P50ms": 6.871,
+              "P95ms": 10.885,
+              "P99ms": 14.2
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37080000,
+              "Seconds": 0.277268248,
+              "P50ms": 166.93,
+              "P95ms": 226.857,
+              "P99ms": 234.19
+            }
+          },
+          "server_peak_rss_bytes": 587022336,
+          "server_cpu_seconds": 2.67
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.059823587,
+              "P50ms": 35.434,
+              "P95ms": 59.778,
+              "P99ms": 59.778
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 474880,
+              "Seconds": 0.026846285,
+              "P50ms": 25.204,
+              "P95ms": 26.562,
+              "P99ms": 26.642
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.049297253,
+              "P50ms": 1.997,
+              "P95ms": 7.711,
+              "P99ms": 12.271
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 674,
+              "BodyBytes": 120938907,
+              "Seconds": 0.314075418,
+              "P50ms": 0.626,
+              "P95ms": 6.034,
+              "P99ms": 16.568
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130110000,
+              "Seconds": 1.521956639,
+              "P50ms": 1415.023,
+              "P95ms": 1478.276,
+              "P99ms": 1501.013
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.113809761,
+              "P50ms": 6.839,
+              "P95ms": 9.767,
+              "P99ms": 11.444
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37090000,
+              "Seconds": 0.394758405,
+              "P50ms": 295.499,
+              "P95ms": 356.641,
+              "P99ms": 360.388
+            }
+          },
+          "server_peak_rss_bytes": 536690688,
+          "server_cpu_seconds": 2.7
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.057417927,
+              "P50ms": 32.757,
+              "P95ms": 57.407,
+              "P99ms": 57.407
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 474880,
+              "Seconds": 0.03065612,
+              "P50ms": 26.417,
+              "P95ms": 30.087,
+              "P99ms": 30.412
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.050796263,
+              "P50ms": 1.905,
+              "P95ms": 8.255,
+              "P99ms": 12.712
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 678,
+              "BodyBytes": 120938795,
+              "Seconds": 0.320424275,
+              "P50ms": 0.72,
+              "P95ms": 5.636,
+              "P99ms": 16.761
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130110000,
+              "Seconds": 1.562559324,
+              "P50ms": 1401.213,
+              "P95ms": 1506.104,
+              "P99ms": 1528.508
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.116452965,
+              "P50ms": 6.889,
+              "P95ms": 10.583,
+              "P99ms": 11.717
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37090000,
+              "Seconds": 0.49487901,
+              "P50ms": 302.864,
+              "P95ms": 322.276,
+              "P99ms": 341.165
+            }
+          },
+          "server_peak_rss_bytes": 613539840,
+          "server_cpu_seconds": 2.9
+        }
+      ],
+      "postgres": [
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.06706241,
+              "P50ms": 45.244,
+              "P95ms": 67.039,
+              "P99ms": 67.039
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473984,
+              "Seconds": 0.027548225,
+              "P50ms": 26.166,
+              "P95ms": 27.25,
+              "P99ms": 27.316
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.065553483,
+              "P50ms": 3.075,
+              "P95ms": 7.991,
+              "P99ms": 10.635
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 677,
+              "BodyBytes": 120928067,
+              "Seconds": 0.419462192,
+              "P50ms": 1.307,
+              "P95ms": 10.263,
+              "P99ms": 17.581
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130040000,
+              "Seconds": 1.466516058,
+              "P50ms": 1321.217,
+              "P95ms": 1438.163,
+              "P99ms": 1444.188
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.101058265,
+              "P50ms": 5.574,
+              "P95ms": 9.894,
+              "P99ms": 12.275
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37020000,
+              "Seconds": 0.226764497,
+              "P50ms": 107.996,
+              "P95ms": 156.434,
+              "P99ms": 165.831
+            }
+          },
+          "server_peak_rss_bytes": 566239232,
+          "server_cpu_seconds": 2.72
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.077319257,
+              "P50ms": 49.762,
+              "P95ms": 77.265,
+              "P99ms": 77.265
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473984,
+              "Seconds": 0.028601885,
+              "P50ms": 26.883,
+              "P95ms": 28.283,
+              "P99ms": 28.368
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.070721821,
+              "P50ms": 3.122,
+              "P95ms": 9.358,
+              "P99ms": 11.152
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 717,
+              "BodyBytes": 120927945,
+              "Seconds": 0.458031784,
+              "P50ms": 1.215,
+              "P95ms": 11.613,
+              "P99ms": 21.553
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130050000,
+              "Seconds": 1.505223008,
+              "P50ms": 1392.658,
+              "P95ms": 1457.18,
+              "P99ms": 1482.896
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.10327478,
+              "P50ms": 5.627,
+              "P95ms": 10.209,
+              "P99ms": 11.962
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37030000,
+              "Seconds": 0.30473829,
+              "P50ms": 186.586,
+              "P95ms": 252.314,
+              "P99ms": 255.685
+            }
+          },
+          "server_peak_rss_bytes": 494551040,
+          "server_cpu_seconds": 2.77
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.071125405,
+              "P50ms": 45.365,
+              "P95ms": 71.051,
+              "P99ms": 71.051
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473856,
+              "Seconds": 0.033646792,
+              "P50ms": 31.6,
+              "P95ms": 33.189,
+              "P99ms": 33.303
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.050312936,
+              "P50ms": 2.183,
+              "P95ms": 7.073,
+              "P99ms": 9.02
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 683,
+              "BodyBytes": 120927007,
+              "Seconds": 0.438680515,
+              "P50ms": 1.417,
+              "P95ms": 9.388,
+              "P99ms": 19.167
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130030000,
+              "Seconds": 1.580967153,
+              "P50ms": 1451.689,
+              "P95ms": 1540.733,
+              "P99ms": 1549.061
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.102925682,
+              "P50ms": 5.648,
+              "P95ms": 10.572,
+              "P99ms": 13.132
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37010000,
+              "Seconds": 0.27925414,
+              "P50ms": 196.74,
+              "P95ms": 227.32,
+              "P99ms": 245.87
+            }
+          },
+          "server_peak_rss_bytes": 549789696,
+          "server_cpu_seconds": 2.68
+        }
+      ],
+      "redb": [
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.062577691,
+              "P50ms": 32.354,
+              "P95ms": 62.533,
+              "P99ms": 62.533
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473984,
+              "Seconds": 0.027012429,
+              "P50ms": 25.549,
+              "P95ms": 26.864,
+              "P99ms": 26.958
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.027222653,
+              "P50ms": 1.101,
+              "P95ms": 3.975,
+              "P99ms": 7.415
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 716,
+              "BodyBytes": 120930942,
+              "Seconds": 0.241618094,
+              "P50ms": 2.683,
+              "P95ms": 9.949,
+              "P99ms": 14.082
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130050000,
+              "Seconds": 1.5506837789999999,
+              "P50ms": 1463.834,
+              "P95ms": 1520.745,
+              "P99ms": 1526.97
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.029856461,
+              "P50ms": 1.346,
+              "P95ms": 4.658,
+              "P99ms": 5.836
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37030000,
+              "Seconds": 0.648264331,
+              "P50ms": 439.029,
+              "P95ms": 524.318,
+              "P99ms": 539.032
+            }
+          },
+          "server_peak_rss_bytes": 540119040,
+          "server_cpu_seconds": 2.56
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.057291121,
+              "P50ms": 33.196,
+              "P95ms": 57.266,
+              "P99ms": 57.266
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473856,
+              "Seconds": 0.031663747,
+              "P50ms": 30.283,
+              "P95ms": 31.169,
+              "P99ms": 31.316
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.024511241,
+              "P50ms": 1.027,
+              "P95ms": 3.633,
+              "P99ms": 4.756
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 754,
+              "BodyBytes": 120929949,
+              "Seconds": 0.252395385,
+              "P50ms": 3.02,
+              "P95ms": 10.032,
+              "P99ms": 13.177
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130040000,
+              "Seconds": 1.480225528,
+              "P50ms": 1366.472,
+              "P95ms": 1434.463,
+              "P99ms": 1443.57
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.033480878,
+              "P50ms": 1.426,
+              "P95ms": 4.915,
+              "P99ms": 5.811
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37020000,
+              "Seconds": 0.642301641,
+              "P50ms": 299.756,
+              "P95ms": 533.877,
+              "P99ms": 550.647
+            }
+          },
+          "server_peak_rss_bytes": 529518592,
+          "server_cpu_seconds": 2.75
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.056589266,
+              "P50ms": 36.512,
+              "P95ms": 56.561,
+              "P99ms": 56.561
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473984,
+              "Seconds": 0.030401551,
+              "P50ms": 28.117,
+              "P95ms": 29.633,
+              "P99ms": 29.876
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.025493398,
+              "P50ms": 1.093,
+              "P95ms": 3.715,
+              "P99ms": 4.468
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 726,
+              "BodyBytes": 120930876,
+              "Seconds": 0.242279008,
+              "P50ms": 2.571,
+              "P95ms": 9.706,
+              "P99ms": 13.002
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130050000,
+              "Seconds": 1.516789008,
+              "P50ms": 1361.341,
+              "P95ms": 1475.323,
+              "P99ms": 1485.08
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.031695971,
+              "P50ms": 1.259,
+              "P95ms": 4.792,
+              "P99ms": 9.276
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37030000,
+              "Seconds": 0.447678444,
+              "P50ms": 234.917,
+              "P95ms": 326.359,
+              "P99ms": 397.589
+            }
+          },
+          "server_peak_rss_bytes": 583856128,
+          "server_cpu_seconds": 2.69
+        }
+      ],
+      "lmdb": [
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.055666371,
+              "P50ms": 34.482,
+              "P95ms": 55.592,
+              "P99ms": 55.592
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473728,
+              "Seconds": 0.035844901,
+              "P50ms": 33.706,
+              "P95ms": 35.212,
+              "P99ms": 35.394
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.024202856,
+              "P50ms": 1.045,
+              "P95ms": 3.476,
+              "P99ms": 4.852
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 755,
+              "BodyBytes": 120927285,
+              "Seconds": 0.242218024,
+              "P50ms": 2.838,
+              "P95ms": 8.795,
+              "P99ms": 11.887
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130030000,
+              "Seconds": 1.509770328,
+              "P50ms": 1387.155,
+              "P95ms": 1473.871,
+              "P99ms": 1494.531
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.027301551,
+              "P50ms": 1.173,
+              "P95ms": 4.36,
+              "P99ms": 5.084
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37010000,
+              "Seconds": 0.538693446,
+              "P50ms": 383.492,
+              "P95ms": 468.602,
+              "P99ms": 507.029
+            }
+          },
+          "server_peak_rss_bytes": 513552384,
+          "server_cpu_seconds": 2.71
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.060400243,
+              "P50ms": 31.129,
+              "P95ms": 60.328,
+              "P99ms": 60.328
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473728,
+              "Seconds": 0.029550628,
+              "P50ms": 27.144,
+              "P95ms": 29.104,
+              "P99ms": 29.409
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.022637343,
+              "P50ms": 0.857,
+              "P95ms": 4.028,
+              "P99ms": 4.967
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 723,
+              "BodyBytes": 120927248,
+              "Seconds": 0.227315911,
+              "P50ms": 2.26,
+              "P95ms": 9.036,
+              "P99ms": 11.181
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130030000,
+              "Seconds": 1.5590011719999999,
+              "P50ms": 1423.824,
+              "P95ms": 1523.528,
+              "P99ms": 1532.815
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.027734582,
+              "P50ms": 1.19,
+              "P95ms": 4.062,
+              "P99ms": 5.579
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37010000,
+              "Seconds": 0.600625703,
+              "P50ms": 483.184,
+              "P95ms": 549.812,
+              "P99ms": 556.072
+            }
+          },
+          "server_peak_rss_bytes": 573865984,
+          "server_cpu_seconds": 2.71
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.061008785,
+              "P50ms": 31.869,
+              "P95ms": 60.949,
+              "P99ms": 60.949
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473600,
+              "Seconds": 0.025888614,
+              "P50ms": 23.4,
+              "P95ms": 25.273,
+              "P99ms": 25.425
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.02470232,
+              "P50ms": 1.039,
+              "P95ms": 3.887,
+              "P99ms": 4.735
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 739,
+              "BodyBytes": 120926247,
+              "Seconds": 0.237488565,
+              "P50ms": 2.599,
+              "P95ms": 9.855,
+              "P99ms": 14.623
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130020000,
+              "Seconds": 1.476300558,
+              "P50ms": 1374.044,
+              "P95ms": 1429.844,
+              "P99ms": 1449.602
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.025215095,
+              "P50ms": 1.037,
+              "P95ms": 4.266,
+              "P99ms": 5.348
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37000000,
+              "Seconds": 0.513088101,
+              "P50ms": 425.162,
+              "P95ms": 485.936,
+              "P99ms": 490.839
+            }
+          },
+          "server_peak_rss_bytes": 496463872,
+          "server_cpu_seconds": 2.58
+        }
+      ]
+    }
+  },
+  "additional_image_heavy": {
+    "server_cpus": [
+      14,
+      15
+    ],
+    "client_cpus": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "gomaxprocs_server": 2,
+    "gomaxprocs_client": 6,
+    "runs": {
+      "sqlite": [
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.145281486,
+              "P50ms": 81.054,
+              "P95ms": 145.22,
+              "P99ms": 145.22
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 474624,
+              "Seconds": 0.042714228,
+              "P50ms": 40.021,
+              "P95ms": 42.094,
+              "P99ms": 42.493
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.252157234,
+              "P50ms": 9.234,
+              "P95ms": 43.127,
+              "P99ms": 62.158
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 681,
+              "BodyBytes": 120936811,
+              "Seconds": 1.638152985,
+              "P50ms": 4.485,
+              "P95ms": 32.368,
+              "P99ms": 79.609
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130110000,
+              "Seconds": 2.517311027,
+              "P50ms": 2119.757,
+              "P95ms": 2351.321,
+              "P99ms": 2424.206
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.761324132,
+              "P50ms": 40.712,
+              "P95ms": 79.762,
+              "P99ms": 95.982
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37090000,
+              "Seconds": 0.639476614,
+              "P50ms": 277.937,
+              "P95ms": 546.88,
+              "P99ms": 568.653
+            }
+          },
+          "server_peak_rss_bytes": 558874624,
+          "server_cpu_seconds": 10.17
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.137173203,
+              "P50ms": 82.843,
+              "P95ms": 137.157,
+              "P99ms": 137.157
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 474752,
+              "Seconds": 0.035398006,
+              "P50ms": 31.32,
+              "P95ms": 34.533,
+              "P99ms": 34.845
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.212634715,
+              "P50ms": 8.314,
+              "P95ms": 35.112,
+              "P99ms": 54.065
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 674,
+              "BodyBytes": 120937727,
+              "Seconds": 1.5696163950000002,
+              "P50ms": 3.851,
+              "P95ms": 31.795,
+              "P99ms": 81.975
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130120000,
+              "Seconds": 2.523142754,
+              "P50ms": 2164.125,
+              "P95ms": 2454.069,
+              "P99ms": 2481.588
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.86076933,
+              "P50ms": 47.723,
+              "P95ms": 87.399,
+              "P99ms": 101.916
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37100000,
+              "Seconds": 0.61775369,
+              "P50ms": 290.767,
+              "P95ms": 487.191,
+              "P99ms": 548.164
+            }
+          },
+          "server_peak_rss_bytes": 537604096,
+          "server_cpu_seconds": 9.74
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.168545898,
+              "P50ms": 84.323,
+              "P95ms": 168.538,
+              "P99ms": 168.538
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 474752,
+              "Seconds": 0.04029808,
+              "P50ms": 37.029,
+              "P95ms": 39.691,
+              "P99ms": 40.136
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.19576262,
+              "P50ms": 7.057,
+              "P95ms": 32.415,
+              "P99ms": 44.355
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 674,
+              "BodyBytes": 120937793,
+              "Seconds": 1.410140849,
+              "P50ms": 3.019,
+              "P95ms": 28.59,
+              "P99ms": 79.926
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130110000,
+              "Seconds": 2.512788221,
+              "P50ms": 2170.75,
+              "P95ms": 2399.571,
+              "P99ms": 2467.251
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.599796345,
+              "P50ms": 36.242,
+              "P95ms": 51.139,
+              "P99ms": 58.916
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37090000,
+              "Seconds": 0.637525548,
+              "P50ms": 331.357,
+              "P95ms": 564.136,
+              "P99ms": 599.075
+            }
+          },
+          "server_peak_rss_bytes": 567828480,
+          "server_cpu_seconds": 9.4
+        }
+      ],
+      "postgres": [
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.229323803,
+              "P50ms": 116.103,
+              "P95ms": 229.26,
+              "P99ms": 229.26
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473856,
+              "Seconds": 0.040449655,
+              "P50ms": 37.149,
+              "P95ms": 40.05,
+              "P99ms": 40.138
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.234284299,
+              "P50ms": 10.933,
+              "P95ms": 31.669,
+              "P99ms": 43.734
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 673,
+              "BodyBytes": 120926955,
+              "Seconds": 2.4743811620000002,
+              "P50ms": 7.279,
+              "P95ms": 45.342,
+              "P99ms": 109.972
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130030000,
+              "Seconds": 2.4971514949999998,
+              "P50ms": 2196.979,
+              "P95ms": 2438.007,
+              "P99ms": 2450.551
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.910653485,
+              "P50ms": 53.377,
+              "P95ms": 93.717,
+              "P99ms": 106.008
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37010000,
+              "Seconds": 0.653956784,
+              "P50ms": 287.489,
+              "P95ms": 546.317,
+              "P99ms": 556.28
+            }
+          },
+          "server_peak_rss_bytes": 506830848,
+          "server_cpu_seconds": 9.72
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.162559976,
+              "P50ms": 105.441,
+              "P95ms": 162.552,
+              "P99ms": 162.552
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473856,
+              "Seconds": 0.039999767,
+              "P50ms": 36.25,
+              "P95ms": 39.165,
+              "P99ms": 39.565
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.245096493,
+              "P50ms": 10.674,
+              "P95ms": 30.42,
+              "P99ms": 50.951
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 665,
+              "BodyBytes": 120926919,
+              "Seconds": 2.217984551,
+              "P50ms": 5.986,
+              "P95ms": 39.003,
+              "P99ms": 91.762
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130040000,
+              "Seconds": 2.513954174,
+              "P50ms": 2164.173,
+              "P95ms": 2399.991,
+              "P99ms": 2472.898
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.667777175,
+              "P50ms": 40.113,
+              "P95ms": 58.556,
+              "P99ms": 67.408
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37020000,
+              "Seconds": 0.671197242,
+              "P50ms": 344.769,
+              "P95ms": 590.916,
+              "P99ms": 615.342
+            }
+          },
+          "server_peak_rss_bytes": 492580864,
+          "server_cpu_seconds": 9.53
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.162270295,
+              "P50ms": 105.803,
+              "P95ms": 162.23,
+              "P99ms": 162.23
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473984,
+              "Seconds": 0.04678273,
+              "P50ms": 43.416,
+              "P95ms": 46.261,
+              "P99ms": 46.574
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.241452676,
+              "P50ms": 11.449,
+              "P95ms": 29.15,
+              "P99ms": 37.274
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 674,
+              "BodyBytes": 120927906,
+              "Seconds": 2.063695873,
+              "P50ms": 7.219,
+              "P95ms": 40.359,
+              "P99ms": 87.131
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130040000,
+              "Seconds": 2.6299020349999997,
+              "P50ms": 2110.45,
+              "P95ms": 2547.467,
+              "P99ms": 2590.916
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.881946538,
+              "P50ms": 52.195,
+              "P95ms": 80.856,
+              "P99ms": 93.732
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37020000,
+              "Seconds": 0.62174526,
+              "P50ms": 270.561,
+              "P95ms": 546.547,
+              "P99ms": 566.701
+            }
+          },
+          "server_peak_rss_bytes": 596713472,
+          "server_cpu_seconds": 9.62
+        }
+      ],
+      "redb": [
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.213912376,
+              "P50ms": 106.064,
+              "P95ms": 213.888,
+              "P99ms": 213.888
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473856,
+              "Seconds": 0.038117567,
+              "P50ms": 33.399,
+              "P95ms": 37.311,
+              "P99ms": 37.773
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.091330704,
+              "P50ms": 4.106,
+              "P95ms": 12.681,
+              "P99ms": 15.432
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 714,
+              "BodyBytes": 120929907,
+              "Seconds": 0.966415932,
+              "P50ms": 12.747,
+              "P95ms": 32.754,
+              "P99ms": 40.648
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130040000,
+              "Seconds": 2.6013892309999997,
+              "P50ms": 2300.085,
+              "P95ms": 2499.537,
+              "P99ms": 2547.205
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.111681177,
+              "P50ms": 5.001,
+              "P95ms": 16.208,
+              "P99ms": 21.087
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37020000,
+              "Seconds": 0.695736237,
+              "P50ms": 400.761,
+              "P95ms": 570.006,
+              "P99ms": 581.604
+            }
+          },
+          "server_peak_rss_bytes": 566853632,
+          "server_cpu_seconds": 8.39
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.200147568,
+              "P50ms": 91.992,
+              "P95ms": 200.093,
+              "P99ms": 200.093
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473856,
+              "Seconds": 0.046792648,
+              "P50ms": 43.197,
+              "P95ms": 45.971,
+              "P99ms": 46.169
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.09435864,
+              "P50ms": 3.945,
+              "P95ms": 13.821,
+              "P99ms": 18.719
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 781,
+              "BodyBytes": 120929820,
+              "Seconds": 1.072303514,
+              "P50ms": 13.399,
+              "P95ms": 33.542,
+              "P99ms": 45.704
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130040000,
+              "Seconds": 2.664245442,
+              "P50ms": 2290.28,
+              "P95ms": 2535.785,
+              "P99ms": 2606.944
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.109108116,
+              "P50ms": 4.531,
+              "P95ms": 16.864,
+              "P99ms": 20.476
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37020000,
+              "Seconds": 0.626945303,
+              "P50ms": 347.306,
+              "P95ms": 537.605,
+              "P99ms": 554.456
+            }
+          },
+          "server_peak_rss_bytes": 562774016,
+          "server_cpu_seconds": 8.16
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.176456539,
+              "P50ms": 82.21,
+              "P95ms": 176.43,
+              "P99ms": 176.43
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473728,
+              "Seconds": 0.038439499,
+              "P50ms": 34.075,
+              "P95ms": 37.629,
+              "P99ms": 37.971
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.090065123,
+              "P50ms": 4.081,
+              "P95ms": 13.815,
+              "P99ms": 17.3
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 702,
+              "BodyBytes": 120928948,
+              "Seconds": 0.954577479,
+              "P50ms": 11.94,
+              "P95ms": 31.363,
+              "P99ms": 42.603
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130030000,
+              "Seconds": 2.5475401570000002,
+              "P50ms": 2247.604,
+              "P95ms": 2489.906,
+              "P99ms": 2507.102
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.105022828,
+              "P50ms": 4.54,
+              "P95ms": 16.111,
+              "P99ms": 19.87
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37010000,
+              "Seconds": 0.690716577,
+              "P50ms": 342.564,
+              "P95ms": 569.185,
+              "P99ms": 585.504
+            }
+          },
+          "server_peak_rss_bytes": 531922944,
+          "server_cpu_seconds": 8.03
+        }
+      ],
+      "lmdb": [
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.16979157,
+              "P50ms": 82.963,
+              "P95ms": 169.711,
+              "P99ms": 169.711
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473600,
+              "Seconds": 0.039250543,
+              "P50ms": 35.717,
+              "P95ms": 38.703,
+              "P99ms": 39.051
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.086945619,
+              "P50ms": 3.953,
+              "P95ms": 13.034,
+              "P99ms": 15.059
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 733,
+              "BodyBytes": 120926280,
+              "Seconds": 0.924802384,
+              "P50ms": 11.803,
+              "P95ms": 30.46,
+              "P99ms": 38.675
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130020000,
+              "Seconds": 2.554032528,
+              "P50ms": 2254.157,
+              "P95ms": 2456.845,
+              "P99ms": 2476.699
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.098719322,
+              "P50ms": 3.973,
+              "P95ms": 14.437,
+              "P99ms": 20.183
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37000000,
+              "Seconds": 0.682100729,
+              "P50ms": 363.647,
+              "P95ms": 557.198,
+              "P99ms": 569.205
+            }
+          },
+          "server_peak_rss_bytes": 549453824,
+          "server_cpu_seconds": 7.86
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.251286035,
+              "P50ms": 141.504,
+              "P95ms": 251.266,
+              "P99ms": 251.266
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473728,
+              "Seconds": 0.038587432,
+              "P50ms": 34.054,
+              "P95ms": 38.03,
+              "P99ms": 38.254
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.088807906,
+              "P50ms": 3.789,
+              "P95ms": 13.159,
+              "P99ms": 16.925
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 732,
+              "BodyBytes": 120927253,
+              "Seconds": 0.970658413,
+              "P50ms": 11.251,
+              "P95ms": 31.729,
+              "P99ms": 48.896
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130030000,
+              "Seconds": 2.618828424,
+              "P50ms": 2096.093,
+              "P95ms": 2524.497,
+              "P99ms": 2568.338
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.097209955,
+              "P50ms": 4.471,
+              "P95ms": 13.172,
+              "P99ms": 15.64
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37010000,
+              "Seconds": 0.637875169,
+              "P50ms": 324.445,
+              "P95ms": 536.861,
+              "P99ms": 562.32
+            }
+          },
+          "server_peak_rss_bytes": 557133824,
+          "server_cpu_seconds": 8.46
+        },
+        {
+          "scenarios": {
+            "cold_thumbnails": {
+              "Requests": 10,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 546510,
+              "Seconds": 0.145327731,
+              "P50ms": 83.297,
+              "P95ms": 145.321,
+              "P99ms": 145.321
+            },
+            "cold_timeline": {
+              "Requests": 128,
+              "Errors": 0,
+              "CacheMisses": 1,
+              "BodyBytes": 473728,
+              "Seconds": 0.035866818,
+              "P50ms": 31.583,
+              "P95ms": 35.28,
+              "P99ms": 35.526
+            },
+            "deep_cursor": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2927104,
+              "Seconds": 0.089883373,
+              "P50ms": 3.81,
+              "P95ms": 13.54,
+              "P99ms": 16.392
+            },
+            "mixed_64": {
+              "Requests": 4096,
+              "Errors": 0,
+              "CacheMisses": 751,
+              "BodyBytes": 120927307,
+              "Seconds": 0.972002002,
+              "P50ms": 12.423,
+              "P95ms": 30.098,
+              "P99ms": 39.505
+            },
+            "two_photo_visits": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 1130030000,
+              "Seconds": 2.664401459,
+              "P50ms": 2270.353,
+              "P95ms": 2546.732,
+              "P99ms": 2588.649
+            },
+            "uncached_search": {
+              "Requests": 512,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 2946048,
+              "Seconds": 0.092694423,
+              "P50ms": 4.175,
+              "P95ms": 14.212,
+              "P99ms": 18.342
+            },
+            "warm_timeline_burst": {
+              "Requests": 10000,
+              "Errors": 0,
+              "CacheMisses": 0,
+              "BodyBytes": 37010000,
+              "Seconds": 0.728098571,
+              "P50ms": 333.698,
+              "P95ms": 619.584,
+              "P99ms": 659.122
+            }
+          },
+          "server_peak_rss_bytes": 592859136,
+          "server_cpu_seconds": 8.37
+        }
+      ]
+    }
+  },
+  "sustained": {
+    "fixture": {
+      "posts": 10000,
+      "independent_images": 200,
+      "image": "1 px PNG"
+    },
+    "server_cpus": {
+      "sqlite": [
+        0,
+        1
+      ],
+      "redb": [
+        2,
+        3
+      ],
+      "lmdb": [
+        4,
+        5
+      ],
+      "postgres": [
+        6,
+        7
+      ]
+    },
+    "client_cpus": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "results": {
+      "sqlite": {
+        "elapsed_seconds": 899.98,
+        "cache": {
+          "HIT": 25920,
+          "BYPASS": 180,
+          "MISS": 19080
+        },
+        "rows": 10000,
+        "read_rps": 50,
+        "seconds": 900,
+        "warmup": 120,
+        "cold": {
+          "feed": {
+            "ms": 12.03,
+            "ok": true
+          },
+          "post": {
+            "ms": 0.7,
+            "ok": true
+          },
+          "search": {
+            "ms": 67.36,
+            "ok": true
+          },
+          "rss": {
+            "ms": 0.8,
+            "ok": true
+          },
+          "markdown": {
+            "ms": 0.46,
+            "ok": true
+          }
+        },
+        "errors": {},
+        "latency": {
+          "feed": {
+            "count": 22500,
+            "p95_ms": 0.52,
+            "p99_ms": 1.32
+          },
+          "write": {
+            "count": 180,
+            "p95_ms": 4.87,
+            "p99_ms": 5.64
+          },
+          "post": {
+            "count": 13500,
+            "p95_ms": 2.14,
+            "p99_ms": 2.64
+          },
+          "search": {
+            "count": 4500,
+            "p95_ms": 5.66,
+            "p99_ms": 6.88
+          },
+          "rss": {
+            "count": 2250,
+            "p95_ms": 0.98,
+            "p99_ms": 1.29
+          },
+          "markdown": {
+            "count": 2250,
+            "p95_ms": 0.65,
+            "p99_ms": 0.92
+          }
+        }
+      },
+      "postgres": {
+        "elapsed_seconds": 899.98,
+        "cache": {
+          "HIT": 25920,
+          "BYPASS": 180,
+          "MISS": 19080
+        },
+        "rows": 10000,
+        "read_rps": 50,
+        "seconds": 900,
+        "warmup": 120,
+        "cold": {
+          "feed": {
+            "ms": 24.03,
+            "ok": true
+          },
+          "post": {
+            "ms": 0.83,
+            "ok": true
+          },
+          "search": {
+            "ms": 196.59,
+            "ok": true
+          },
+          "rss": {
+            "ms": 6.3,
+            "ok": true
+          },
+          "markdown": {
+            "ms": 5.31,
+            "ok": true
+          }
+        },
+        "errors": {},
+        "latency": {
+          "feed": {
+            "count": 22500,
+            "p95_ms": 1.06,
+            "p99_ms": 2.26
+          },
+          "write": {
+            "count": 180,
+            "p95_ms": 4.82,
+            "p99_ms": 5.53
+          },
+          "post": {
+            "count": 13500,
+            "p95_ms": 2.59,
+            "p99_ms": 3.39
+          },
+          "search": {
+            "count": 4500,
+            "p95_ms": 7.41,
+            "p99_ms": 9.52
+          },
+          "rss": {
+            "count": 2250,
+            "p95_ms": 1.2,
+            "p99_ms": 2.4
+          },
+          "markdown": {
+            "count": 2250,
+            "p95_ms": 1.13,
+            "p99_ms": 1.94
+          }
+        }
+      },
+      "redb": {
+        "elapsed_seconds": 899.98,
+        "cache": {
+          "HIT": 25920,
+          "BYPASS": 180,
+          "MISS": 19080
+        },
+        "rows": 10000,
+        "read_rps": 50,
+        "seconds": 900,
+        "warmup": 120,
+        "cold": {
+          "feed": {
+            "ms": 11.73,
+            "ok": true
+          },
+          "post": {
+            "ms": 0.52,
+            "ok": true
+          },
+          "search": {
+            "ms": 70.08,
+            "ok": true
+          },
+          "rss": {
+            "ms": 0.8,
+            "ok": true
+          },
+          "markdown": {
+            "ms": 0.45,
+            "ok": true
+          }
+        },
+        "errors": {},
+        "latency": {
+          "feed": {
+            "count": 22500,
+            "p95_ms": 0.65,
+            "p99_ms": 1.29
+          },
+          "write": {
+            "count": 180,
+            "p95_ms": 3.8,
+            "p99_ms": 4.63
+          },
+          "post": {
+            "count": 13500,
+            "p95_ms": 1.7,
+            "p99_ms": 2.29
+          },
+          "search": {
+            "count": 4500,
+            "p95_ms": 4.4,
+            "p99_ms": 5.27
+          },
+          "rss": {
+            "count": 2250,
+            "p95_ms": 0.84,
+            "p99_ms": 1.22
+          },
+          "markdown": {
+            "count": 2250,
+            "p95_ms": 0.64,
+            "p99_ms": 0.9
+          }
+        }
+      },
+      "lmdb": {
+        "elapsed_seconds": 899.98,
+        "cache": {
+          "HIT": 25920,
+          "BYPASS": 180,
+          "MISS": 19080
+        },
+        "rows": 10000,
+        "read_rps": 50,
+        "seconds": 900,
+        "warmup": 120,
+        "cold": {
+          "feed": {
+            "ms": 12.74,
+            "ok": true
+          },
+          "post": {
+            "ms": 0.67,
+            "ok": true
+          },
+          "search": {
+            "ms": 76.81,
+            "ok": true
+          },
+          "rss": {
+            "ms": 0.68,
+            "ok": true
+          },
+          "markdown": {
+            "ms": 0.33,
+            "ok": true
+          }
+        },
+        "errors": {},
+        "latency": {
+          "feed": {
+            "count": 22500,
+            "p95_ms": 0.56,
+            "p99_ms": 1.26
+          },
+          "write": {
+            "count": 180,
+            "p95_ms": 2.92,
+            "p99_ms": 3.43
+          },
+          "post": {
+            "count": 13500,
+            "p95_ms": 1.82,
+            "p99_ms": 2.02
+          },
+          "search": {
+            "count": 4500,
+            "p95_ms": 4.15,
+            "p99_ms": 4.92
+          },
+          "rss": {
+            "count": 2250,
+            "p95_ms": 0.83,
+            "p99_ms": 1.22
+          },
+          "markdown": {
+            "count": 2250,
+            "p95_ms": 0.56,
+            "p99_ms": 0.89
+          }
+        }
+      }
+    },
+    "resources": {
+      "sqlite": {
+        "peak_sample_bytes": 43282432,
+        "samples": 1020,
+        "memory_events": {
+          "low": 0,
+          "high": 0,
+          "max": 0,
+          "oom": 0,
+          "oom_kill": 0,
+          "oom_group_kill": 0,
+          "sock_throttled": 0
+        },
+        "cpu_max": "200000 100000",
+        "memory_max": 2147483648
+      },
+      "redb": {
+        "peak_sample_bytes": 45666304,
+        "samples": 1020,
+        "memory_events": {
+          "low": 0,
+          "high": 0,
+          "max": 0,
+          "oom": 0,
+          "oom_kill": 0,
+          "oom_group_kill": 0,
+          "sock_throttled": 0
+        },
+        "cpu_max": "200000 100000",
+        "memory_max": 2147483648
+      },
+      "lmdb": {
+        "peak_sample_bytes": 36057088,
+        "samples": 1020,
+        "memory_events": {
+          "low": 0,
+          "high": 0,
+          "max": 0,
+          "oom": 0,
+          "oom_kill": 0,
+          "oom_group_kill": 0,
+          "sock_throttled": 0
+        },
+        "cpu_max": "200000 100000",
+        "memory_max": 2147483648
+      },
+      "postgres": {
+        "peak_sample_bytes": 87310336,
+        "samples": 1020,
+        "memory_events": {
+          "low": 0,
+          "high": 0,
+          "max": 0,
+          "oom": 0,
+          "oom_kill": 0,
+          "oom_group_kill": 0,
+          "sock_throttled": 0
+        },
+        "cpu_max": "200000 100000",
+        "memory_max": 2147483648
+      }
+    }
+  },
+  "mobile": {
+    "server_cpus": [
+      14,
+      15
+    ],
+    "client_cpus": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "image_heavy": {
+      "sqlite": {
+        "browser": "159.0.8154.6",
+        "profile": "390x844, 4x CPU slowdown, 150ms RTT, 1.6 Mbps down / 750 Kbps up, eight fresh contexts",
+        "runs": [
+          {
+            "LCP": 1688,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1576,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1724,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1744,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1728,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1696,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1724,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1728,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          }
+        ],
+        "p75": {
+          "LCP": 1728,
+          "CLS": 0,
+          "INP": 32
+        }
+      },
+      "postgres": {
+        "browser": "159.0.8154.6",
+        "profile": "390x844, 4x CPU slowdown, 150ms RTT, 1.6 Mbps down / 750 Kbps up, eight fresh contexts",
+        "runs": [
+          {
+            "LCP": 1680,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1724,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1676,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1620,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1596,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1760,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1596,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1748,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          }
+        ],
+        "p75": {
+          "LCP": 1724,
+          "CLS": 0,
+          "INP": 32
+        }
+      },
+      "redb": {
+        "browser": "159.0.8154.6",
+        "profile": "390x844, 4x CPU slowdown, 150ms RTT, 1.6 Mbps down / 750 Kbps up, eight fresh contexts",
+        "runs": [
+          {
+            "LCP": 1684,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1656,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1724,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1596,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1728,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1728,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1700,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1748,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          }
+        ],
+        "p75": {
+          "LCP": 1728,
+          "CLS": 0,
+          "INP": 32
+        }
+      },
+      "lmdb": {
+        "browser": "159.0.8154.6",
+        "profile": "390x844, 4x CPU slowdown, 150ms RTT, 1.6 Mbps down / 750 Kbps up, eight fresh contexts",
+        "runs": [
+          {
+            "LCP": 1596,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1724,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1720,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1616,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1724,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1744,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1612,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 1680,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          }
+        ],
+        "p75": {
+          "LCP": 1724,
+          "CLS": 0,
+          "INP": 32
+        }
+      }
+    },
+    "text_heavy": {
+      "sqlite": {
+        "browser": "159.0.8154.6",
+        "profile": "390x844, 4x CPU slowdown, 150ms RTT, 1.6 Mbps down / 750 Kbps up, eight fresh contexts",
+        "runs": [
+          {
+            "LCP": 444,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 456,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 424,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 424,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 456,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 456,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 460,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 456,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          }
+        ],
+        "p75": {
+          "LCP": 456,
+          "CLS": 0,
+          "INP": 32
+        }
+      },
+      "postgres": {
+        "browser": "159.0.8154.6",
+        "profile": "390x844, 4x CPU slowdown, 150ms RTT, 1.6 Mbps down / 750 Kbps up, eight fresh contexts",
+        "runs": [
+          {
+            "LCP": 484,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 472,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 452,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 424,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 460,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 460,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 460,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 460,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          }
+        ],
+        "p75": {
+          "LCP": 460,
+          "CLS": 0,
+          "INP": 32
+        }
+      },
+      "redb": {
+        "browser": "159.0.8154.6",
+        "profile": "390x844, 4x CPU slowdown, 150ms RTT, 1.6 Mbps down / 750 Kbps up, eight fresh contexts",
+        "runs": [
+          {
+            "LCP": 464,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 452,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 424,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 460,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 460,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 424,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 420,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 460,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          }
+        ],
+        "p75": {
+          "LCP": 460,
+          "CLS": 0,
+          "INP": 32
+        }
+      },
+      "lmdb": {
+        "browser": "159.0.8154.6",
+        "profile": "390x844, 4x CPU slowdown, 150ms RTT, 1.6 Mbps down / 750 Kbps up, eight fresh contexts",
+        "runs": [
+          {
+            "LCP": 464,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 472,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 456,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 460,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 456,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 428,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 456,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          },
+          {
+            "LCP": 460,
+            "CLS": 0,
+            "INP": 32,
+            "interactions": 7,
+            "js": 4142
+          }
+        ],
+        "p75": {
+          "LCP": 460,
+          "CLS": 0,
+          "INP": 32
+        }
+      }
+    }
+  },
+  "storage_workflow": "https://github.com/sametcn99/th0ughts/actions/runs/45851673928"
+}
