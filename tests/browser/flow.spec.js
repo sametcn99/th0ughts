@@ -4,7 +4,18 @@ import { randomBytes } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import net from "node:net";
+import { once } from "node:events";
+import { createInterface } from "node:readline";
+
+async function listeningPort(stderr) {
+  const lines = createInterface({ input: stderr });
+  for await (const line of lines) {
+    const match = /^Listening on 127\.0\.0\.1:(\d+)$/.exec(line);
+    if (match) return Number(match[1]);
+    console.error(line);
+  }
+  throw new Error("The server exited before binding its HTTP listener");
+}
 
 async function expectRepositoryFooter(page, lang) {
   const label = lang === "en" ? "host your own th0ughts" : "th0ughts’u kendi sunucunda çalıştır";
@@ -19,36 +30,33 @@ for (const [lang, mobile] of [
 ]) {
   test("Owner and anonymous publishing in " + lang, async ({ browser }) => {
     const dir = await mkdtemp(path.join(tmpdir(), "thoughts-browser-"));
-    const reservation = net.createServer();
-    await new Promise((resolve) => reservation.listen(0, "127.0.0.1", resolve));
-    const port = reservation.address().port;
-    await new Promise((resolve) => reservation.close(resolve));
-    const base = "http://localhost:" + port,
-      master = randomBytes(32).toString("hex");
+    const master = randomBytes(32).toString("hex");
     const app = spawn(
       process.env.TEST_BINARY || "bin/th0ughts",
-      ["-listen", "127.0.0.1:" + port, "-data", dir, "serve"],
-      { env: { ...process.env, TH0UGHTS_MASTER_KEY: master }, stdio: "ignore" },
+      ["-listen", "127.0.0.1:0", "-data", dir, "serve"],
+      {
+        env: { ...process.env, TH0UGHTS_MASTER_KEY: master },
+        stdio: ["ignore", "ignore", "pipe"],
+      },
     );
-    const ctx = await browser.newContext({
-      baseURL: base,
-      viewport: mobile
-        ? { width: 390, height: 844 }
-        : { width: 1280, height: 800 },
-    });
-    const page = await ctx.newPage();
-    const errors = [];
-    page.on("pageerror", (e) => errors.push(e.message));
+    const closed = new Promise(resolve => app.once("close", resolve));
+    let ctx;
     try {
-      await expect
-        .poll(async () => {
-          try {
-            return (await fetch(base + "/healthz")).status;
-          } catch {
-            return 0;
-          }
-        })
-        .toBe(200);
+      await once(app, "spawn");
+      // Keep localhost as the WebAuthn origin, and probe the exact bound interface.
+      const port = await listeningPort(app.stderr);
+      const base = "http://localhost:" + port;
+      ctx = await browser.newContext({
+        baseURL: base,
+        viewport: mobile
+          ? { width: 390, height: 844 }
+          : { width: 1280, height: 800 },
+      });
+      const health = await ctx.request.get("http://127.0.0.1:" + port + "/healthz");
+      expect(health.status()).toBe(200);
+      const page = await ctx.newPage();
+      const errors = [];
+      page.on("pageerror", (e) => errors.push(e.message));
       await page.goto("/?lang=" + lang);
       await expectRepositoryFooter(page, lang);
       await expect(page.locator('a[href*="/login"]')).toHaveCount(0);
@@ -260,12 +268,9 @@ for (const [lang, mobile] of [
       }
       expect(errors).toEqual([]);
     } finally {
-      await ctx.close();
       app.kill();
-      await new Promise((resolve) => {
-        if (app.exitCode !== null) resolve();
-        else app.once("exit", resolve);
-      });
+      await closed;
+      await ctx?.close();
       await rm(dir, { recursive: true, force: true });
     }
   });

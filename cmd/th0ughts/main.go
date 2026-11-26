@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -109,14 +110,18 @@ func run() error {
 			return s.S.SaveSettings(ctx, feed.Actor{Owner: true}, v)
 		}
 		httpd := http.Server{Addr: o.listen, Handler: s, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 2 * time.Minute, WriteTimeout: 3 * time.Minute, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 32 << 10}
+		listener, e := net.Listen("tcp", o.listen)
+		if e != nil {
+			return e
+		}
 		go func() {
 			<-ctx.Done()
 			c, done := context.WithTimeout(context.Background(), 10*time.Second)
 			defer done()
 			httpd.Shutdown(c)
 		}()
-		fmt.Fprintln(os.Stderr, "Listening on", o.listen)
-		e = httpd.ListenAndServe()
+		fmt.Fprintln(os.Stderr, "Listening on", listener.Addr())
+		e = httpd.Serve(listener)
 		if errors.Is(e, http.ErrServerClosed) {
 			return nil
 		}
